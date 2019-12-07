@@ -1,3 +1,4 @@
+const util = require('util');
 const PORT = 8081;	 // порт
 const clients = new Map(); // контейнер для хранения сокета клиента (key) и информации о нем (value)
 const hallStr = 'hall'; // имя комнаты, в которую добавляются все, кто online, но еще не играет
@@ -8,8 +9,23 @@ const hallStr = 'hall'; // имя комнаты, в которую добавл
  * @param {String} type Тип сообщения
  * @param {String} message Сообщение
  */
-function log(type, message) {
-	console.log( type + ': ' + message );
+function log( message, type, path ) {
+	if( message instanceof Error )
+		switch (type) {
+			case 'error':
+				console.error( message );
+				break;
+			case 'warn':
+				console.warn( message );
+				break;
+		
+			default:
+				console.log( message.stack );
+				break;		
+	}
+	else {
+		console.log( `${type}: ${path != undefined ? (path + ': ') : ''}${message}` );
+	}
 }
 
 
@@ -33,8 +49,10 @@ const HALL = UE4.in( hallStr ); // комната, в которую добав�
 class ElemConfig {
 
 	constructor( buf ) {
-		if ( buf == undefined || ( !( buf instanceof Array ) && !( buf instanceof Int32Array ) ) )
+		if ( buf == undefined || ( !( buf instanceof Array ) && !( buf instanceof Int32Array ) ) ) {
+			log( new Error( `Invalid initializer value ( ${buf} )` ), 'warn' );
 			this.config = new Int32Array([0, 0, 0, 0]);
+		}
 		else {
 			this.config = new Int32Array( 4 );
 			let i = 0;
@@ -56,7 +74,7 @@ class ElemConfig {
 			state ? this._Add( num - 1 )
 				: this._Remove( num - 1 );
 		else 
-			console.log( 'Error: ElemConfig::Write: Invalid element number', num );
+			log( new Error( `Write: Invalid element number : ${num}`, 'error' ));
 	}
 
 	/**
@@ -228,24 +246,17 @@ function teamToNum( team ) {
 /**
  * Получить массив неиграющих клиентов [{id, name}]
  */
-function getClientsInHall() {
+function getClientsInHall( clientIds ) {
 
 	const clientList = [];
-
-	HALL.clients( ( error, clientIds ) => {
-		if( error ) {
-			log( 'Error', error );
-		}
+	// проход по всем неиграющим клиентам и запись в результирующий массив их id и name
+	for (const id of clientIds) {
+		const info = clients.get( id );
+		if( info != unsigned )
+			clientList.push( {'id': id, 'name': info.name} )
 		else
-			// проход по всем неиграющим клиентам и запись в результирующий массив их id и name
-			for (const id of clientIds) {
-				const info = clients.get( id );
-				if( info != unsigned )
-					clientList.push( {'id': id, 'name': info.name} )
-				else
-					log('Error', 'getClientsInHall: there is no information about client ( ' + id + ' )' );
-			}
-	} );
+			log( new Error( `There is no information about client ( ${id} )` ), 'error' );
+	}
 
 	return clientList;
 }
@@ -267,34 +278,45 @@ UE4.on( 'connect', function( socket ) {
 
 
 	// Пользователь перешел в состояние Online, передает свое имя и ожидает список доступных соперников
-	socket.on( 'registration', function( myName, callback ) {
-		
+	socket.on( 'registration', async ( myName, callback ) => {
+
 		const myId = socket.id;
-		const clientList = getClientsInHall();
 
-		// отправка клиенту списка неиграющих подключенных игроков
-		callback( clientList );
+		try {
 
-		// создание объекта с игровой информацией об игроке
-		clients.set( myId, new ClientInfo( myName ) );
+			const list = await util.promisify( HALL.clients );
 
-		/* добавление клиента в комнату к неиграющим клиентам
-		и извещение всех находящихся в этой комнате о присоединении нового клиента */
-		socket.join( hallStr, ( error ) => {
-			if( error ) {
-				log( 'Error', error );
-				socket.disconnect( true );
-			}
-			else {
-				log( 'LOG', 'Client join to room "HALL" ( ' + myId + ' )' );
+			// отправка клиенту списка неиграющих подключенных игроков
+			callback( list );
 
-				const data = { 'id': myId, 'name': myName };
+			// создание объекта с игровой информацией об игроке
+			clients.set( myId, new ClientInfo( myName ) );
 
-				for (const item of clientList) {
-					HALL.to[ item.id ].emit( 'refreshResults', { 'action': 'add', 'data': data } );
+			// добавление клиента в комнату к неиграющим клиентам
+			// и извещение всех находящихся в этой комнате о присоединении нового клиента
+			socket.join( hallStr, ( error ) => {
+				if( error ) {
+					log( error, 'error' );
+					socket.disconnect( true );
 				}
-			}
-		});
+				else {
+
+					log( 'Client join to room "HALL" ( ' + myId + ' )', 'LOG', 'onRegistration' );
+
+					const data = { 'id': myId, 'name': myName };
+
+					for (const item of clientList) {
+						HALL.to[ item.id ].emit( 'refreshResults', { 'action': 'add', 'data': data } );
+					}
+				}
+			});
+
+
+		} catch( error ) {
+			log( error, 'error' );
+		}
+		
+
 	});
 
 
