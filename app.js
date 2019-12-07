@@ -262,6 +262,26 @@ function getClientsInHall( clientIds ) {
 }
 
 
+/**
+ * Удалить элемент из массива, если он там имеется
+ * @param {Array} arr Массив, из которого необходимо вырезать элемент
+ * @param {any} elem Элемент, который необходимо удалить из массива, если он там имеется
+ */
+function cutElem( arr, elem ) {
+
+	try {
+		const i = arr.indexOf( elem, 0 );
+
+		if( i != -1 )
+			arr.splice( i, 1 );
+	}
+	catch( error ) {
+		log( error, 'error' );
+	}
+	
+}
+
+
 
 io.on( 'connect', function ( socket ) {
 	log( 'Event', "New client: " + socket.id );
@@ -278,45 +298,35 @@ UE4.on( 'connect', function( socket ) {
 
 
 	// Пользователь перешел в состояние Online, передает свое имя и ожидает список доступных соперников
-	socket.on( 'registration', async ( myName, callback ) => {
+	socket.on( 'registration', ( myName, callback ) => {
 
 		const myId = socket.id;
 
 		try {
 
-			const list = await util.promisify( HALL.clients );
+			socket.join( hallStr, async ( error ) => {
 
-			// отправка клиенту списка неиграющих подключенных игроков
-			callback( list );
+				log( 'Client join to room "HALL" ( ' + myId + ' )', 'LOG', 'onRegistration' );
 
-			// создание объекта с игровой информацией об игроке
-			clients.set( myId, new ClientInfo( myName ) );
+				const list = await util.promisify( HALL.clients );
 
-			// добавление клиента в комнату к неиграющим клиентам
-			// и извещение всех находящихся в этой комнате о присоединении нового клиента
-			socket.join( hallStr, ( error ) => {
-				if( error ) {
-					log( error, 'error' );
-					socket.disconnect( true );
+				// удалить из результата id самого клиента
+				cutElem( list, myId );
+
+				// отправка клиенту списка неиграющих подключенных игроков
+				callback( getClientsInHall( list ) );
+
+				// извещение всех находящихся в комнате о присоединении нового клиента
+				const data = { 'id': myId, 'name': myName };
+				for (const item of list) {
+					HALL.to[ item.id ].emit( 'refreshResults', { 'action': 'add', 'data': data } );
 				}
-				else {
 
-					log( 'Client join to room "HALL" ( ' + myId + ' )', 'LOG', 'onRegistration' );
-
-					const data = { 'id': myId, 'name': myName };
-
-					for (const item of clientList) {
-						HALL.to[ item.id ].emit( 'refreshResults', { 'action': 'add', 'data': data } );
-					}
-				}
-			});
-
+			})
 
 		} catch( error ) {
 			log( error, 'error' );
 		}
-		
-
 	});
 
 
