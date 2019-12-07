@@ -1,0 +1,501 @@
+const PORT = 8081;	 // порт
+const clients = new Map(); // контейнер для хранения сокета клиента (key) и информации о нем (value)
+const hallStr = 'hall'; // имя комнаты, в которую добавляются все, кто online, но еще не играет
+
+
+/**
+ * Сообщение пользователю служебной информации (логирование)
+ * @param {String} type Тип сообщения
+ * @param {String} message Сообщение
+ */
+function log(type, message) {
+	console.log( type + ': ' + message );
+}
+
+
+// ===============================================================================================
+// ===============================================================================================
+try {
+
+// Создание сервера, слушающего заданный порт
+const io = require('socket.io')(PORT);
+
+const UE4 = io.of( '/ue4' ); // namespace, в котором находятся все играющие клиенты
+const HALL = UE4.in( hallStr ); // комната, в которую добавляются все, кто online, но еще не играет
+
+
+
+/** ============================================
+ * Электронная конфигурация химического элемента
+ * =============================================
+ * @property {Int32Array[4]} config электронная конфигурация
+ */
+class ElemConfig {
+
+	constructor( buf ) {
+		if ( buf == undefined || ( !( buf instanceof Array ) && !( buf instanceof Int32Array ) ) )
+			this.config = new Int32Array([0, 0, 0, 0]);
+		else {
+			this.config = new Int32Array( 4 );
+			let i = 0;
+			for( ; i < buf.length && i < 4; i++ )
+				this.config[i] = buf[i];
+			for( ; i < 4; i++ )
+				this.config[i] = 0;
+		}
+	}
+
+
+	/**
+	 * Отметить спин в объекте конфигурации элемента
+	 * @param {Number} num Порядковый номер химического элемента
+	 * @param {Bool} state Отмечен ли спин
+	 */
+	Write( num, state ) {
+		if( num >= 1 && num <= 118 )
+			state ? this._Add( num - 1 )
+				: this._Remove( num - 1 );
+		else 
+			console.log( 'Error: ElemConfig::Write: Invalid element number', num );
+	}
+
+	/**
+	 * Отметить спин
+	 * @param {Number} index Индекс спина
+	 */
+	_Add( index ) {
+		let mask = 1;
+		mask <<= index % 32;
+		this.config[ ( index / 32 ) | 0 ] |= mask;
+	}
+
+	/**
+	 * Снять отметку со спина
+	 * @param {Number} index Индекс спина
+	 */
+	_Remove( index ) {
+		let mask = 1;
+		mask <<= index % 32;
+		this.config[ ( index / 32 ) | 0 ] &= ~mask;
+	}
+
+} // ---------------------------------------------
+
+
+/** ==========================================
+ * Периодическая таблица химических элементов
+ * ==========================================
+ */
+class PeriodicTable {
+
+	constructor( ) {
+		if( table == null ) {
+			init();
+		}
+	}
+
+	static table = null;
+
+	static init() {
+		table = new Array[119];
+		initTable( table );
+	}
+
+	static _getChemicalElementObject( name, symbol, config ) {
+		return { 'name': name, 'symbol': symbol, 'config': config };
+	}
+
+} // ---------------------------------------------
+
+
+
+/** =============================================
+ * Информация об игроке
+ * ==============================================
+ * @property {Object} chemicalElement химический элемент
+ * @property {ElemConfig} diagramState состояние диаграммы
+ * @property {GameInfo} gameInfo ссылка на объект игры
+ * @property {Number} gameState текущее состояние игры
+ * @property {Set} invited множество всех приглашенных игроком
+ * @property {Set} inviting множество всех приглашающих игрока
+ * @property {Number} losses количество проигрышей
+ * @property {String} name имя игрока
+ * @property {String} opponent id оппонента
+ * @property {ElemConfig} shots схема выстрелов, совершенных игроком
+ * @property {Number} team команда
+ * @property {Number} wins количество побед
+ */
+class ClientInfo {
+
+	/**
+	 * Объект с информацией об игроке
+	 * @param {String} name Имя игрока
+	 */
+	constructor( name ) {
+		this.chemicalElement = {
+			element: null, // ссылка на объект в периодической таблице
+			number: 0
+		};
+		this.diagramState = null;
+		this.gameInfo = null;
+		this.gameState = GameStateToNum( 'Online' );
+		this.invited = new Set();
+		this.inviting = new Set();
+		this.losses = 0;
+		this.name = name;
+		this.opponent = null;
+		this.shots = null;
+		this.team = -1;
+		this.wins = 0;
+	}
+
+	/* {Map} ссылка на список всех клиентов с информацией о них */
+	static clientsInfo = clients;
+
+} // ---------------------------------------------
+
+
+
+/** =============================================
+ * Информация об игре
+ * ==============================================
+ * @property {Number} readyPlayers количество игроков готовых перейти в следующее синхронное состояние игры
+ * @property {Socket} rightMove игрок с правом хода
+ */
+class GameInfo {
+
+	constructor() {
+		this.readyPlayers = 0;
+		this.rightMove = null;
+	}
+} // ---------------------------------------------
+
+
+
+/**
+ * Перевести строковое представление состояния игры в число
+ * @param {String} state Состояние игры
+ * @returns {Number} Численное представление состояния игры
+ */
+function gameStateToNum( state ) {
+	switch (state) {
+		case 'Offline':
+			return 0;
+			break;
+		case 'Online':
+			return 1;
+			break;
+		case 'PeriodicTable':
+			return 2;
+			break;
+		case 'Preparing':
+			return 3;
+			break;
+		case 'Match':
+			return 4;
+			break;
+		case 'Celebration':
+			return 5;
+			break;
+	
+		default:
+			return -1;
+			break;
+	}
+}
+
+
+/**
+ * Перевести строковое представление команды в число
+ * @param {String} team Название команды
+ * @returns {Number} Численное представление команды
+ */
+function teamToNum( team ) {
+	switch( team ) {
+		case 'Azydy':
+			return 0;
+			break;
+		case 'Galogeny':
+			return 1;
+			break;
+	
+		default:
+			break;
+	}
+}
+
+
+/**
+ * Получить массив неиграющих клиентов [{id, name}]
+ */
+function getClientsInHall() {
+
+	const clientList = [];
+
+	HALL.clients( ( error, clientIds ) => {
+		if( error ) {
+			log( 'Error', error );
+		}
+		else
+			// проход по всем неиграющим клиентам и запись в результирующий массив их id и name
+			for (const id of clientIds) {
+				const info = clients.get( id );
+				if( info != unsigned )
+					clientList.push( {'id': id, 'name': info.name} )
+				else
+					log('Error', 'getClientsInHall: there is no information about client ( ' + id + ' )' );
+			}
+	} );
+
+	return clientList;
+}
+
+
+
+io.on( 'connect', function ( socket ) {
+	log( 'Event', "New client: " + socket.id );
+});
+
+
+
+UE4.on( 'connect', function( socket ) {
+
+	// Вывести сообщение о тм, что подключился новый пользователь
+	log( 'Event', "New client in 'UE4' namespace: " + socket.id );
+	// Отдать команду клиенту сменить состояние игры
+	socket.emit( 'changeState', {'id': socket.id});
+
+
+	// Пользователь перешел в состояние Online, передает свое имя и ожидает список доступных соперников
+	socket.on( 'registration', function( myName, callback ) {
+		
+		const myId = socket.id;
+		const clientList = getClientsInHall();
+
+		// отправка клиенту списка неиграющих подключенных игроков
+		callback( clientList );
+
+		// создание объекта с игровой информацией об игроке
+		clients.set( myId, new ClientInfo( myName ) );
+
+		/* добавление клиента в комнату к неиграющим клиентам
+		и извещение всех находящихся в этой комнате о присоединении нового клиента */
+		socket.join( hallStr, ( error ) => {
+			if( error ) {
+				log( 'Error', error );
+				socket.disconnect( true );
+			}
+			else {
+				log( 'LOG', 'Client join to room "HALL" ( ' + myId + ' )' );
+
+				const data = { 'id': myId, 'name': myName };
+
+				for (const item of clientList) {
+					HALL.to[ item.id ].emit( 'refreshResults', { 'action': 'add', 'data': data } );
+				}
+			}
+		});
+	});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
+	
+	
+	socket.emit('message', 'Hello client' + socket.id.toString() );
+
+	socket.on('message', function( num ) {
+		console.log( 'Server get message: ' + num );
+		io.sockets.emit('message', num.toString() );
+	});
+
+	socket.on( 'GetClientList', function( data, callback ) {
+		console.log( 'Client sent: ', data );
+		let res = [];
+		for( let i = 0; i < io.clients.length; i++ ) {
+			res.push( io.clients[i].id.toString() );
+		}
+		callback( res );
+	});
+
+	socket.on( 'disconnect', function() {
+		console.log( 'Client disconnected', socket.id );
+		io.sockets.emit( 'message', 'user disconnect' );
+	});
+
+	socket.on( 'error', function( err ) {
+		console.log( 'Error: ', err );
+	});
+
+
+})
+
+// ===============================================================================================
+// ===============================================================================================
+} catch( error ) {
+	log( 'Error', error.stack );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function initTable( table ) {
+		table[1]  = PeriodicTable._getChemicalElementObject( 'hydrogen', 		'H',  [1, 			0, 			0, 			0] );
+		table[2]  = PeriodicTable._getChemicalElementObject( 'helium', 			'He', [3, 			0, 			0, 			0] );
+		table[3]  = PeriodicTable._getChemicalElementObject( 'lithium', 		'Li', [7, 			0, 			0, 			0] );
+		table[4]  = PeriodicTable._getChemicalElementObject( 'beryllium', 		'Be', [15, 			0, 			0, 			0] );
+		table[5]  = PeriodicTable._getChemicalElementObject( 'boron', 			'B',  [31, 			0, 			0, 			0] );
+		table[6]  = PeriodicTable._getChemicalElementObject( 'carbon', 			'C',  [95,  		0, 			0, 			0] );
+		table[7]  = PeriodicTable._getChemicalElementObject( 'nitrogen', 		'N',  [351, 		0, 			0, 			0] );
+		table[8]  = PeriodicTable._getChemicalElementObject( 'oxygen', 			'O',  [383, 		0, 			0, 			0] );
+		table[9]  = PeriodicTable._getChemicalElementObject( 'fluorine', 		'F',  [511, 		0, 			0, 			0] );
+		table[10] = PeriodicTable._getChemicalElementObject( 'neon', 			'Ne', [1023, 		0, 			0, 			0] );
+		table[11] = PeriodicTable._getChemicalElementObject( 'sodium', 			'Na', [2047, 		0, 			0, 			0] );
+		table[12] = PeriodicTable._getChemicalElementObject( 'magnesium', 		'Mg', [4095, 		0, 			0, 			0] );
+		table[13] = PeriodicTable._getChemicalElementObject( 'aluminium', 		'Al', [8191, 		0, 			0, 			0] );
+		table[14] = PeriodicTable._getChemicalElementObject( 'silicon', 		'Si', [24575,		0, 			0, 			0] );
+		table[15] = PeriodicTable._getChemicalElementObject( 'phosphorus', 		'P',  [90111,		0, 			0, 			0] );
+		table[16] = PeriodicTable._getChemicalElementObject( 'sulfur', 			'S',  [98303,		0, 			0, 			0] );
+		table[17] = PeriodicTable._getChemicalElementObject( 'chlorine', 		'Cl', [131071,		0, 			0, 			0] );
+		table[18] = PeriodicTable._getChemicalElementObject( 'argon', 			'Ar', [262143,		0, 			0, 			0] );
+		table[19] = PeriodicTable._getChemicalElementObject( 'potassium', 		'K',  [524287,		0, 			0, 			0] );
+		table[20] = PeriodicTable._getChemicalElementObject( 'calcium', 		'Ca', [1048575,		0, 			0, 			0] );
+		table[21] = PeriodicTable._getChemicalElementObject( 'scandium', 		'Sc', [2097151,		0, 			0, 			0] );
+		table[22] = PeriodicTable._getChemicalElementObject( 'titanium', 		'Ti', [6291455,		0, 			0, 			0] );
+		table[23] = PeriodicTable._getChemicalElementObject( 'vanadium', 		'V',  [23068671,	0, 			0, 			0] );
+		table[24] = PeriodicTable._getChemicalElementObject( 'chromium', 		'Cr', [358088703,	0, 			0, 			0] );
+		table[25] = PeriodicTable._getChemicalElementObject( 'manganese', 		'Mn', [358612991,	0, 			0, 			0] );
+		table[26] = PeriodicTable._getChemicalElementObject( 'iron', 			'Fe', [, 			0, 			0, 			0] );
+		table[27] = PeriodicTable._getChemicalElementObject( 'cobalt', 			'Co', [, 			0, 			0, 			0] );
+		table[28] = PeriodicTable._getChemicalElementObject( 'nickel', 			'Ni', [, 			0, 			0, 			0] );
+		table[29] = PeriodicTable._getChemicalElementObject( 'copper', 			'Cu', [1073217535,	0, 			0, 			0] );
+		table[30] = PeriodicTable._getChemicalElementObject( 'zinc', 			'Zn', [, 			0, 			0, 			0] );
+		table[31] = PeriodicTable._getChemicalElementObject( 'gallium', 		'Ga', [, 			0, 			0, 			0] );
+		table[32] = PeriodicTable._getChemicalElementObject( 'germanium', 		'Ge', [, 			, 			0, 			0] );
+		table[33] = PeriodicTable._getChemicalElementObject( 'arsenic', 		'As', [, 			, 			0, 			0] );
+		table[34] = PeriodicTable._getChemicalElementObject( 'selenium', 		'Se', [-1, 			, 			0, 			0] );
+		table[35] = PeriodicTable._getChemicalElementObject( 'bromine', 		'Br', [-1, 			, 			0, 			0] );
+		table[36] = PeriodicTable._getChemicalElementObject( 'krypton', 		'Kr', [-1, 			, 			0, 			0] );
+		table[37] = PeriodicTable._getChemicalElementObject( 'rubidium', 		'Rb', [-1, 			, 			0, 			0] );
+		table[38] = PeriodicTable._getChemicalElementObject( 'strontium', 		'Sr', [-1, 			, 			0, 			0] );
+		table[39] = PeriodicTable._getChemicalElementObject( 'yttrium', 		'Y',  [-1, 			, 			0, 			0] );
+		table[40] = PeriodicTable._getChemicalElementObject( 'zirconium', 		'Zr', [-1, 			, 			0, 			0] );
+		table[41] = PeriodicTable._getChemicalElementObject( 'niobium', 		'Nb', [-1, 			, 			0, 			0] );
+		table[42] = PeriodicTable._getChemicalElementObject( 'molybdenum', 		'Mo', [-1, 			, 			0, 			0] );
+		table[43] = PeriodicTable._getChemicalElementObject( 'technetium', 		'Tc', [-1, 			, 			0, 			0] );
+		table[44] = PeriodicTable._getChemicalElementObject( 'ruthenium', 		'Ru', [-1, 			, 			0, 			0] );
+		table[45] = PeriodicTable._getChemicalElementObject( 'rhodium', 		'Rh', [-1, 			, 			0, 			0] );
+		table[46] = PeriodicTable._getChemicalElementObject( 'palladium', 		'Pd', [-1, 			, 			0, 			0] );
+		table[47] = PeriodicTable._getChemicalElementObject( 'silver', 			'Ag', [-1, 			, 			0, 			0] );
+		table[48] = PeriodicTable._getChemicalElementObject( 'cadmium', 		'Cd', [-1, 			, 			0, 			0] );
+		table[49] = PeriodicTable._getChemicalElementObject( 'indium', 			'In', [-1, 			, 			0, 			0] );
+		table[50] = PeriodicTable._getChemicalElementObject( 'tin', 			'Sn', [-1, 			, 			0, 			0] );
+		table[51] = PeriodicTable._getChemicalElementObject( 'antimony', 		'Sb', [-1, 			, 			0, 			0] );
+		table[52] = PeriodicTable._getChemicalElementObject( 'tellurium', 		'Te', [-1, 			, 			0, 			0] );
+		table[53] = PeriodicTable._getChemicalElementObject( 'iodine', 			'I',  [-1, 			, 			0, 			0] );
+		table[54] = PeriodicTable._getChemicalElementObject( 'xenon', 			'Xe', [-1, 			, 			0, 			0] );
+		table[55] = PeriodicTable._getChemicalElementObject( 'caesium', 		'Cs', [-1, 			, 			0, 			0] );
+		table[56] = PeriodicTable._getChemicalElementObject( 'barium', 			'Ba', [-1, 			, 			0, 			0] );
+		table[57] = PeriodicTable._getChemicalElementObject( 'lanthanum', 		'La', [-1, 			, 			, 			0] );
+		table[58] = PeriodicTable._getChemicalElementObject( 'cerium', 			'Ce', [-1, 			, 			, 			0] );
+		table[59] = PeriodicTable._getChemicalElementObject( 'praseodymium',	'Pr', [-1, 			, 			0, 			0] );
+		table[60] = PeriodicTable._getChemicalElementObject( 'neodymium', 		'Nd', [-1, 			, 			0, 			0] );
+		table[61] = PeriodicTable._getChemicalElementObject( 'promethium', 		'Pm', [-1, 			, 			, 			0] );
+		table[62] = PeriodicTable._getChemicalElementObject( 'samarium', 		'Sm', [-1, 			, 			, 			0] );
+		table[63] = PeriodicTable._getChemicalElementObject( 'europium', 		'Eu', [-1, 			, 			, 			0] );
+		table[64] = PeriodicTable._getChemicalElementObject( 'gadolinium', 		'Gb', [-1, 			, 			, 			0] );
+		table[65] = PeriodicTable._getChemicalElementObject( 'terbium', 		'Tb', [-1, 			, 			, 			0] );
+		table[66] = PeriodicTable._getChemicalElementObject( 'dysprosium', 		'Dy', [-1, 			, 			, 			0] );
+		table[67] = PeriodicTable._getChemicalElementObject( 'holmium', 		'Ho', [-1, 			-1, 		, 			0] );
+		table[68] = PeriodicTable._getChemicalElementObject( 'erbium', 			'Er', [-1, 			-1, 		, 			0] );
+		table[69] = PeriodicTable._getChemicalElementObject( 'thulium', 		'Tm', [-1, 			-1, 		, 			0] );
+		table[70] = PeriodicTable._getChemicalElementObject( 'ytterbium', 		'Yb', [-1, 			-1, 		, 			0] );
+		table[71] = PeriodicTable._getChemicalElementObject( 'lutetium', 		'Lu', [-1, 			-1, 		, 			0] );
+		table[72] = PeriodicTable._getChemicalElementObject( 'hafnium', 		'Hf', [-1, 			-1, 		, 			0] );
+		table[73] = PeriodicTable._getChemicalElementObject( 'tantalum', 		'Ta', [-1, 			-1, 		, 			0] );
+		table[74] = PeriodicTable._getChemicalElementObject( 'tungsten', 		'W',  [-1, 			-1, 		, 			0] );
+		table[75] = PeriodicTable._getChemicalElementObject( 'rhenium', 		'Re', [-1, 			-1, 		, 			0] );
+		table[76] = PeriodicTable._getChemicalElementObject( 'osmium', 			'Os', [-1, 			-1, 		, 			0] );
+		table[77] = PeriodicTable._getChemicalElementObject( 'iridium', 		'Ir', [-1, 			-1, 		, 			0] );
+		table[78] = PeriodicTable._getChemicalElementObject( 'platinum', 		'Pt', [-1, 			-1, 		, 			0] );
+		table[79] = PeriodicTable._getChemicalElementObject( 'gold', 			'Au', [-1, 			-1, 		, 			0] );
+		table[80] = PeriodicTable._getChemicalElementObject( 'mercury', 		'Hg', [-1, 			-1, 		, 			0] );
+		table[81] = PeriodicTable._getChemicalElementObject( 'thallium', 		'Tl', [-1, 			-1, 		, 			0] );
+		table[82] = PeriodicTable._getChemicalElementObject( 'lead', 			'Pb', [-1, 			-1, 		, 			0] );
+		table[83] = PeriodicTable._getChemicalElementObject( 'bismuth', 		'Bi', [-1, 			-1, 		, 			0] );
+		table[84] = PeriodicTable._getChemicalElementObject( 'polonium', 		'Po', [-1, 			-1, 		, 			0] );
+		table[85] = PeriodicTable._getChemicalElementObject( 'astatine', 		'At', [-1, 			-1, 		, 			0] );
+		table[86] = PeriodicTable._getChemicalElementObject( 'radon', 			'Rn', [-1, 			-1, 		, 			0] );
+		table[87] = PeriodicTable._getChemicalElementObject( 'francium', 		'Fr', [-1, 			-1, 		, 			0] );
+		table[88] = PeriodicTable._getChemicalElementObject( 'radium', 			'Ra', [-1, 			-1, 		, 			0] );
+		table[89] = PeriodicTable._getChemicalElementObject( 'actinium', 		'Ac', [-1, 			-1, 		, 			] );
+		table[90] = PeriodicTable._getChemicalElementObject( 'thorium', 		'Th', [-1, 			-1, 		, 			] );
+		table[91] = PeriodicTable._getChemicalElementObject( 'protactinium',	'Pa', [-1, 			-1, 		, 			] );
+		table[92] = PeriodicTable._getChemicalElementObject( 'uranium', 		'U',  [-1, 			-1, 		, 			] );
+		table[93] = PeriodicTable._getChemicalElementObject( 'neptunium', 		'Np', [-1, 			-1, 		, 			] );
+		table[94] = PeriodicTable._getChemicalElementObject( 'plutonium', 		'Pu', [-1, 			-1, 		, 			] );
+		table[95] = PeriodicTable._getChemicalElementObject( 'americium', 		'Am', [-1, 			-1, 		, 			] );
+		table[96] = PeriodicTable._getChemicalElementObject( 'curium', 			'Cm', [-1, 			-1, 		, 			] );
+		table[97] = PeriodicTable._getChemicalElementObject( 'berkelium', 		'Bk', [-1, 			-1, 		, 			] );
+		table[98] = PeriodicTable._getChemicalElementObject( 'californium', 	'Cf', [-1, 			-1, 2147483647, 		21] );
+		table[99] = PeriodicTable._getChemicalElementObject( 'einsteinium', 	'Es', [-1, 			-1,			-1, 		21] );
+		table[100] = PeriodicTable._getChemicalElementObject( 'fermium', 		'Fm', [-1, 			-1, 		-1, 		] );
+		table[101] = PeriodicTable._getChemicalElementObject( 'mendelevium',	'Md', [-1, 			-1, 		-1, 		] );
+		table[102] = PeriodicTable._getChemicalElementObject( 'nobelium', 		'No', [-1, 			-1, 		-1, 		] );
+		table[103] = PeriodicTable._getChemicalElementObject( 'lawrencium', 	'Lr', [-1, 			-1, 		-1, 		] );
+		table[104] = PeriodicTable._getChemicalElementObject( 'rutherfordium',	'Rf', [-1, 			-1, 		-1, 		] );
+		table[105] = PeriodicTable._getChemicalElementObject( 'dubnium', 		'Db', [-1, 			-1, 		-1, 		] );
+		table[106] = PeriodicTable._getChemicalElementObject( 'seaborgium', 	'Sg', [-1, 			-1, 		-1, 		] );
+		table[107] = PeriodicTable._getChemicalElementObject( 'bohrium', 		'Bh', [-1, 			-1, 		-1, 		] );
+		table[108] = PeriodicTable._getChemicalElementObject( 'hassium', 		'Hs', [-1, 			-1, 		-1, 		] );
+		table[109] = PeriodicTable._getChemicalElementObject( 'meitnerium', 	'Mt', [-1, 			-1, 		-1, 		] );
+		table[110] = PeriodicTable._getChemicalElementObject( 'darmstadtium',	'Ds', [-1, 			-1, 		-1, 		] );
+		table[111] = PeriodicTable._getChemicalElementObject( 'roentgenium',	'Rg', [-1, 			-1, 		-1, 		] );
+		table[112] = PeriodicTable._getChemicalElementObject( 'copernicium',	'Cn', [-1, 			-1, 		-1, 		] );
+		table[113] = PeriodicTable._getChemicalElementObject( 'nihonium', 		'Nh', [-1, 			-1, 		-1, 		] );
+		table[114] = PeriodicTable._getChemicalElementObject( 'flerovium', 		'Fl', [-1, 			-1, 		-1, 		] );
+		table[115] = PeriodicTable._getChemicalElementObject( 'moscovium', 		'Mc', [-1, 			-1, 		-1, 		] );
+		table[116] = PeriodicTable._getChemicalElementObject( 'livermorium',	'Lv', [-1, 			-1, 		-1, 		] );
+		table[117] = PeriodicTable._getChemicalElementObject( 'tennessine', 	'Ts', [-1, 			-1, 		-1, 		] );
+		table[118] = PeriodicTable._getChemicalElementObject( 'oganesson', 		'Og', [-1, 			-1, 		-1, 		] );
+}
