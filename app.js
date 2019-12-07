@@ -246,19 +246,30 @@ function teamToNum( team ) {
 /**
  * Получить массив неиграющих клиентов [{id, name}]
  */
-function getClientsInHall( clientIds ) {
+async function getClientsInHall( resolve, reject ) {
 
-	const clientList = [];
-	// проход по всем неиграющим клиентам и запись в результирующий массив их id и name
-	for (const id of clientIds) {
-		const info = clients.get( id );
-		if( info != unsigned )
-			clientList.push( {'id': id, 'name': info.name} )
-		else
-			log( new Error( `There is no information about client ( ${id} )` ), 'error' );
+	try{
+		const clientIds = await util.promisify( HALL.clients );
+
+		// удалить из результата id самого клиента
+		cutElem( list, myId );
+
+		const clientList = [];
+
+		// проход по всем неиграющим клиентам и запись в результирующий массив их id и name
+		for (const id of clientIds) {
+			const info = clients.get( id );
+			if( info != unsigned )
+				clientList.push( {'id': id, 'name': info.name} )
+			else
+				log( new Error( `There is no information about client ( ${id} )` ), 'error' );
+		}
+
+		resolve( clientList);
 	}
-
-	return clientList;
+	catch( error ) {
+		reject( error );
+	}	
 }
 
 
@@ -308,13 +319,10 @@ UE4.on( 'connect', function( socket ) {
 
 				log( 'Client join to room "HALL" ( ' + myId + ' )', 'LOG', 'onRegistration' );
 
-				const list = await util.promisify( HALL.clients );
-
-				// удалить из результата id самого клиента
-				cutElem( list, myId );
+				const list = await new Promise( getClientsInHall )
 
 				// отправка клиенту списка неиграющих подключенных игроков
-				callback( getClientsInHall( list ) );
+				callback( list );
 
 				// извещение всех находящихся в комнате о присоединении нового клиента
 				const data = { 'id': myId, 'name': myName };
@@ -326,6 +334,22 @@ UE4.on( 'connect', function( socket ) {
 
 		} catch( error ) {
 			log( error, 'error' );
+			callback( [] );
+		}
+	});
+
+
+	// отправка клиенту списка неиграющих подключенных игроков
+	socket.on( 'refreshList', async (callback) => {
+
+		log( `The client asks for a list of all non-playing connected clients ( ${socket.id} )`, 'LOG', 'onRefreshList' );
+
+		try {
+			callback( await new Promise( getClientsInHall ) );
+		} catch (error) {
+			log( `Failed to get list for client { ${socket.id} }`, 'Error', 'onRefreshList' );
+			log( error, 'error' );
+			callback( [] );
 		}
 	});
 
