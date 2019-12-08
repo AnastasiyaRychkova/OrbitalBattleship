@@ -137,7 +137,7 @@ class PeriodicTable {
  * @property {Number} 		gameState 		текущее состояние игры
  * @property {Set} 			inviters 		множество всех приглашающих игрока
  * @property {Number} 		losses 			количество проигрышей
- * @property {String} 		name и			мя игрока
+ * @property {String} 		name 			имя игрока
  * @property {String} 		opponent 		id оппонента
  * @property {ElemConfig} 	shots 			схема выстрелов, совершенных игроком
  * @property {Number} 		team 			команда
@@ -160,14 +160,27 @@ class ClientInfo {
 		this.inviters 		= new Set();
 		this.losses 		= 0;
 		this.name 			= name;
-		this.opponent 		= null;
+		this.opponent 		= ''; // TODO: заменить на Socket
 		this.shots 			= null;
 		this.team 			= -1;
 		this.wins 			= 0;
 	}
 
-	/* {Map} ссылка на список всех клиентов с информацией о них */
-	static clientsInfo = clients;
+	resetGameInfo() {
+		if( this.opponent ) {
+			const opInfo = clients.get( this.opponent );
+			if( opInfo )
+				opInfo.opponent = null;
+			this.opponent = null;
+		}
+		this.chemicalElement.number = 0;
+		this.chemicalElement.element = null;
+		this.diagramState = null;
+		this.gameInfo = null;
+		this.gameState = gameStateToNum( 'Online' );
+		this.shots = null;
+		this.team = -1;
+	}
 
 } // ---------------------------------------------
 
@@ -178,12 +191,15 @@ class ClientInfo {
  * ==============================================
  * @property {Number} readyPlayers количество игроков готовых перейти в следующее синхронное состояние игры
  * @property {Socket} rightMove игрок с правом хода
+ * @property {String} winner победивший игрок
  */
 class GameInfo {
 
-	constructor() {
+	constructor( roomName ) {
+		this.room = roomName;
 		this.readyPlayers = 0;
 		this.rightMove = null;
+		this.winner = null;
 	}
 } // ---------------------------------------------
 
@@ -287,6 +303,18 @@ function joinRoom( player, room ) {
 
 
 /**
+ * Удалить игрока из комнаты
+ * @param {Socket} player Игрок
+ * @param {String} room Имя комнаты
+ */
+function leaveRoom( player, room ) {
+	return new Promise( ( resolve, reject ) => {
+		player.leave( room, ( error ) => error ? reject( error ) : resolve( 1 ) );
+	})
+}
+
+
+/**
  * Добавить игроков в отдельную комнату, начать матч и сообщить об этом другим игрокам
  * @param {Socket} player1 Игрок
  * @param {Socket} player2 Игрок
@@ -304,13 +332,15 @@ async function startMatch( player1, player2 ) {
 	}
 
 	// перевести игроков с состояние 'PeriodicTable'
-	let info = clients.get( player1.id );
-	UE4.to( player1.id ).emit( 'changeState', { 'state': info.gameState, 'data': { 'team': info.team } } );
-	info = clients.get( player2 );
-	UE4.to( player2.id ).emit( 'changeState', { 'state': info.gameState, 'data': { 'team': info.team } } );
+	const info1 = clients.get( player1.id );
+	const info2 = clients.get( player2 );
+	info1.gameInfo = info2.gameInfo = new GameInfo( roomName );
+	UE4.to( player1.id ).emit( 'changeState', { 'state': info1.gameState, 'data': { 'team': info.team } } );
+	UE4.to( player2.id ).emit( 'changeState', { 'state': info2.gameState, 'data': { 'team': info.team } } );
 
+	const list = [];
 	try {
-		const list = await HALL.getClients();
+		list = await HALL.getClients();
 	}
 	catch ( error ) {
 		log( 'Failed to inform clients about one started match', 'Error', 'startMatch' );
@@ -328,6 +358,60 @@ async function startMatch( player1, player2 ) {
 				{ 'id': player1.id },
 				{ 'id': player2.id }
 			]
+		} );
+	}
+}
+
+
+/**
+ * Удалить клиента из выдачи результатов в списке клиентов в HALL
+ * @param {Sting} id Клиент, которого необходимо удалить из списков клиентов в HALL
+ */
+async function deleteFromLists( id ) {
+	const list = []
+	try {
+		list = await HALL.getClients();
+	}
+	catch( error ) {
+		log( `Failed to delete id ( ${id} ) from inviter lists of clients in HALL`, 'Error', 'deleteFromLists' );
+		log( error, 'error' );
+		return;
+	}
+	
+	for (const client of list) {
+		clients.get( client ).inviters.delete( id );
+		HALL.to( client ).emit( 'refreshResults', {
+			'action': 'remove',
+			'data': [ { 'id': id } ]
+		} );
+	}
+}
+
+
+/**
+ * Отпустить проигравшего игрока в состояние Online
+ * @param {String} id Проигравший игрок в состоянии Celebration
+ */
+async function releaseTheLosingPlayer( id ) {
+	const info = clients.get( id );
+
+	if( info && info.gameState === gameStateToNum( 'Celebration' ) ) {
+		info.resetGameInfo();
+		try {
+			await leaveRoom( UE4.to( id ), info.gameInfo.room );
+			await joinRoom( UE4.to( id ), hallStr );
+		}
+		catch( error ) {
+			log( `Failed to leave the room ( ${info.gameInfo.room} ) or join to HALL ( ${id} )`, 'Error', 'releaseTheLosingPlayer' );
+			log( error, 'error' );
+			return;
+		}
+		UE4.to( id ).broadcast.to( hallStr ).emit( 'refreshResults', { // FIXME: проверить
+			'action': 'add', 
+			'data': [ { 
+				'id': id, 
+				'name': info.name 
+			} ] 
 		} );
 	}
 }
@@ -356,6 +440,8 @@ UE4.on( 'connect', function( socket ) {
 	function getClientsInHall( myId, bWithInvitations ) {
 		return HALL.getClients()
 		.then( ( clientIds ) => {
+			if( clientIds.length === 0 )
+				resolve( clientIds );
 			const clientList = [];
 			cutElem( clientIds, myId );
 
@@ -377,7 +463,7 @@ UE4.on( 'connect', function( socket ) {
 				}
 			}
 
-			resolve( clientList);
+			resolve( clientList );
 		})
 		.catch( ( error ) => error );
 	}
@@ -434,6 +520,7 @@ UE4.on( 'connect', function( socket ) {
 
 	// приглашение игрока ( id ) на начало матча
 	socket.on( 'invite', ( {id} ) => {
+		log( `Client ( ${socket.id} ) is inviting the client ( ${id} )`, 'LOG', 'onInvite' );
 		const opInfo = clients.get( id );
 		if( !opInfo ) { // существует ли вообще такой клиент
 			log( new Error( `Trying to invite invalid client id ( ${id} )` ), 'error' );
@@ -449,7 +536,6 @@ UE4.on( 'connect', function( socket ) {
 			if( myInfo.inviters.delete( id ) ) {
 				myInfo.opponent = id;
 				opInfo.opponent = myId;
-				myInfo.gameInfo = op.gameInfo = new GameInfo();
 				myInfo.gameState = op.gameState = gameStateToNum( 'PeriodicTable' );
 				myInfo.team = Math.round( Math.random() );
 				opInfo.team = myInfo.team ? 0 : 1;
@@ -485,6 +571,81 @@ UE4.on( 'connect', function( socket ) {
 	});
 
 
+	socket.on( 'flyAway', () => {
+		log( `Client wants to fly away ( ${socket.id} )`, 'LOG', 'onFlyAway' );
+
+		const info = clients.get( socket.id ); // TODO: заменить на switch
+		if( info.gameState === gameStateToNum( 'Online' ) ) {
+			socket.emit( 'changeState', { 'state': gameStateToNum( 'Offline' ) } );
+			socket.disconnect( true );
+		}
+		else {
+			const celebration = gameStateToNum( 'Celebration' );
+			const opInfo = clients.get( info.opponent );
+			socket.emit( 'changeState', {
+				'state': celebration,
+				'data': {
+					'bIsWinner': false,
+					'opponentElem': opInfo.chemicalElement
+				}
+			} );
+			UE4.to( info.opponent ).emit( 'changeState', {
+				'state': celebration,
+				'data': {
+					'bIsWinner': true,
+					'opponentElem': info.chemicalElement
+				}
+			} );
+			info.gameState = opInfo.gameState = celebration;
+			setTimeout(  )
+		} // TODO: отпустить проигравшего через время
+	})
+
+
+	// отключение клиента от сервера
+	socket.on( 'disconnect', ( reason ) => {
+		log( `Client disconnected ( ${socket.id} ): ${reason}`, 'LOG', 'onDisconnect' );
+		const info = clients.get( socket.id );
+
+		// оповестить клиентов в HALL
+		if( info.gameState === gameStateToNum( 'Online' ) ) {
+			if( clients.size > 1 )
+				deleteFromLists( socket.id );
+		}
+		else { // оповестить противника и перевести его в состояние Celebration
+			if( info.opponent != '' ) {
+				const opInfo = clients.get( info.opponent );
+				const celebration = gameStateToNum( 'Celebration' );
+
+				// если игроки уже в конце матча
+				if( opInfo.gameState === celebration ) {
+					if( opInfo.gameInfo.winner != info.opponent ) // оппонент проиграл
+						releaseTheLosingPlayer( info.opponent );
+				}
+				else { // если клиенты еще играют, то оппонент становится победителем
+					UE4.to( info.opponent ).emit( 'changeState', {
+						'state': gameStateToNum( 'Celebration' ),
+						'data': {
+							'bIsWinner': true,
+							'opponentElem': info.chemicalElement
+						}
+					});
+					clients.get( info.opponent ).opponent = '';
+				}
+				
+			}
+		}
+		// удалить информацию о клиенте
+		clients.delete( socket.id );
+	});
+
+
+	socket.on( 'error', function( error ) {
+		log( error, 'error' );
+	});
+
+
+
 
 
 
@@ -518,17 +679,8 @@ UE4.on( 'connect', function( socket ) {
 		callback( res );
 	});
 
-	socket.on( 'disconnect', function() {
-		console.log( 'Client disconnected', socket.id );
-		io.sockets.emit( 'message', 'user disconnect' );
-	});
 
-	socket.on( 'error', function( err ) {
-		console.log( 'Error: ', err );
-	});
-
-
-})
+});
 
 // ===============================================================================================
 // ===============================================================================================
