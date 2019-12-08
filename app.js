@@ -51,7 +51,6 @@ class ElemConfig {
 
 	constructor( buf ) {
 		if ( buf == undefined || ( !( buf instanceof Array ) && !( buf instanceof Int32Array ) ) ) {
-			log( new Error( `Invalid initializer value ( ${buf} )` ), 'warn' );
 			this.config = new Int32Array([0, 0, 0, 0]);
 		}
 		else {
@@ -447,6 +446,8 @@ io.on( 'connect', function ( socket ) {
 });
 
 
+PeriodicTable.init();
+
 
 UE4.on( 'connect', function( socket ) {
 
@@ -544,7 +545,9 @@ UE4.on( 'connect', function( socket ) {
 
 	// приглашение игрока ( id ) на начало матча
 	socket.on( 'invite', ( {id} ) => {
+
 		log( `Client ( ${socket.id} ) is inviting the client ( ${id} )`, 'LOG', 'onInvite' );
+
 		const opInfo = clients.get( id );
 		if( !opInfo ) { // существует ли вообще такой клиент
 			log( new Error( `Trying to invite invalid client id ( ${id} )` ), 'error' );
@@ -642,6 +645,31 @@ UE4.on( 'connect', function( socket ) {
 	});
 
 
+	socket.on( 'elemSelection', ( {number} ) => {
+		const myId = socket.id;
+		const info = clients.get( myId );
+
+		if( info.gameState != gameStateToNum( 'PeriodicTable' ) ) {
+			log( `Event instigator does not have appropriate rights ( 'id': ${myId}, 'state': ${info.gameState} )`, 'Cheater', 'elemSelection' );
+			return;
+		}
+
+		if( number < 1 || number > 118 ) {
+			log( `Player selected invalid element ( 'id': ${myId}, 'number': ${number} )`, 'LOG', 'elemSelection' );
+			return;
+		}
+
+		log( `Player selected element ( 'id': ${myId}, 'number': ${number} )`, 'LOG', 'elemSelection' );
+
+		info.chemicalElement.number = number;
+		info.chemicalElement.element = PeriodicTable.table[ number ];
+		info.gameState = gameStateToNum( 'Preparing' );
+		info.diagramState = new ElemConfig();
+
+		socket.emit( 'changeState', { 'state': info.gameState } );
+	} );
+
+
 	// победитель подтверждает окончание матча
 	socket.on( 'endGame', () => {
 		const myId = socket.id;
@@ -651,6 +679,8 @@ UE4.on( 'connect', function( socket ) {
 			log( `Event instigator does not have appropriate rights ${myId}`, 'Cheater', 'onEndGame' );
 			return;
 		}
+
+		log( 'Winner confirmed the end of game', 'LOG', 'onEndGame' );
 
 		// перевести в состояние online сначала оппонента, если есть, а затем перевести себя
 		if( info.opponent != '' )
