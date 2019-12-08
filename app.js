@@ -2,6 +2,7 @@ const util = require('util');
 const PORT = 8081;	 // порт
 const clients = new Map(); // контейнер для хранения сокета клиента (key) и информации о нем (value)
 const hallStr = 'hall'; // имя комнаты, в которую добавляются все, кто online, но еще не играет
+var roomCounter = 0; // счетчик созданных комнат
 
 
 /**
@@ -130,18 +131,17 @@ class PeriodicTable {
 /** =============================================
  * Информация об игроке
  * ==============================================
- * @property {Object} chemicalElement химический элемент
- * @property {ElemConfig} diagramState состояние диаграммы
- * @property {GameInfo} gameInfo ссылка на объект игры
- * @property {Number} gameState текущее состояние игры
- * @property {Set} invited множество всех приглашенных игроком
- * @property {Set} inviting множество всех приглашающих игрока
- * @property {Number} losses количество проигрышей
- * @property {String} name имя игрока
- * @property {String} opponent id оппонента
- * @property {ElemConfig} shots схема выстрелов, совершенных игроком
- * @property {Number} team команда
- * @property {Number} wins количество побед
+ * @property {Object} 		chemicalElement химический элемент
+ * @property {ElemConfig} 	diagramState 	состояние диаграммы
+ * @property {GameInfo} 	gameInfo 		ссылка на объект игры
+ * @property {Number} 		gameState 		текущее состояние игры
+ * @property {Set} 			inviters 		множество всех приглашающих игрока
+ * @property {Number} 		losses 			количество проигрышей
+ * @property {String} 		name и			мя игрока
+ * @property {String} 		opponent 		id оппонента
+ * @property {ElemConfig} 	shots 			схема выстрелов, совершенных игроком
+ * @property {Number} 		team 			команда
+ * @property {Number} 		wins 			количество побед
  */
 class ClientInfo {
 
@@ -154,17 +154,16 @@ class ClientInfo {
 			element: null, // ссылка на объект в периодической таблице
 			number: 0
 		};
-		this.diagramState = null;
-		this.gameInfo = null;
-		this.gameState = GameStateToNum( 'Online' );
-		this.invited = new Set();
-		this.inviting = new Set();
-		this.losses = 0;
-		this.name = name;
-		this.opponent = null;
-		this.shots = null;
-		this.team = -1;
-		this.wins = 0;
+		this.diagramState 	= null;
+		this.gameInfo 		= null;
+		this.gameState 		= GameStateToNum( 'Online' );
+		this.inviters 		= new Set();
+		this.losses 		= 0;
+		this.name 			= name;
+		this.opponent 		= null;
+		this.shots 			= null;
+		this.team 			= -1;
+		this.wins 			= 0;
 	}
 
 	/* {Map} ссылка на список всех клиентов с информацией о них */
@@ -244,36 +243,6 @@ function teamToNum( team ) {
 
 
 /**
- * Получить массив неиграющих клиентов [{id, name}]
- */
-async function getClientsInHall( resolve, reject ) {
-
-	try{
-		const clientIds = await util.promisify( HALL.clients );
-
-		// удалить из результата id самого клиента
-		cutElem( list, myId );
-
-		const clientList = [];
-
-		// проход по всем неиграющим клиентам и запись в результирующий массив их id и name
-		for (const id of clientIds) {
-			const info = clients.get( id );
-			if( info != unsigned )
-				clientList.push( {'id': id, 'name': info.name} )
-			else
-				log( new Error( `There is no information about client ( ${id} )` ), 'error' );
-		}
-
-		resolve( clientList);
-	}
-	catch( error ) {
-		reject( error );
-	}	
-}
-
-
-/**
  * Удалить элемент из массива, если он там имеется
  * @param {Array} arr Массив, из которого необходимо вырезать элемент
  * @param {any} elem Элемент, который необходимо удалить из массива, если он там имеется
@@ -294,6 +263,38 @@ function cutElem( arr, elem ) {
 
 
 
+function joinMatch( player, room ) {
+	return new Promise( ( resolve, reject ) => {
+		player.join( room, ( error ) => error ? reject( error ) : resolve( 1 ) );
+	})
+}
+
+
+
+async function startMatch( player1, player2 ) {
+	roomCounter++;
+	const roomName = 'r_' + roomCounter;
+	
+	try {
+		await joinMatch( player1, roomName );
+		await joinMatch( player2, roomName );
+	} catch( error ) {
+		log( 'Failed to start match', 'Error', `onInvite: startMatch: ${roomName}` );
+		log( error, 'error' );
+	}
+
+	// перевести игроков с состояние 'PeriodicTable'
+	let info = clients.get( player1.id );
+	UE4.to( player1.id ).emit( 'changeState', { 'state': info.gameState, 'data': { 'team': info.team } } );
+	info = clients.get( player2 );
+	UE4.to( player2.id ).emit( 'changeState', { 'state': info.gameState, 'data': { 'team': info.team } } );
+
+	// отправить команду неиграющим игрокам на удаление записей из списка доступных игроков
+	HALL.emit( 'refreshResults', { 'action': 'remove', 'data': [ { 'id': player1.id }, { 'id': player2.id } ] } );
+}
+
+
+
 io.on( 'connect', function ( socket ) {
 	log( 'Event', "New client: " + socket.id );
 });
@@ -308,6 +309,33 @@ UE4.on( 'connect', function( socket ) {
 	socket.emit( 'changeState', {'id': socket.id});
 
 
+	/**
+	 * Получить массив неиграющих клиентов [{id, name}] кроме клиента, в окружении которого вызывается функция
+	 */
+	async function getClientsInHall( resolve, reject ) {
+
+		try{
+			const clientIds = await util.promisify( HALL.clients );
+			cutElem( clientIds, socket.id );
+			const clientList = [];
+
+			// проход по всем неиграющим клиентам и запись в результирующий массив их id и name
+			for (const id of clientIds) {
+				const info = clients.get( id );
+				if( info != unsigned )
+					clientList.push( {'id': id, 'name': info.name} )
+				else
+					log( new Error( `There is no information about client ( ${id} )` ), 'error' );
+			}
+
+			resolve( clientList);
+		}
+		catch( error ) {
+			reject( error );
+		}	
+	}
+
+
 	// Пользователь перешел в состояние Online, передает свое имя и ожидает список доступных соперников
 	socket.on( 'registration', ( myName, callback ) => {
 
@@ -319,7 +347,8 @@ UE4.on( 'connect', function( socket ) {
 
 				log( 'Client join to room "HALL" ( ' + myId + ' )', 'LOG', 'onRegistration' );
 
-				const list = await new Promise( getClientsInHall )
+				clients.set( myId, new ClientInfo( myName ) );
+				const list = await new Promise( getClientsInHall );
 
 				// отправка клиенту списка неиграющих подключенных игроков
 				callback( list );
@@ -327,7 +356,7 @@ UE4.on( 'connect', function( socket ) {
 				// извещение всех находящихся в комнате о присоединении нового клиента
 				const data = { 'id': myId, 'name': myName };
 				for (const item of list) {
-					HALL.to[ item.id ].emit( 'refreshResults', { 'action': 'add', 'data': data } );
+					HALL.to[ item.id ].emit( 'refreshResults', { 'action': 'add', 'data': [ data ] } );
 				}
 
 			})
@@ -353,6 +382,58 @@ UE4.on( 'connect', function( socket ) {
 		}
 	});
 
+
+	socket.on( 'invite', ( {id} ) => {
+		const opInfo = clients.get( id );
+		if( !opInfo ) { // существует ли вообще такой клиент
+			log( new Error( `Trying to invite invalid client id ( ${id} )` ), 'error' );
+			socket.emit( 'refreshResults', { 'action': 'remove', 'data': [ { 'id': id } ] } );
+			return;
+		}
+
+		const myId = socket.id;
+		const myInfo = clients.get( myId );
+
+		if( myInfo.gameState === opInfo.gameState === gameStateToNum( 'Online' ) ) {
+			// если оба игрока пригласили друг друга, то можно начинать матч
+			if( myInfo.inviters.delete( id ) ) {
+				myInfo.opponent = id;
+				opInfo.opponent = myId;
+				myInfo.gameInfo = op.gameInfo = new GameInfo();
+				myInfo.gameState = op.gameState = gameStateToNum( 'PeriodicTable' );
+				myInfo.team = Math.round( Math.random() );
+				opInfo.team = myInfo.team ? 0 : 1;
+				myInfo.inviters.clear();
+				opInfo.inviters.clear();
+
+				// присоединиться к игровой комнате и разослать всем клиентам в hall, что необходимо удалить две записи
+				startMatch( socket, socket.to( myInfo.opponent ) ); // FIXME: проверить socket.to()
+				// TODO: refreshList -> bIsInviter
+			}
+			else { // если второй игрок еще не приглашал текущего
+
+				opInfo.inviters.add( myId ); // добавить в список приглашающих клиентов
+				UE4.to( id ).emit( 'refreshResults', { // отправить команду на обновление данных о доступном клиенте
+					'action': 'refresh',
+					'data': [
+						{
+							'id': myId,
+							'name': myInfo.name,
+							'bIsInvited': false,
+							'bIsInviting': true
+						}
+					]
+				} );
+			}
+		}
+		else { // Кто-то уже играет
+			log( new Error( `Somebody is not online ( inviter state: ${myInfo.gameState}, inviting player state: ${opInfo.gameState} )` ), 'error' );
+			socket.emit( 'refreshResults', {
+				'action': 'remove',
+				'data': [ { 'id': id } ]
+			});
+		}
+	});
 
 
 
