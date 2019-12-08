@@ -1,7 +1,7 @@
-const util = require('util');
 const PORT = 8081;	 // порт
 const clients = new Map(); // контейнер для хранения сокета клиента (key) и информации о нем (value)
 const hallStr = 'hall'; // имя комнаты, в которую добавляются все, кто online, но еще не играет
+const waitingTime = 120000; // время ожидания победившего игрока
 var roomCounter = 0; // счетчик созданных комнат
 
 
@@ -140,6 +140,7 @@ class PeriodicTable {
  * @property {String} 		name 			имя игрока
  * @property {String} 		opponent 		id оппонента
  * @property {ElemConfig} 	shots 			схема выстрелов, совершенных игроком
+ * @property {Socket} 		socket 			сокет клиента
  * @property {Number} 		team 			команда
  * @property {Number} 		wins 			количество побед
  */
@@ -149,7 +150,7 @@ class ClientInfo {
 	 * Объект с информацией об игроке
 	 * @param {String} name Имя игрока
 	 */
-	constructor( name ) {
+	constructor( name, skt ) {
 		this.chemicalElement = {
 			element: null, // ссылка на объект в периодической таблице
 			number: 0
@@ -160,8 +161,9 @@ class ClientInfo {
 		this.inviters 		= new Set();
 		this.losses 		= 0;
 		this.name 			= name;
-		this.opponent 		= ''; // TODO: заменить на Socket
+		this.opponent 		= '';
 		this.shots 			= null;
+		this.socket 		= skt;
 		this.team 			= -1;
 		this.wins 			= 0;
 	}
@@ -323,7 +325,9 @@ async function startMatch( player1, player2 ) {
 	roomCounter++;
 	const roomName = 'r_' + roomCounter;
 	
-	try {
+	try { // покинуть hall и перейти в свою комнату
+		await leaveRoom( player1, hallStr );
+		await leaveRoom( player2, hallStr );
 		await joinRoom( player1, roomName );
 		await joinRoom( player2, roomName );
 	} catch( error ) {
@@ -335,8 +339,8 @@ async function startMatch( player1, player2 ) {
 	const info1 = clients.get( player1.id );
 	const info2 = clients.get( player2 );
 	info1.gameInfo = info2.gameInfo = new GameInfo( roomName );
-	UE4.to( player1.id ).emit( 'changeState', { 'state': info1.gameState, 'data': { 'team': info.team } } );
-	UE4.to( player2.id ).emit( 'changeState', { 'state': info2.gameState, 'data': { 'team': info.team } } );
+	info1.socket.emit( 'changeState', { 'state': info1.gameState, 'data': { 'team': info.team } } );
+	info2.socket.emit( 'changeState', { 'state': info2.gameState, 'data': { 'team': info.team } } );
 
 	const list = [];
 	try {
@@ -396,23 +400,39 @@ async function releaseTheLosingPlayer( id ) {
 	const info = clients.get( id );
 
 	if( info && info.gameState === gameStateToNum( 'Celebration' ) ) {
-		info.resetGameInfo();
+		info.resetGameInfo(); // сбросить информацию, касающуюся матча
 		try {
-			await leaveRoom( UE4.to( id ), info.gameInfo.room );
-			await joinRoom( UE4.to( id ), hallStr );
+			await leaveRoom( info.socket, info.gameInfo.room );
+			await joinRoom( info.socket, hallStr );
 		}
 		catch( error ) {
 			log( `Failed to leave the room ( ${info.gameInfo.room} ) or join to HALL ( ${id} )`, 'Error', 'releaseTheLosingPlayer' );
 			log( error, 'error' );
 			return;
 		}
-		UE4.to( id ).broadcast.to( hallStr ).emit( 'refreshResults', { // FIXME: проверить
+
+		log( `Client joined to the room "HALL" ( ${id} )`, 'LOG', 'releaseTheLosingPlayer' );
+
+		// извещение клиентов в hall о добавлении нового игрока
+		info.socket.broadcast.to( hallStr ).emit( 'refreshResults', {
 			'action': 'add', 
 			'data': [ { 
 				'id': id, 
 				'name': info.name 
 			} ] 
 		} );
+
+		const list = [];
+		try { // отправка игроку списка неиграющих клиентов
+			list = await getClientsInHall( id, false );
+			info.socket.emit( 'changeState', {
+				'state': gameStateToNum( 'Online' ),
+				'data': list
+			});
+		}
+		catch( error ) {
+			log( `Failed to get client list after joining "HALL" ( ${id} )`, 'Error', 'releaseTheLosingPlayer' );
+		}
 	}
 }
 
@@ -479,9 +499,9 @@ UE4.on( 'connect', function( socket ) {
 
 			socket.join( hallStr, async ( error ) => {
 
-				log( 'Client join to room "HALL" ( ' + myId + ' )', 'LOG', 'onRegistration' );
+				log( `Client joined to the room "HALL" ( ${id} )`, 'LOG', 'onRegistration' );
 
-				clients.set( myId, new ClientInfo( myName ) );
+				clients.set( myId, new ClientInfo( myName, socket ) );
 				const list = await getClientsInHall( myId, false );
 
 				// отправка клиенту списка неиграющих подключенных игроков
@@ -490,7 +510,7 @@ UE4.on( 'connect', function( socket ) {
 				// извещение всех находящихся в комнате о присоединении нового клиента
 				const data = { 'id': myId, 'name': myName };
 				for (const item of list) {
-					HALL.to[ item.id ].emit( 'refreshResults', { 'action': 'add', 'data': [ data ] } );
+					HALL.to( item.id ).emit( 'refreshResults', { 'action': 'add', 'data': [ data ] } );
 				}
 
 			})
@@ -543,7 +563,7 @@ UE4.on( 'connect', function( socket ) {
 				opInfo.inviters.clear();
 
 				// присоединиться к игровой комнате и разослать всем клиентам в hall, что необходимо удалить две записи
-				startMatch( socket, socket.to( myInfo.opponent ) ); // FIXME: проверить socket.to()
+				startMatch( socket, opInfo.socket );
 			}
 			else { // если второй игрок еще не приглашал текущего
 
@@ -571,34 +591,50 @@ UE4.on( 'connect', function( socket ) {
 	});
 
 
+	// клиент хочет отсоединиться или закончить матч
 	socket.on( 'flyAway', () => {
 		log( `Client wants to fly away ( ${socket.id} )`, 'LOG', 'onFlyAway' );
 
-		const info = clients.get( socket.id ); // TODO: заменить на switch
-		if( info.gameState === gameStateToNum( 'Online' ) ) {
-			socket.emit( 'changeState', { 'state': gameStateToNum( 'Offline' ) } );
-			socket.disconnect( true );
+		const info = clients.get( socket.id );
+
+		switch (info.gameState) {
+			case gameStateToNum( 'Online' ):
+				// отдать команду на переход в offline состояние
+				socket.emit( 'changeState', { 'state': gameStateToNum( 'Offline' ) } );
+				socket.disconnect( true )
+				break;
+			
+			case gameStateToNum( 'Celebration'):
+				log( new Error( 'Client try to fly away from invalid state' ), 'warn' );
+				break;
+
+			default:
+				const celebration = gameStateToNum( 'Celebration' );
+				const opInfo = clients.get( info.opponent );
+
+				// перевести клиентов в состояние celebration, передав каждому его результат матча
+				socket.emit( 'changeState', {
+					'state': celebration,
+					'data': {
+						'bIsWinner': false,
+						'opponentElem': opInfo.chemicalElement
+					}
+				} );
+				UE4.to( info.opponent ).emit( 'changeState', {
+					'state': celebration,
+					'data': {
+						'bIsWinner': true,
+						'opponentElem': info.chemicalElement
+					}
+				} );
+				info.gameState = opInfo.gameState = celebration;
+				info.losses++;
+				opInfo.wins++;
+
+				// отпустить игрока через указанное время, если этого не сделал победивший соперник
+				setTimeout( releaseTheLosingPlayer( socket.id ), waitingTime );
+				break;
 		}
-		else {
-			const celebration = gameStateToNum( 'Celebration' );
-			const opInfo = clients.get( info.opponent );
-			socket.emit( 'changeState', {
-				'state': celebration,
-				'data': {
-					'bIsWinner': false,
-					'opponentElem': opInfo.chemicalElement
-				}
-			} );
-			UE4.to( info.opponent ).emit( 'changeState', {
-				'state': celebration,
-				'data': {
-					'bIsWinner': true,
-					'opponentElem': info.chemicalElement
-				}
-			} );
-			info.gameState = opInfo.gameState = celebration;
-			setTimeout(  )
-		} // TODO: отпустить проигравшего через время
 	})
 
 
@@ -607,36 +643,42 @@ UE4.on( 'connect', function( socket ) {
 		log( `Client disconnected ( ${socket.id} ): ${reason}`, 'LOG', 'onDisconnect' );
 		const info = clients.get( socket.id );
 
-		// оповестить клиентов в HALL
-		if( info.gameState === gameStateToNum( 'Online' ) ) {
-			if( clients.size > 1 )
-				deleteFromLists( socket.id );
-		}
-		else { // оповестить противника и перевести его в состояние Celebration
-			if( info.opponent != '' ) {
-				const opInfo = clients.get( info.opponent );
-				const celebration = gameStateToNum( 'Celebration' );
+		try {
+			// оповестить клиентов в HALL, если online
+			if( info.gameState === gameStateToNum( 'Online' ) ) {
+				if( clients.size > 1 )
+					deleteFromLists( socket.id );
+			}
+			else { // оповестить противника и перевести его в состояние Celebration
+				if( info.opponent != '' ) { // если еще есть противник
+					const opInfo = clients.get( info.opponent );
+					const celebration = gameStateToNum( 'Celebration' );
 
-				// если игроки уже в конце матча
-				if( opInfo.gameState === celebration ) {
-					if( opInfo.gameInfo.winner != info.opponent ) // оппонент проиграл
-						releaseTheLosingPlayer( info.opponent );
+					// если игроки уже в конце матча
+					if( opInfo.gameState === celebration ) {
+						if( opInfo.gameInfo.winner != info.opponent ) // оппонент проиграл
+							releaseTheLosingPlayer( info.opponent );
+					}
+					else { // если клиенты еще играют, то оппонент становится победителем
+						opInfo.socket.emit( 'changeState', {
+							'state': celebration,
+							'data': {
+								'bIsWinner': true,
+								'opponentElem': info.chemicalElement
+							}
+						});
+						opInfo.gameInfo.winner = info.opponent;
+						opInfo.gameState = celebration;
+						opInfo.wins++;
+						opInfo.opponent = '';
+					}
 				}
-				else { // если клиенты еще играют, то оппонент становится победителем
-					UE4.to( info.opponent ).emit( 'changeState', {
-						'state': gameStateToNum( 'Celebration' ),
-						'data': {
-							'bIsWinner': true,
-							'opponentElem': info.chemicalElement
-						}
-					});
-					clients.get( info.opponent ).opponent = '';
-				}
-				
 			}
 		}
-		// удалить информацию о клиенте
-		clients.delete( socket.id );
+		finally {
+			// при любом раскладе необходимо удалить информацию о клиенте
+			clients.delete( socket.id );
+		}
 	});
 
 
