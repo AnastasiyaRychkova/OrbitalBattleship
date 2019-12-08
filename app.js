@@ -262,22 +262,42 @@ function cutElem( arr, elem ) {
 }
 
 
+/**
+ * Получить Promise для получения списка клиентов в комнате HALL
+ */
+HALL.getClients = () => {
+	return new Promise( ( resolve, reject ) => {
+		HALL.clients( ( error, clientIds ) => {
+			error ? reject( error ) : resolve( clientIds );
+		})
+	});
+}
 
-function joinMatch( player, room ) {
+
+/**
+ * Добавить игрока в комнату
+ * @param {Socket} player Игрок
+ * @param {String} room Имя комнаты
+ */
+function joinRoom( player, room ) {
 	return new Promise( ( resolve, reject ) => {
 		player.join( room, ( error ) => error ? reject( error ) : resolve( 1 ) );
 	})
 }
 
 
-
+/**
+ * Добавить игроков в отдельную комнату, начать матч и сообщить об этом другим игрокам
+ * @param {Socket} player1 Игрок
+ * @param {Socket} player2 Игрок
+ */
 async function startMatch( player1, player2 ) {
 	roomCounter++;
 	const roomName = 'r_' + roomCounter;
 	
 	try {
-		await joinMatch( player1, roomName );
-		await joinMatch( player2, roomName );
+		await joinRoom( player1, roomName );
+		await joinRoom( player2, roomName );
 	} catch( error ) {
 		log( 'Failed to start match', 'Error', `onInvite: startMatch: ${roomName}` );
 		log( error, 'error' );
@@ -289,8 +309,27 @@ async function startMatch( player1, player2 ) {
 	info = clients.get( player2 );
 	UE4.to( player2.id ).emit( 'changeState', { 'state': info.gameState, 'data': { 'team': info.team } } );
 
-	// отправить команду неиграющим игрокам на удаление записей из списка доступных игроков
-	HALL.emit( 'refreshResults', { 'action': 'remove', 'data': [ { 'id': player1.id }, { 'id': player2.id } ] } );
+	try {
+		const list = await HALL.getClients();
+	}
+	catch ( error ) {
+		log( 'Failed to inform clients about one started match', 'Error', 'startMatch' );
+		log( error, 'error' );
+		return;
+	}
+
+	for( const id of list ) {
+		const info = clients.get( id );
+		info.inviters.delete( player1.id );
+		info.inviters.delete( player2.id );
+		HALL.to( id ).emit( 'refreshResults', {
+			'action': 'remove',
+			'data': [
+				{ 'id': player1.id },
+				{ 'id': player2.id }
+			]
+		} );
+	}
 }
 
 
@@ -310,14 +349,15 @@ UE4.on( 'connect', function( socket ) {
 
 
 	/**
-	 * Получить массив неиграющих клиентов [{id, name}] кроме клиента, в окружении которого вызывается функция
+	 * Получить список игроков в hall, исключая клиента с myId, в формате [ ...{ id, name, bIsInvited, bIsInviting } ]
+	 * @param {String} myId id клиента, для которого формируется список
+	 * @param {Bool} bWithInvitations Нужно ли добавлять информацию о приглашениях
 	 */
-	async function getClientsInHall( resolve, reject ) {
-
-		try{
-			const clientIds = await util.promisify( HALL.clients );
-			cutElem( clientIds, socket.id );
+	function getClientsInHall( myId, bWithInvitations ) {
+		return HALL.getClients()
+		.then( ( clientIds ) => {
 			const clientList = [];
+			cutElem( clientIds, myId );
 
 			// проход по всем неиграющим клиентам и запись в результирующий массив их id и name
 			for (const id of clientIds) {
@@ -328,12 +368,20 @@ UE4.on( 'connect', function( socket ) {
 					log( new Error( `There is no information about client ( ${id} )` ), 'error' );
 			}
 
+			// добавление в результат выдачи информации о приглашениях
+			if( bWithInvitations ) {
+				const inviters = clients.get( myId );
+				for( const item of clientList ) {
+					item.bIsInvited = clients.get( item.id ).inviters.has( myId );
+					item.bIsInviting = inviters.has( item.id );
+				}
+			}
+
 			resolve( clientList);
-		}
-		catch( error ) {
-			reject( error );
-		}	
+		})
+		.catch( ( error ) => error );
 	}
+	
 
 
 	// Пользователь перешел в состояние Online, передает свое имя и ожидает список доступных соперников
@@ -348,7 +396,7 @@ UE4.on( 'connect', function( socket ) {
 				log( 'Client join to room "HALL" ( ' + myId + ' )', 'LOG', 'onRegistration' );
 
 				clients.set( myId, new ClientInfo( myName ) );
-				const list = await new Promise( getClientsInHall );
+				const list = await getClientsInHall( myId, false );
 
 				// отправка клиенту списка неиграющих подключенных игроков
 				callback( list );
@@ -374,7 +422,8 @@ UE4.on( 'connect', function( socket ) {
 		log( `The client asks for a list of all non-playing connected clients ( ${socket.id} )`, 'LOG', 'onRefreshList' );
 
 		try {
-			callback( await new Promise( getClientsInHall ) );
+			const list = await getClientsInHall( socket.id, true );
+			callback( list );
 		} catch (error) {
 			log( `Failed to get list for client { ${socket.id} }`, 'Error', 'onRefreshList' );
 			log( error, 'error' );
@@ -383,6 +432,7 @@ UE4.on( 'connect', function( socket ) {
 	});
 
 
+	// приглашение игрока ( id ) на начало матча
 	socket.on( 'invite', ( {id} ) => {
 		const opInfo = clients.get( id );
 		if( !opInfo ) { // существует ли вообще такой клиент
@@ -408,7 +458,6 @@ UE4.on( 'connect', function( socket ) {
 
 				// присоединиться к игровой комнате и разослать всем клиентам в hall, что необходимо удалить две записи
 				startMatch( socket, socket.to( myInfo.opponent ) ); // FIXME: проверить socket.to()
-				// TODO: refreshList -> bIsInviter
 			}
 			else { // если второй игрок еще не приглашал текущего
 
