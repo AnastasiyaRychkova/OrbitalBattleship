@@ -1,7 +1,10 @@
 const PORT = 8081;	 // порт
 const clients = new Map(); // контейнер для хранения сокета клиента (key) и информации о нем (value)
 const hallStr = 'hall'; // имя комнаты, в которую добавляются все, кто online, но еще не играет
-const waitingTime = 120000; // время ожидания победившего игрока
+const waitingTime = { // время ожидания перехода в следующее состояние
+	'preparing': 5000,
+	'celebration': 120000
+}; 
 var roomCounter = 0; // счетчик созданных комнат
 
 
@@ -54,6 +57,11 @@ class ElemConfig {
 			this.config = new Int32Array([0, 0, 0, 0]);
 		}
 		else {
+			if( buf.length === 4 ) {
+				this.config = new Int32Array( buf );
+				return;
+			}
+
 			this.config = new Int32Array( 4 );
 			let i = 0;
 			for( ; i < buf.length && i < 4; i++ )
@@ -65,14 +73,29 @@ class ElemConfig {
 
 
 	/**
+	 * Сравнивает два элемента и возвращает истину только в том случае, если они правильные и эквивалентные
+	 * @param {ElemConfig} elem1 Конфигурация первого элемента
+	 * @param {ElemConfig} elem2 Конфигурация второго элемента
+	 */
+	static isEqual( elem1, elem2 ) {
+		if( !( elem1 instanceof ElemConfig ) ||!( elem2 instanceof ElemConfig ) || elem1.length != 4 || elem2.length != 4 )
+			return false;
+		for( const i = 0; i < 4; i++ )
+			if( elem1[i] != elem2[i] )
+				return false;
+		return true;
+	}
+
+
+	/**
 	 * Отметить спин в объекте конфигурации элемента
 	 * @param {Number} num Порядковый номер химического элемента
 	 * @param {Bool} state Отмечен ли спин
 	 */
-	Write( num, state ) {
+	write( num, state ) {
 		if( num >= 1 && num <= 118 )
-			state ? this._Add( num - 1 )
-				: this._Remove( num - 1 );
+			state ? this._add( num - 1 )
+				: this._remove( num - 1 );
 		else 
 			log( new Error( `Write: Invalid element number : ${num}`, 'error' ));
 	}
@@ -81,7 +104,7 @@ class ElemConfig {
 	 * Отметить спин
 	 * @param {Number} index Индекс спина
 	 */
-	_Add( index ) {
+	_add( index ) {
 		let mask = 1;
 		mask <<= index % 32;
 		this.config[ ( index / 32 ) | 0 ] |= mask;
@@ -91,7 +114,7 @@ class ElemConfig {
 	 * Снять отметку со спина
 	 * @param {Number} index Индекс спина
 	 */
-	_Remove( index ) {
+	_remove( index ) {
 		let mask = 1;
 		mask <<= index % 32;
 		this.config[ ( index / 32 ) | 0 ] &= ~mask;
@@ -392,6 +415,45 @@ async function deleteFromLists( id ) {
 
 
 /**
+ * Перевести игрока и его оппонента в состояние матча, если оба готовы
+ * @param {String} id Игрок
+ */
+function toMatch( id ) {
+	const info = clients.get( id );
+	if( info && info.opponent ) { // соединение с обоими игроками еще не потеряно
+		if( info.gameState === gameStateToNum( 'Preparing' ) ) { // состояние игры соответствующее
+			if( info.GameInfo.readyPlayers === 2 ) { // оба игрока готовы продолжить игру
+				const opInfo = clients.get( info.opponent );
+
+				info.gameState = opInfo.gameState = gameStateToNum( 'Match' );
+				info.shots = new ElemConfig();
+				opInfo.shots = new ElemConfig();
+
+				// розыгрыш права хода
+				const myRightMove = Math.random() < 0.5;
+				info.gameInfo.rightMove = myRightMove ? id : info.opponent;
+				info.gameInfo.readyPlayers = 0;
+
+				// изменить состояние игры на клиентах
+				info.socket.emit( 'changeState', {
+					'state': info.gameState,
+					'data': { 'rightMove': myRightMove }
+				});
+				opInfo.socket.emit( 'changeState', {
+					'state': info.gameState,
+					'data': { 'rightMove': !myRightMove }
+				});
+			}
+		}
+		else
+			log( `Failed to go to Match: Invalid state ( ${info.gameState} )`, 'Warn', 'toMatch' );
+	}
+	else
+		log( 'Can not go to Match state because of invalid ClientInfo object or null opponent', 'Error', 'toMatch' );
+}
+
+
+/**
  * Перевести игрока в состояние Online
  * @param {String} id Игрок
  */
@@ -639,12 +701,13 @@ UE4.on( 'connect', function( socket ) {
 				opInfo.wins++;
 
 				// отпустить игрока через указанное время, если этого не сделал победивший соперник
-				setTimeout( leaveTheMatch( socket.id ), waitingTime );
+				setTimeout( leaveTheMatch, waitingTime.celebration, socket.id );
 				break;
 		}
 	});
 
 
+	// Игрок выбрал элемент в таблице Менделеева
 	socket.on( 'elemSelection', ( {number} ) => {
 		const myId = socket.id;
 		const info = clients.get( myId );
@@ -668,6 +731,35 @@ UE4.on( 'connect', function( socket ) {
 
 		socket.emit( 'changeState', { 'state': info.gameState } );
 	} );
+
+
+	// проверить заполнение диаграммы
+	socket.on( 'checkConfig', ( { data } ) => {
+		const diagram = new ElemConfig( data );
+		if( diagram.config[0] == 0 ) { // проверка типа пришедших данных
+			log( `Invalid data type ( 'data': ${data} )`, 'Error', 'onCheckConfig' );
+			socket.emit( 'checkResult', { 'result': false } );
+			return;
+		}
+
+		log( `Checking the diagram ( 'id': ${socket.id}, 'diagram': ${diagram} )`, 'LOG', 'onCheckConfig' );
+
+		const info = clients.get( socket.id );
+		info.diagramState = diagram;
+
+		// сравнить диаграмму и конфигурацию загаданного элемента
+		if( ElemConfig.isEqual( diagram, info.chemicalElement.element.config ) ) { // правильно
+			info.gameInfo.readyPlayers++;
+			log( `Checking the diagram ( 'id': ${socket.id}, 'result': true, 'ready': ${info.gameInfo.readyPlayers} )`, 'LOG', 'onCheckConfig' );
+			socket.emit( 'checkResult', { 'result': true } );
+
+			// подождать и перевести обоих в следующее состояние
+			setTimeout( toMatch, waitingTime.preparing, socket.id );
+		}
+		else { // неправильно
+			socket.emit( 'checkResult', { 'result': false } );
+		}
+	})
 
 
 	// победитель подтверждает окончание матча
@@ -757,23 +849,6 @@ UE4.on( 'connect', function( socket ) {
 
 	
 	
-	socket.emit('message', 'Hello client' + socket.id.toString() );
-
-	socket.on('message', function( num ) {
-		console.log( 'Server get message: ' + num );
-		io.sockets.emit('message', num.toString() );
-	});
-
-	socket.on( 'GetClientList', function( data, callback ) {
-		console.log( 'Client sent: ', data );
-		let res = [];
-		for( let i = 0; i < io.clients.length; i++ ) {
-			res.push( io.clients[i].id.toString() );
-		}
-		callback( res );
-	});
-
-
 });
 
 // ===============================================================================================
