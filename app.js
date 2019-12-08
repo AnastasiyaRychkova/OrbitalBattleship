@@ -393,14 +393,16 @@ async function deleteFromLists( id ) {
 
 
 /**
- * Отпустить проигравшего игрока в состояние Online
- * @param {String} id Проигравший игрок в состоянии Celebration
+ * Перевести игрока в состояние Online
+ * @param {String} id Игрок
  */
-async function releaseTheLosingPlayer( id ) {
+async function leaveTheMatch( id ) {
 	const info = clients.get( id );
 
 	if( info && info.gameState === gameStateToNum( 'Celebration' ) ) {
+		
 		info.resetGameInfo(); // сбросить информацию, касающуюся матча
+
 		try {
 			await leaveRoom( info.socket, info.gameInfo.room );
 			await joinRoom( info.socket, hallStr );
@@ -434,6 +436,8 @@ async function releaseTheLosingPlayer( id ) {
 			log( `Failed to get client list after joining "HALL" ( ${id} )`, 'Error', 'releaseTheLosingPlayer' );
 		}
 	}
+	else
+		log( new Error( `Client information object is invalid or gameState is not celebration ( ${info} )`), 'warn' );
 }
 
 
@@ -632,10 +636,28 @@ UE4.on( 'connect', function( socket ) {
 				opInfo.wins++;
 
 				// отпустить игрока через указанное время, если этого не сделал победивший соперник
-				setTimeout( releaseTheLosingPlayer( socket.id ), waitingTime );
+				setTimeout( leaveTheMatch( socket.id ), waitingTime );
 				break;
 		}
-	})
+	});
+
+
+	// победитель подтверждает окончание матча
+	socket.on( 'endGame', () => {
+		const myId = socket.id;
+		const info = clients.get( myId );
+
+		if( info.gameInfo.winner != myId ) {
+			log( `Event instigator does not have appropriate rights ${myId}`, 'Cheater', 'onEndGame' );
+			return;
+		}
+
+		// перевести в состояние online сначала оппонента, если есть, а затем перевести себя
+		if( info.opponent != '' )
+			leaveTheMatch( info.opponent );
+
+		leaveTheMatch( myId );
+	} );
 
 
 	// отключение клиента от сервера
@@ -657,7 +679,7 @@ UE4.on( 'connect', function( socket ) {
 					// если игроки уже в конце матча
 					if( opInfo.gameState === celebration ) {
 						if( opInfo.gameInfo.winner != info.opponent ) // оппонент проиграл
-							releaseTheLosingPlayer( info.opponent );
+							leaveTheMatch( info.opponent );
 					}
 					else { // если клиенты еще играют, то оппонент становится победителем
 						opInfo.socket.emit( 'changeState', {
