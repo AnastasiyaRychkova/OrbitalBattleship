@@ -792,6 +792,12 @@ UE4.on( 'connect', function( socket ) {
 			return;
 		}
 
+		if( number < 1 || number > 118 ) {
+			log( `Invalid value of spin number ( 'id': ${myId}, 'spin': ${number} )`, 'Cheater', 'onShot' );
+			callback( false );
+			return;
+		}
+
 		log( `Shot >> ${number} ( ${myId} )`, 'LOG', 'onShot' );
 
 		// отправить результат выстрела стрелявшему и сообщить о выстреле оппоненту
@@ -805,7 +811,7 @@ UE4.on( 'connect', function( socket ) {
 	} );
 
 
-	
+
 
 
 	// победитель подтверждает окончание матча
