@@ -88,6 +88,17 @@ class ElemConfig {
 
 
 	/**
+	 * Отмечен ли в данной конфигурации спин
+	 * @param {Number} num Номер спина
+	 */
+	hasSpin( num ) {
+		let mask = 1;
+		mask <<= ( num - 1 ) % 32;
+		return this.config[ ( ( num - 1 ) / 32 ) | 0 ] & mask;
+	}
+
+
+	/**
 	 * Отметить спин в объекте конфигурации элемента
 	 * @param {Number} num Порядковый номер химического элемента
 	 * @param {Bool} state Отмечен ли спин
@@ -760,6 +771,41 @@ UE4.on( 'connect', function( socket ) {
 			socket.emit( 'checkResult', { 'result': false } );
 		}
 	})
+
+
+	// выстрел во время матча
+	socket.on( 'shot', ( { number }, callback ) => {
+		const myId = socket.id;
+		const info = clients.get( myId );
+
+		// действительно ли сейчас матч
+		if( info.gameState != gameStateToNum( 'Match' ) ) {
+			log( `Event instigator is in an invalid state ( 'id': ${myId}, 'state': ${info.gameState} )`, 'Cheater', 'onShot' );
+			callback( false );
+			return;
+		}
+
+		// имеет ли игрок право хода
+		if( info.gameInfo.rightMove != myId ) {
+			log( `Event instigator does not have appropriate rights ( 'id': ${myId} )`, 'Cheater', 'onShot' );
+			callback( false );
+			return;
+		}
+
+		log( `Shot >> ${number} ( ${myId} )`, 'LOG', 'onShot' );
+
+		// отправить результат выстрела стрелявшему и сообщить о выстреле оппоненту
+		const opInfo = clients.get( info.opponent );
+		callback( opInfo.chemicalElement.element.config.hasSpin( number ) );
+		opInfo.socket.emit( 'shot', { 'number': number } );
+
+		// запомнить выстрел
+		info.shots.write( number, true );
+
+	} );
+
+
+	
 
 
 	// победитель подтверждает окончание матча
