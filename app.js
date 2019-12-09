@@ -724,16 +724,21 @@ UE4.on( 'connect', function( socket ) {
 		const info = clients.get( myId );
 
 		if( info.gameState != gameStateToNum( 'PeriodicTable' ) ) {
-			log( `Event instigator does not have appropriate rights ( 'id': ${myId}, 'state': ${info.gameState} )`, 'Cheater', 'elemSelection' );
+			log( `Event instigator does not have appropriate rights ( 'id': ${myId}, 'state': ${info.gameState} )`, 'Cheater', 'onElemSelection' );
+			return;
+		}
+
+		if( info.chemicalElement.number != -1 ) {
+			log( `Player has chosen the element yet ( 'id': ${myId}, 'player element': ${info.chemicalElement.number}, 'request': ${number} )`, 'Cheater', 'onElemSelection' );
 			return;
 		}
 
 		if( number < 1 || number > 118 ) {
-			log( `Player selected invalid element ( 'id': ${myId}, 'number': ${number} )`, 'LOG', 'elemSelection' );
+			log( `Player selected invalid element ( 'id': ${myId}, 'number': ${number} )`, 'LOG', 'onElemSelection' );
 			return;
 		}
 
-		log( `Player selected element ( 'id': ${myId}, 'number': ${number} )`, 'LOG', 'elemSelection' );
+		log( `Player selected element ( 'id': ${myId}, 'number': ${number} )`, 'LOG', 'onElemSelection' );
 
 		info.chemicalElement.number = number;
 		info.chemicalElement.element = PeriodicTable.table[ number ];
@@ -811,7 +816,65 @@ UE4.on( 'connect', function( socket ) {
 	} );
 
 
+	// игрок хочет назвать элемент
+	socket.on( 'nameElement', ( { number } ) => {
+		const myId = socket.id;
+		const info = clients.get( myId );
 
+		// действительно ли сейчас матч
+		if( info.gameState != gameStateToNum( 'Match' ) ) {
+			log( `Event instigator is in an invalid state ( 'id': ${myId}, 'state': ${info.gameState} )`, 'Cheater', 'onNameElement' );
+			return;
+		}
+
+		// имеет ли игрок право хода
+		if( info.gameInfo.rightMove != myId ) {
+			log( `Event instigator does not have appropriate rights ( 'id': ${myId} )`, 'Cheater', 'onNameElement' );
+			return;
+		}
+
+		// элемент с таким номером еть в таблице Менделеева
+		if( number < 1 || number > 118 ) {
+			log( `Invalid value of element number ( 'id': ${myId}, 'spin': ${number} )`, 'Cheater', 'onNameElement' );
+			return;
+		}
+
+		log( `Player want to name element >> ${number} ( ${myId} )`, 'LOG', 'onNameElement' );
+
+		const opInfo = clients.get( info.opponent );
+		const celebration = gameStateToNum( 'Celebration' );
+
+		info.gameState = opInfo.gameState = celebration; // изменить состояние игры
+		const result = opInfo.chemicalElement.number == number; // результат ( отгадал или нет)
+
+		// перевести игроков в состояние celebration, сообщив результат матча
+		info.socket.emit( 'changeState', {
+			'state': celebration,
+			'data': {
+				'bIsWinner': result,
+				'opponentElem': opInfo.chemicalElement
+			}
+		});
+		opInfo.socket.emit( 'changeState', {
+			'state': celebration,
+			'data': {
+				'bIsWinner': !result,
+				'opponentElem': info.chemicalElement
+			}
+		});
+
+		// подвести итог матча
+		info.gameInfo.rightMove = '';
+		if( res ) {
+			info.wins++;
+			opInfo.losses++;
+		}
+		else {
+			opInfo.wins++;
+			info.losses++;
+		}
+
+	} )
 
 
 	// победитель подтверждает окончание матча
