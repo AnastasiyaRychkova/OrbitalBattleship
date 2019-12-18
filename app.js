@@ -360,7 +360,7 @@ function leaveRoom( player, room ) {
  * @param {Socket} player1 Игрок
  * @param {Socket} player2 Игрок
  */
-async function startMatch( player1, player2 ) {
+async function startMatch( player1, player2, player1callback ) {
 	roomCounter++;
 	const roomName = 'r_' + roomCounter;
 	
@@ -378,8 +378,8 @@ async function startMatch( player1, player2 ) {
 	const info1 = clients.get( player1.id );
 	const info2 = clients.get( player2.id );
 	info1.gameInfo = info2.gameInfo = new GameInfo( roomName );
-	info1.socket.emit( 'changeState', { 'state': info1.gameState, 'data': { 'team': info1.team } } );
 	info2.socket.emit( 'changeState', { 'state': info2.gameState, 'data': { 'team': info2.team } } );
+	player1callback( { 'state': info1.gameState, 'data': { 'team': info1.team } } );
 
 	let list = [];
 	try {
@@ -525,7 +525,44 @@ io.on( 'connect', function ( socket ) {
 });
 
 
+/**
+ * Получить список игроков в hall, исключая клиента с myId, в формате [ ...{ id, name, bIsInvited, bIsInviting } ]
+ * @param {String} myId id клиента, для которого формируется список
+ * @param {Bool} bWithInvitations Нужно ли добавлять информацию о приглашениях
+ */
+function getClientsInHall( myId, bWithInvitations ) {
+	return HALL.getClients()
+	.then( ( clientIds ) => {
+		if( clientIds.length === 0 )
+			return clientIds;
+		const clientList = [];
+		cutElem( clientIds, myId );
 
+		// проход по всем неиграющим клиентам и запись в результирующий массив их id и name
+		for (const id of clientIds) {
+			const info = clients.get( id );
+			if( info != undefined )
+				clientList.push( {'id': id, 'name': info.name} )
+			else
+				log( new Error( `There is no information about client ( ${id} )` ), 'error' );
+		}
+
+		// добавление в результат выдачи информации о приглашениях
+		if( bWithInvitations ) {
+			const myInviters = clients.get( myId ).inviters;
+			for( const item of clientList ) {
+				item.bIsInvited = clients.get( item.id ).inviters.has( myId );
+				item.bIsInviting = myInviters.has( item.id );
+			}
+		}
+
+		return clientList;
+	})
+	.catch( ( error ) => {
+		log( error, 'error' );
+		return [];
+		});
+}
 
 UE4.on( 'connect', function( socket ) {
 
@@ -533,49 +570,12 @@ UE4.on( 'connect', function( socket ) {
 	log( `New client in 'UE4' namespace: ${socket.id}`, 'Event' );
 
 
-	/**
-	 * Получить список игроков в hall, исключая клиента с myId, в формате [ ...{ id, name, bIsInvited, bIsInviting } ]
-	 * @param {String} myId id клиента, для которого формируется список
-	 * @param {Bool} bWithInvitations Нужно ли добавлять информацию о приглашениях
-	 */
-	function getClientsInHall( myId, bWithInvitations ) {
-		return HALL.getClients()
-		.then( ( clientIds ) => {
-			if( clientIds.length === 0 )
-				return clientIds;
-			const clientList = [];
-			cutElem( clientIds, myId );
-
-			// проход по всем неиграющим клиентам и запись в результирующий массив их id и name
-			for (const id of clientIds) {
-				const info = clients.get( id );
-				if( info != undefined )
-					clientList.push( {'id': id, 'name': info.name} )
-				else
-					log( new Error( `There is no information about client ( ${id} )` ), 'error' );
-			}
-
-			// добавление в результат выдачи информации о приглашениях
-			if( bWithInvitations ) {
-				const myInviters = clients.get( myId ).inviters;
-				for( const item of clientList ) {
-					item.bIsInvited = clients.get( item.id ).inviters.has( myId );
-					item.bIsInviting = myInviters.has( item.id );
-				}
-			}
-
-			return clientList;
-		})
-		.catch( ( error ) => {
-			log( error, 'error' );
-			return [];
-			});
-	}
+	
 	
 
 
 	// Пользователь перешел в состояние Online, передает свое имя и ожидает список доступных соперников
-	socket.on( 'registration', ( myName ) => {
+	socket.on( 'registration', ( myName, callback ) => {
 
 		const myId = socket.id;
 
@@ -586,20 +586,21 @@ UE4.on( 'connect', function( socket ) {
 					log( error, 'error' );
 					socket.disconnect( true );
 				}
-				log( `Client joined to the room "HALL" ( ${myId} )`, 'LOG', 'onRegistration' );
 
 				clients.set( myId, new ClientInfo( myName, socket ) );
 				const list = await getClientsInHall( myId, false );
 
+				log( `Client joined to the room "HALL" ( ${myId} )`, 'LOG', 'onRegistration' );
+
 				// отправка клиенту списка неиграющих подключенных игроков
-				socket.emit( 'changeState', {
+				callback( {
 					'state': gameStateToNum( 'Online' ),
 					'data': list
-				});
+				} );
+				log( `List: ${list} ( Join: getClientsInHall )`, 'Debug' );
 
 				// извещение всех находящихся в комнате о присоединении нового клиента
 				const data = { 'id': myId, 'name': myName };
-				log( `List: ${list} ( Join: getClientsInHall )`, 'Debug' );
 				for (const item of list) {
 					HALL.to( item.id ).emit( 'refreshResults', { 'action': 'add', 'data': [ data ] } );
 				}
@@ -608,6 +609,7 @@ UE4.on( 'connect', function( socket ) {
 
 		} catch( error ) {
 			log( error, 'error' );
+			socket.disconnect( true );
 		}
 	});
 
@@ -629,14 +631,14 @@ UE4.on( 'connect', function( socket ) {
 
 
 	// приглашение игрока ( id ) на начало матча
-	socket.on( 'invite', ( id ) => {
+	socket.on( 'invite', ( id, callback ) => {
 		id = id.toString();
 		log( `Client ( ${socket.id} ) is inviting the client ( ${id} )`, 'LOG', 'onInvite' );
 
 		const opInfo = clients.get( id );
 		if( !opInfo ) { // существует ли вообще такой клиент
 			log( new Error( `Trying to invite invalid client id ( ${id} )` ), 'error' );
-			socket.emit( 'refreshResults', { 'action': 'remove', 'data': [ { 'id': id } ] } );
+			callback( false );
 			return;
 		}
 
@@ -655,7 +657,7 @@ UE4.on( 'connect', function( socket ) {
 				opInfo.inviters.clear();
 
 				// присоединиться к игровой комнате и разослать всем клиентам в hall, что необходимо удалить две записи
-				startMatch( socket, opInfo.socket );
+				startMatch( socket, opInfo.socket, callback );
 			}
 			else { // если второй игрок еще не приглашал текущего
 
@@ -671,20 +673,18 @@ UE4.on( 'connect', function( socket ) {
 						}
 					]
 				} );
+				callback( true );
 			}
 		}
 		else { // Кто-то уже играет
 			log( new Error( `Somebody is not online ( inviter state: ${myInfo.gameState}, inviting player state: ${opInfo.gameState} )` ), 'warn' );
-			socket.emit( 'refreshResults', {
-				'action': 'remove',
-				'data': [ { 'id': id } ]
-			});
+			callback( false );
 		}
 	});
 
 
 	// клиент хочет отсоединиться или закончить матч
-	socket.on( 'flyAway', () => {
+	socket.on( 'flyAway', ( data, callback ) => {
 		const info = clients.get( socket.id );
 
 		log( `Client wants to fly away from ${info.gameState} state ( ${socket.id} )`, 'LOG', 'onFlyAway' );
@@ -692,8 +692,8 @@ UE4.on( 'connect', function( socket ) {
 		switch (info.gameState) {
 			case gameStateToNum( 'Online' ):
 				// отдать команду на переход в offline состояние
-				socket.emit( 'changeState', { 'state': gameStateToNum( 'Offline' ) } );
-				socket.disconnect( true )
+				callback( { 'state': gameStateToNum( 'Offline' ) } );
+				socket.disconnect( true );
 				break;
 			
 			case gameStateToNum( 'Celebration'):
@@ -707,7 +707,7 @@ UE4.on( 'connect', function( socket ) {
 				info.gameInfo.winner = info.opponent;
 
 				// перевести клиентов в состояние celebration, передав каждому его результат матча
-				socket.emit( 'changeState', {
+				callback( {
 					'state': celebration,
 					'data': {
 						'bIsWinner': false,
@@ -733,7 +733,7 @@ UE4.on( 'connect', function( socket ) {
 
 
 	// Игрок выбрал элемент в таблице Менделеева
-	socket.on( 'elemSelection', ( number ) => {
+	socket.on( 'elemSelection', ( number, callback ) => {
 		const myId = socket.id;
 		const info = clients.get( myId );
 
@@ -760,7 +760,7 @@ UE4.on( 'connect', function( socket ) {
 		info.gameState = gameStateToNum( 'Preparing' );
 		info.diagramState = new ElemConfig();
 
-		socket.emit( 'changeState', { 'state': info.gameState } );
+		callback( { 'state': info.gameState } );
 	} );
 
 
@@ -834,7 +834,7 @@ UE4.on( 'connect', function( socket ) {
 
 
 	// игрок хочет назвать элемент
-	socket.on( 'nameElement', ( number ) => {
+	socket.on( 'nameElement', ( number, callback ) => {
 		const myId = socket.id;
 		const info = clients.get( myId );
 
@@ -865,7 +865,7 @@ UE4.on( 'connect', function( socket ) {
 		const result = opInfo.chemicalElement.number == number; // результат ( отгадал или нет)
 
 		// перевести игроков в состояние celebration, сообщив результат матча
-		info.socket.emit( 'changeState', {
+		callback( {
 			'state': celebration,
 			'data': {
 				'bIsWinner': result,
@@ -886,10 +886,14 @@ UE4.on( 'connect', function( socket ) {
 		if( result ) {
 			info.wins++;
 			opInfo.losses++;
+			// отпустить игрока через указанное время, если этого не сделал победивший соперник
+			setTimeout( leaveTheMatch, waitingTime.celebration, socket.id );
 		}
 		else {
 			opInfo.wins++;
 			info.losses++;
+			// отпустить игрока через указанное время, если этого не сделал победивший соперник
+			setTimeout( leaveTheMatch, waitingTime.celebration, info.opponent );
 		}
 
 	} )
