@@ -209,22 +209,11 @@ function toMatch( id ) {
  * Перевести игрока в состояние Online
  * @param {String} id Игрок
  */
-async function leaveTheMatch( id ) {
+function leaveTheMatch( id ) {
 	const info = clients.get( id );
 
 	if( info === undefined || info.gameState === gameStateEnum.Celebration )
 		return;
-
-	try {
-		await joinRoom( info.socket, hallStr );
-	}
-	catch( error ) {
-		log( `Failed to join to HALL ( ${info.name} )`, 'Error', 'leaveTheMatch' );
-		log( error, 'error' );
-		return;
-	}
-
-	log( 'Joined the room "HALL"', `${info.name}`, 'leaveTheMatch' );
 
 	info.resetGameInfo(); // сбросить информацию, касающуюся матча
 
@@ -237,13 +226,7 @@ async function leaveTheMatch( id ) {
 		} ] 
 	} );
 
-	let list = [];
-	try { // отправка игроку списка неиграющих клиентов
-		list = await getClientsInHall( id, false );
-	}
-	catch( error ) {
-		log( `Failed to get client list after joining "HALL" ( ${info.name} )`, 'Error', 'leaveTheMatch' );
-	}
+	const list = getClientsInHall( id, false );
 	info.socket.emit( 'changeState', {
 			'state': gameStateEnum.Online,
 			'data': list
@@ -343,19 +326,12 @@ UE4.on( 'connect', function( socket ) {
 
 
 	// отправка клиенту списка неиграющих подключенных игроков
-	socket.on( 'refreshList', async ( data, callback ) => {
+	socket.on( 'refreshList', ( data, callback ) => {
 
-		const info = clients.get( socket.id );
-		log( 'The client asks for a list of all non-playing connected clients', `${info.name}`, 'RefreshList' );
+		log( 'The client asks for a list of all non-playing connected clients', myInfo.name, 'RefreshList' );
 
-		try {
-			const list = await getClientsInHall( socket.id, true );
-			callback( list );
-		} catch (error) {
-			log( `Failed to get list for client { ${info.name} }`, 'Error', 'onRefreshList' );
-			log( error, 'error' );
-			callback( [] );
-		}
+		const list = getClientsInHall( myId, true );
+		callback( list );
 	});
 
 
