@@ -8,6 +8,18 @@ const waitingTime = { // время ожидания перехода в сле�
 };
 
 
+const gameStateEnum = {
+	'Void': 		0,
+	'Offline': 		1,
+	'Registration': 2,
+	'Online': 		3,
+	'PeriodicTable':4,
+	'Preparing': 	5,
+	'Match': 		6,
+	'Celebration':  7
+}
+
+
 /**
  * Сообщение пользователю служебной информации (логирование)
  * @param {String} type Тип сообщения
@@ -25,7 +37,7 @@ function log( message, type, path ) {
 		
 			default:
 				console.log( message.stack );
-				break;		
+				break;
 	}
 	else {
 		switch (type) {
@@ -43,7 +55,7 @@ function log( message, type, path ) {
 				type += '>';
 				break;
 		}
-		console.log( `${type} ${path != undefined ? (path + ': ') : ''}${message}` );
+		console.log( type, path !== undefined ? (path + ': ') : '', message );
 	}
 }
 
@@ -70,7 +82,7 @@ console.log( `The server was started at ${ip.address()}:${PORT}`);
 class ElemConfig {
 
 	constructor( buf ) {
-		if ( buf == undefined || ( !( buf instanceof Array ) && !( buf instanceof Int32Array ) ) ) {
+		if ( buf === undefined || ( !( buf instanceof Array ) && !( buf instanceof Int32Array ) ) ) {
 			this.config = new Int32Array([0, 0, 0, 0]);
 		}
 		else {
@@ -214,7 +226,7 @@ class ClientInfo {
 		};
 		this.diagramState 	= null;
 		this.gameInfo 		= null;
-		this.gameState 		= gameStateToNum( 'Online' );
+		this.gameState 		= gameStateEnum.Online;
 		this.inviters 		= new Set();
 		this.losses 		= 0;
 		this.name 			= name;
@@ -239,7 +251,7 @@ class ClientInfo {
 		this.chemicalElement.element = null;
 		this.diagramState = null;
 		this.gameInfo = null;
-		this.gameState = gameStateToNum( 'Online' );
+		this.gameState = gameStateEnum.Online;
 		this.shots = null;
 		this.team = -1;
 	}
@@ -264,34 +276,6 @@ class GameInfo {
 	}
 } // ---------------------------------------------
 
-
-
-/**
- * Перевести строковое представление состояния игры в число
- * @param {String} state Состояние игры
- * @returns {Number} Численное представление состояния игры
- */
-function gameStateToNum( state ) {
-	switch (state) {
-		case 'Offline':
-			return 1;
-		case 'Registration':
-			return 2;
-		case 'Online':
-			return 3;
-		case 'PeriodicTable':
-			return 4;
-		case 'Preparing':
-			return 5;
-		case 'Match':
-			return 6;
-		case 'Celebration':
-			return 7;
-	
-		default:
-			return 0;
-	}
-}
 
 
 /**
@@ -432,11 +416,11 @@ async function deleteFromLists( id ) {
 function toMatch( id ) {
 	const info = clients.get( id );
 	if( info && info.opponent ) { // соединение с обоими игроками еще не потеряно
-		if( info.gameState === gameStateToNum( 'Preparing' ) ) { // состояние игры соответствующее
+		if( info.gameState === gameStateEnum.Preparing ) { // состояние игры соответствующее
 			if( info.gameInfo.readyPlayers === 2 ) { // оба игрока готовы продолжить игру
 				const opInfo = clients.get( info.opponent );
 
-				info.gameState = opInfo.gameState = gameStateToNum( 'Match' );
+				info.gameState = opInfo.gameState = gameStateEnum.Match;
 				info.shots = new ElemConfig();
 				opInfo.shots = new ElemConfig();
 
@@ -471,51 +455,43 @@ function toMatch( id ) {
 async function leaveTheMatch( id ) {
 	const info = clients.get( id );
 
-	if( info && info.gameState === gameStateToNum( 'Celebration' ) ) {
+	if( info === undefined || info.gameState === gameStateEnum.Celebration )
+		return;
 
-		try {
-			await joinRoom( info.socket, hallStr );
-		}
-		catch( error ) {
-			log( `Failed to join to HALL ( ${info.name} )`, 'Error', 'leaveTheMatch' );
-			log( error, 'error' );
-			return;
-		}
-
-		log( 'Joined the room "HALL"', `${info.name}`, 'leaveTheMatch' );
-
-		info.resetGameInfo(); // сбросить информацию, касающуюся матча
-
-		// извещение клиентов в hall о добавлении нового игрока
-		info.socket.broadcast.to( hallStr ).emit( 'refreshResults', {
-			'action': 'add', 
-			'data': [ { 
-				'id': id, 
-				'name': info.name 
-			} ] 
-		} );
-
-		let list = [];
-		try { // отправка игроку списка неиграющих клиентов
-			list = await getClientsInHall( id, false );
-		}
-		catch( error ) {
-			log( `Failed to get client list after joining "HALL" ( ${info.name} )`, 'Error', 'leaveTheMatch' );
-		}
-		info.socket.emit( 'changeState', {
-				'state': gameStateToNum( 'Online' ),
-				'data': list
-			});
+	try {
+		await joinRoom( info.socket, hallStr );
 	}
-	else
-		log( `Client information object is invalid or gameState is not celebration ( ${info} )`, 'LOG', 'leaveTheMatch' );
+	catch( error ) {
+		log( `Failed to join to HALL ( ${info.name} )`, 'Error', 'leaveTheMatch' );
+		log( error, 'error' );
+		return;
+	}
+
+	log( 'Joined the room "HALL"', `${info.name}`, 'leaveTheMatch' );
+
+	info.resetGameInfo(); // сбросить информацию, касающуюся матча
+
+	// извещение клиентов в hall о добавлении нового игрока
+	info.socket.broadcast.to( hallStr ).emit( 'refreshResults', {
+		'action': 'add', 
+		'data': [ { 
+			'id': id, 
+			'name': info.name 
+		} ] 
+	} );
+
+	let list = [];
+	try { // отправка игроку списка неиграющих клиентов
+		list = await getClientsInHall( id, false );
+	}
+	catch( error ) {
+		log( `Failed to get client list after joining "HALL" ( ${info.name} )`, 'Error', 'leaveTheMatch' );
+	}
+	info.socket.emit( 'changeState', {
+			'state': gameStateEnum.Online,
+			'data': list
+		});
 }
-
-
-
-io.on( 'connect', function ( socket ) {
-	log( `New client: ${socket.id}. Total connected clients: ${clients.size}`, 'Event' );
-});
 
 
 /**
@@ -534,7 +510,7 @@ function getClientsInHall( myId, bWithInvitations ) {
 		// проход по всем неиграющим клиентам и запись в результирующий массив их id и name
 		for (const id of clientIds) {
 			const info = clients.get( id );
-			if( info != undefined )
+			if( info !== undefined )
 				clientList.push( {'id': id, 'name': info.name} )
 			else
 				log( new Error( `There is no information about client ( ${id} )` ), 'error' );
@@ -560,6 +536,8 @@ function getClientsInHall( myId, bWithInvitations ) {
 
 io.on( 'connect', (socket) => {
 
+	log( `New client: ${socket.id}. Total connected clients: ${clients.size}`, 'Event' );
+
 	socket.on( 'disconnectMe', () => {
 		socket.disconnect( true );
 	} )
@@ -582,7 +560,7 @@ UE4.on( 'connect', function( socket ) {
 		const myId = socket.id;
 		myName = myName.toString();
 		const status = names.get( myName );
-		if( typeof status !== 'undefined' && status )
+		if( status !== undefined && status )
 			callback( false );
 		else {
 			callback( true );
@@ -602,7 +580,7 @@ UE4.on( 'connect', function( socket ) {
 
 					// отправка клиенту списка неиграющих подключенных игроков
 					socket.emit( 'changeState', {
-						'state': gameStateToNum( 'Online' ),
+						'state': gameStateEnum.Online,
 						'data': list
 					} );
 
@@ -657,12 +635,12 @@ UE4.on( 'connect', function( socket ) {
 
 		log( `Invites ${opInfo.name}`, `${myInfo.name}`, 'Invitation' );
 
-		if( myInfo.gameState == gameStateToNum( 'Online' ) && myInfo.gameState == opInfo.gameState ) {
+		if( myInfo.gameState == gameStateEnum.Online && myInfo.gameState == opInfo.gameState ) {
 			// если оба игрока пригласили друг друга, то можно начинать матч
 			if( myInfo.inviters.delete( id ) ) {
 				myInfo.opponent = id;
 				opInfo.opponent = myId;
-				myInfo.gameState = opInfo.gameState = gameStateToNum( 'PeriodicTable' );
+				myInfo.gameState = opInfo.gameState = gameStateEnum.PeriodicTable;
 				myInfo.team = Math.round( Math.random() );
 				opInfo.team = myInfo.team ? 0 : 1;
 				myInfo.inviters.clear();
@@ -699,9 +677,9 @@ UE4.on( 'connect', function( socket ) {
 	socket.on( 'flyAway', ( data, callback ) => {
 		const info = clients.get( socket.id );
 
-		if( typeof info === 'undefined' ) {
+		if( info === undefined ) {
 			log( `Wants to fly away`, `${socket.id}`, 'FlyAway' );
-			callback( { 'state': gameStateToNum( 'Offline' ) } );
+			callback( { 'state': gameStateEnum.Offline } );
 			socket.disconnect( true );
 			return;
 		}
@@ -709,38 +687,37 @@ UE4.on( 'connect', function( socket ) {
 		log( `Client wants to fly away from ${info.gameState} state ( ${info.name} )`, 'LOG', 'onFlyAway' );
 
 		switch (info.gameState) {
-			case gameStateToNum( 'Online' ):
+			case gameStateEnum.Online:
 				// отдать команду на переход в offline состояние
-				callback( { 'state': gameStateToNum( 'Offline' ) } );
+				callback( { 'state': gameStateEnum.Offline } );
 				socket.disconnect( true );
 				break;
 			
-			case gameStateToNum( 'Celebration'):
+			case gameStateEnum.Celebration:
 				log( new Error( 'Client try to fly away from invalid state' ), 'warn' );
 				break;
 
 			default:
-				const celebration = gameStateToNum( 'Celebration' );
 				const opInfo = clients.get( info.opponent );
 				info.gameInfo.rightMove = '';
 				info.gameInfo.winner = info.opponent;
 
 				// перевести клиентов в состояние celebration, передав каждому его результат матча
 				callback( {
-					'state': celebration,
+					'state': gameStateEnum.Celebration,
 					'data': {
 						'bIsWinner': false,
 						'opponentElem': opInfo.chemicalElement
 					}
 				} );
 				UE4.to( info.opponent ).emit( 'changeState', {
-					'state': celebration,
+					'state': gameStateEnum.Celebration,
 					'data': {
 						'bIsWinner': true,
 						'opponentElem': info.chemicalElement
 					}
 				} );
-				info.gameState = opInfo.gameState = celebration;
+				info.gameState = opInfo.gameState = gameStateEnum.Celebration;
 				info.losses++;
 				opInfo.wins++;
 
@@ -756,7 +733,7 @@ UE4.on( 'connect', function( socket ) {
 		const myId = socket.id;
 		const info = clients.get( myId );
 
-		if( info.gameState != gameStateToNum( 'PeriodicTable' ) ) {
+		if( info.gameState != gameStateEnum.PeriodicTable ) {
 			log( `Event instigator does not have appropriate rights ( 'id': ${info.name}, 'state': ${info.gameState} )`, 'Cheater', 'onElemSelection' );
 			return;
 		}
@@ -774,7 +751,7 @@ UE4.on( 'connect', function( socket ) {
 		info.chemicalElement.number = number;
 		info.chemicalElement.element = PeriodicTable.table[ number ];
 		log( `Element selected: Number: ${info.chemicalElement.number}, Name: ${info.chemicalElement.element.name}, Symbol: ${info.chemicalElement.element.symbol}, Config: ${info.chemicalElement.element.config}`, `${info.name}`, 'ElementSelection')
-		info.gameState = gameStateToNum( 'Preparing' );
+		info.gameState = gameStateEnum.Preparing;
 		info.diagramState = new ElemConfig();
 
 		callback( { 'state': info.gameState } );
@@ -816,7 +793,7 @@ UE4.on( 'connect', function( socket ) {
 		const info = clients.get( myId );
 
 		// действительно ли сейчас матч
-		if( info.gameState != gameStateToNum( 'Match' ) ) {
+		if( info.gameState != gameStateEnum.Match ) {
 			log( `Event instigator is in an invalid state ( 'id': ${info.name}, 'state': ${info.gameState} )`, 'Cheater', 'onShot' );
 			callback( false );
 			return;
@@ -856,7 +833,7 @@ UE4.on( 'connect', function( socket ) {
 		const info = clients.get( myId );
 
 		// действительно ли сейчас матч
-		if( info.gameState != gameStateToNum( 'Match' ) ) {
+		if( info.gameState != gameStateEnum.Match ) {
 			log( `Event instigator is in an invalid state ( 'id': ${info.name}, 'state': ${info.gameState} )`, 'Cheater', 'onNameElement' );
 			return;
 		}
@@ -873,7 +850,7 @@ UE4.on( 'connect', function( socket ) {
 			return;
 		}
 
-		const celebration = gameStateToNum( 'Celebration' );
+		const celebration = gameStateEnum.Celebration;
 		const opInfo = clients.get( info.opponent );
 		info.gameState = opInfo.gameState = celebration; // изменить состояние игры
 		const result = opInfo.chemicalElement.number == number; // результат ( отгадал или нет)
@@ -943,14 +920,14 @@ UE4.on( 'connect', function( socket ) {
 		if( info ) {
 			try {
 				// оповестить клиентов в HALL, если online
-				if( info.gameState === gameStateToNum( 'Online' ) ) {
+				if( info.gameState === gameStateEnum.Online ) {
 					if( clients.size > 1 )
 						deleteFromLists( socket.id );
 				}
 				else { // оповестить противника и перевести его в состояние Celebration
 					if( info.opponent != '' ) { // если еще есть противник
 						const opInfo = clients.get( info.opponent );
-						const celebration = gameStateToNum( 'Celebration' );
+						const celebration = gameStateEnum.Celebration;
 
 						// если игроки уже в конце матча
 						if( opInfo.gameState === celebration ) {
