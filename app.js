@@ -252,42 +252,37 @@ async function leaveTheMatch( id ) {
 
 
 /**
- * Получить список игроков в hall, исключая клиента с myId, в формате [ ...{ id, name, bIsInvited, bIsInviting } ]
- * @param {String} myId id клиента, для которого формируется список
+ * Получить список игроков в hall, исключая клиента с reqId, в формате [ ...{ id, name, bIsInvited, bIsInviting } ]
+ * @param {String} reqId id клиента, для которого формируется список
  * @param {Bool} bWithInvitations Нужно ли добавлять информацию о приглашениях
  */
-function getClientsInHall( myId, bWithInvitations ) {
-	return HALL.getClients()
-	.then( ( clientIds ) => {
-		if( clientIds.length === 0 )
-			return clientIds;
-		const clientList = [];
-		cutElem( clientIds, myId );
+function getClientsInHall( reqId, bWithInvitations ) {
 
-		// проход по всем неиграющим клиентам и запись в результирующий массив их id и name
-		for (const id of clientIds) {
-			const info = clients.get( id );
-			if( info !== undefined )
-				clientList.push( {'id': id, 'name': info.name} )
-			else
-				log( new Error( `There is no information about client ( ${id} )` ), 'error' );
+	const reqInfo = clients.get( reqId );
+	const clientList = [];
+	let getInfo = bWithInvitations ? ( cId, cInfo ) => {
+			clientList.push( 
+				{
+					'id': cId, 
+					'name': cInfo.name, 
+					'bIsInvited': cInfo.inviters.has( reqId ),
+					'bIsInviting': reqInfo.inviters.has( cId ) 
+				} 
+			);
 		}
+	: ( cId, cInfo ) => {
+			clientList.push( 
+				{
+					'id': cId, 
+					'name': cInfo.name
+				} 
+			);
+		};
 
-		// добавление в результат выдачи информации о приглашениях
-		if( bWithInvitations ) {
-			const myInviters = clients.get( myId ).inviters;
-			for( const item of clientList ) {
-				item.bIsInvited = clients.get( item.id ).inviters.has( myId );
-				item.bIsInviting = myInviters.has( item.id );
-			}
-		}
-
-		return clientList;
-	})
-	.catch( ( error ) => {
-		log( error, 'error' );
-		return [];
-		});
+	clients.forEach( ( id, info, map ) => {
+		if( id !== reqId && info.gameState === gameStateEnum.Online )
+			getInfo( id, info );
+	});
 }
 
 
@@ -306,7 +301,8 @@ UE4.on( 'connect', function( socket ) {
 	// Вывести сообщение о тм, что подключился новый пользователь
 	log( `New client in 'UE4' namespace: ${socket.id}`, 'Event' );
 
-
+	const myId = socket.id;
+	const myInfo = null;
 	
 	
 
@@ -314,48 +310,34 @@ UE4.on( 'connect', function( socket ) {
 	// Пользователь перешел в состояние Online, передает свое имя и ожидает список доступных соперников
 	socket.on( 'registration', ( myName, callback ) => {
 
-		const myId = socket.id;
 		myName = myName.toString();
 		const status = names.get( myName );
 		if( status !== undefined && status )
 			callback( false );
 		else {
 			callback( true );
-			try {
+			
+			myInfo = new ClientInfo( myName, socket );
+			clients.set( myId, myInfo );
+			names.set( myName, true );
+			const list = getClientsInHall( myId, false );
 
-				socket.join( hallStr, async ( error ) => {
-					if( error ) {
-						log( error, 'error' );
-						socket.disconnect( true );
-					}
+			log( 'Client joined to the room "HALL"', `${myName}`, 'Registration' );
 
-					clients.set( myId, new ClientInfo( myName, socket ) );
-					names.set( myName, true );
-					const list = await getClientsInHall( myId, false );
+			// отправка клиенту списка неиграющих подключенных игроков
+			socket.emit( 'changeState', {
+				'state': gameStateEnum.Online,
+				'data': list
+			} );
 
-					log( 'Client joined to the room "HALL"', `${myName}`, 'Registration' );
-
-					// отправка клиенту списка неиграющих подключенных игроков
-					socket.emit( 'changeState', {
-						'state': gameStateEnum.Online,
-						'data': list
-					} );
-
-					// извещение всех находящихся в комнате о присоединении нового клиента
-					socket.broadcast.to( hallStr ).emit( 'refreshResults', {
-						'action': 'add', 
-						'data': [ { 
-							'id': myId, 
-							'name': myName 
-							} ] 
-						} );
-
-				})
-
-			} catch( error ) {
-				log( error, 'error' );
-				socket.disconnect( true );
-			}
+			// извещение всех находящихся в комнате о присоединении нового клиента
+			socket.broadcast.to( hallStr ).emit( 'refreshResults', {
+				'action': 'add', 
+				'data': [ { 
+					'id': myId, 
+					'name': myName 
+					} ] 
+				} );
 		}
 	});
 
