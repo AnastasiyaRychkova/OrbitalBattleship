@@ -1,0 +1,124 @@
+html {
+	--violet: #493AF8;
+	--grey: #858585;
+	--disable: #c4c4c4;
+	--hoveredRow: #DAD8FF;
+	--background: #F3F2FA;
+	font-family: Open Sans;
+	text-transform: uppercase;
+	font-size: 14px;
+}
+
+* {
+	border: 0.3px solid rgba(240, 239, 254, 0.774)
+}
+
+.visibility-hidden {
+	position: absolute;
+	margin: -1px;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	overflow: hidden;
+	border: 0;
+	clip: rect(0, 0, 0, 0);
+}
+
+body {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 400px;
+	margin: 0 auto;
+	padding: 0;
+}
+
+.logo {
+	display: block;
+	margin: 5em auto 2.3em;
+	border: 5px solid var(--hoveredRow);
+}
+
+.logo-arrow {
+	fill:var(--hoveredRow);
+}
+
+h2 {
+	font-size: 1.4em;
+	color: var(--grey);
+	margin: 1.2em 0 0.8em;
+}
+
+.server-address {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	color: var(--disable);
+	background-color: var(--background);
+	margin-bottom: 2.2em;
+	width: calc(100% - 2em)
+}
+
+.address-row {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin: 0 0 2.2em;
+}
+
+.server-address ul {
+	display: flex;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.server-address li,
+input[type="number"] {
+	font-size: 1.3em;
+	color: var(--grey);
+	width: 2.8em;
+	height: 1.6em;
+	border: 2px solid var(--disable);
+}
+
+.server-address li:nth-child(2n) {
+	width: 0.5em;
+	border: none;
+}
+
+.server-address li {
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+}
+
+input[type="number"] {
+	width: 4.2em;
+	border-color: var(--hoveredRow);
+	font-size: 1.3em;
+	padding: 0;
+	font-family: Open Sans;
+	background-color: var(--background);
+	transition: background-color 1s, border-color 1s, color 1s;
+	outline: none;
+	text-align: center;
+}
+
+input[type="number"]:focus {
+	border-color: var(--violet);
+	background-color: white;
+	color: var(--violet);
+}
+
+.server-address:hover input[type="number"] {
+	border-color: var(--violet);
+	color: var(--violet);
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+

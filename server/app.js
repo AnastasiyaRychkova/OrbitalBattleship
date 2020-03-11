@@ -104,12 +104,6 @@ async function startMatch( player1, player2, player1callback ) {
 		log( `The invalid ClientInfo object ( ${player1.id}, ${player2.id} )`, 'Error', 'startMatch');
 		return;
 	}
-	try { // покинуть hall
-		await Promise.all( [ leaveRoom( player1, hallStr ), leaveRoom( player2, hallStr ) ] );
-	} catch( error ) {
-		log( 'Failed to start match', 'Error', `onInvite: startMatch: ${info1.name}, ${info2.name}` );
-		log( error, 'error' );
-	}
 
 	// перевести игроков с состояние 'PeriodicTable'
 	info1.gameInfo = info2.gameInfo = new GameInfo();
@@ -285,7 +279,7 @@ UE4.on( 'connect', function( socket ) {
 	log( `New client in 'UE4' namespace: ${socket.id}`, 'Event' );
 
 	const myId = socket.id;
-	const myInfo = null;
+	let myInfo = null;
 	
 	
 

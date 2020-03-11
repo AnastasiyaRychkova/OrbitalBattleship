@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Orbital Battleship</title>
+	<link rel="stylesheet" href="style/style.css">
+</head>
+<body>
+	<svg version="1.1" id="Слой_2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="120" height="120" class="logo"
+	 viewBox="0 0 120 120" style="enable-background:new 0 0 120 120;" xml:space="preserve">
+		<polygon class="logo-arrow" points="53,107 53,101 35,101 35,43 29,43 41,24 57,49 65,49 41,12 17,49 29,49 29,107 "/>
+		<polygon class="logo-arrow" points="80,108 104,71 92,71 92,13 68,13 68,19 86,19 86,77 92,77 80,96 "/>
+	</svg>
+	<h1 class="visibility-hidden">Orbital battleship</h1>
+	<section class="server-address">
+		<h2>Server address</h2>
+		<div class="address-row">
+			<ul>
+				<li id="address-0">192</li>
+				<li>.</li>
+				<li id="address-1">168</li>
+				<li>.</li>
+				<li id="address-2">0</li>
+				<li>.</li>
+				<li id="address-3">173</li>
+				<li>:</li>
+			</ul>
+			<input type="number" min="1024" max="65535" id="port" value="8081">
+		</div>
+	</section>
+	<button class="main-action start-server-btn">
+		<div class="play-btn">
+			<div class="play-icon">
+			</div>
+		</div>
+		<span class="main-action btn-name">Start server</span>
+	</button>
+	<button class="admin-btn">
+		Admin<span>→</span>
+	</button>
+	<label class="logging">
+		<div class="toggle">
+			<input class="toggle-state" type="checkbox" name="check" value="check" />
+			<div class="toggle-inner">
+				<div class="indicator"></div>
+			</div>
+			<div class="active-bg"></div>
+		</div>
+		<div class="logging-text">Logging</div>
+	</label>
+</body>
+</html>
