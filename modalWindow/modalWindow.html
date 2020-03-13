@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Error</title>
+	<link rel="stylesheet" href="mw-style.css" </head> <body>
+	<h1>Oops!<br>Something went wrong...</h1>
+	<pre id="reason">TypeError: Cannot read property 'gameState' of undefined
+    at Socket.<anonymous> (C:\Users\anast\Desktop\OrbitalBattleshipServer\app.js:956:18)
+    at Socket.emit (events.js:200:13)
+    at Socket.emit (C:\Users\anast\Desktop\OrbitalBattleshipServer\node_modules\socket.io\lib\socket.js:142:10)
+    at Socket.onclose (C:\Users\anast\Desktop\OrbitalBattleshipServer\node_modules\socket.io\lib\socket.js:454:8)
+    at Client.onclose (C:\Users\anast\Desktop\OrbitalBattleshipServer\node_modules\socket.io\lib\client.js:254:24)
+    at Socket.emit (events.js:205:15)
+    at Socket.onClose (C:\Users\anast\Desktop\OrbitalBattleshipServer\node_modules\engine.io\lib\socket.js:318:10)
+    at Object.onceWrapper (events.js:288:20)
+    at WebSocket.emit (events.js:200:13)
+    at WebSocket.Transport.onClose (C:\Users\anast\Desktop\OrbitalBattleshipServer\node_modules\engine.io\lib\transport.js:127:8)</pre>
+	<p id="question">Would you like to send a crash report to the author?</p>
+	<div class="selection-buttons">
+		<div class="send-report-btn">
+			<button type="button" class="select-btn" id="send-btn">Send and close</button>
+			<button type="button" id="open-report-btn">Open report</button>
+		</div>
+		<button type="button" class="select-btn" id="close-btn">Close</button>
+	</div>
+	</body>
+
+</html>

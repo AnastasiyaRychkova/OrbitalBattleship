@@ -4,13 +4,9 @@ html {
 	--disable: #c4c4c4;
 	--hoveredRow: #DAD8FF;
 	--background: #F3F2FA;
-	font-family: Open Sans;
 	text-transform: uppercase;
+	font-family: Open Sans;
 	font-size: 14px;
-}
-
-* {
-	border: 0.3px solid rgba(240, 239, 254, 0.774)
 }
 
 .visibility-hidden {
@@ -26,60 +22,71 @@ html {
 
 body {
 	display: flex;
-	flex-direction: column;
+	position: relative;
 	align-items: center;
-	width: 400px;
+	flex-direction: column;
 	margin: 0 auto;
+	width: 500px;
+	height: 550px;
 	padding: 0;
+}
+
+::selection {
+	background: var(--hoveredRow);
+	/* Safari */
 }
 
 .logo {
 	display: block;
-	margin: 5em auto 2.3em;
-	border: 5px solid var(--hoveredRow);
+	margin: 3em auto 2.3em;
+	width: 6em;
+	height: 6em;
+	border: 0.25em solid var(--hoveredRow);
 }
 
 .logo-arrow {
-	fill:var(--hoveredRow);
+	fill: var(--hoveredRow);
 }
 
 h2 {
-	font-size: 1.4em;
+	margin-top: 0;
+	margin-bottom: 0.8em;
 	color: var(--grey);
-	margin: 1.2em 0 0.8em;
+	font-size: 1.3em;
+	font-weight: 900;
 }
 
 .server-address {
 	display: flex;
-	flex-direction: column;
 	align-items: center;
-	color: var(--disable);
+	flex-direction: column;
+	margin-bottom: 2em;
+	padding: 2em 2.4em 2.4em;
 	background-color: var(--background);
-	margin-bottom: 2.2em;
-	width: calc(100% - 2em)
+	color: var(--disable);
 }
 
 .address-row {
 	display: flex;
-	justify-content: center;
 	align-items: center;
-	margin: 0 0 2.2em;
+	justify-content: center;
 }
 
 .server-address ul {
 	display: flex;
-	list-style: none;
-	padding: 0;
 	margin: 0;
+	padding: 0;
+	list-style: none;
 }
 
 .server-address li,
 input[type="number"] {
-	font-size: 1.3em;
-	color: var(--grey);
-	width: 2.8em;
-	height: 1.6em;
+	width: 2.7em;
+	height: 1.3em;
 	border: 2px solid var(--disable);
+	line-height: 1.2em;
+	color: var(--grey);
+	font-size: 1.3em;
 }
 
 .server-address li:nth-child(2n) {
@@ -89,20 +96,21 @@ input[type="number"] {
 
 .server-address li {
 	display: inline-flex;
-	justify-content: center;
 	align-items: center;
+	justify-content: center;
 }
 
 input[type="number"] {
 	width: 4.2em;
-	border-color: var(--hoveredRow);
-	font-size: 1.3em;
 	padding: 0;
-	font-family: Open Sans;
+	outline: none;
+	border-color: var(--hoveredRow);
 	background-color: var(--background);
 	transition: background-color 1s, border-color 1s, color 1s;
-	outline: none;
 	text-align: center;
+	font-family: Open Sans;
+	font-size: 1.3em;
+	font-weight: 500;
 }
 
 input[type="number"]:focus {
@@ -118,7 +126,231 @@ input[type="number"]:focus {
 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
-	-webkit-appearance: none;
 	margin: 0;
+	-webkit-appearance: none;
 }
 
+
+/*=============================================
+=         Start / Stop server button         =
+=============================================*/
+
+.main-action,
+.play-btn {
+	width: 14em;
+	height: 2.8em;
+	border: none;
+	border-radius: 1.4em;
+	text-transform: uppercase;
+	color: var(--violet);
+	font-family: Open Sans;
+	font-weight: bold;
+}
+
+.main-action {
+	position: relative;
+	margin-bottom: 1.4em;
+	padding: 0;
+	padding-right: 2.5em;
+	overflow: hidden;
+	outline: none;
+	background-color: unset;
+	cursor: pointer;
+	transition: color .3s, background-color .1s;
+	text-align: right;
+	letter-spacing: 0.04em;
+	font-size: 1.25em;
+}
+
+.main-action:hover {
+	color: white;
+}
+
+.main-action:active {
+	background-color: #3525ec;
+}
+
+.play-btn {
+	position: absolute;
+	top: 0;
+	z-index: -1;
+	background-color: var(--violet);
+	transform: translateX(-11.2em);
+	transition: transform 0.3s;
+}
+
+.main-action:hover .play-btn {
+	transform: translateX(-0.1em);
+}
+
+.play-icon {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+/*=====  End of Start / Stop server button  ======*/
+
+
+
+
+/*=============================================
+=                Admin button                =
+=============================================*/
+
+.admin-btn {
+	position: relative;
+	width: 12.4em;
+	height: 2.4em;
+	outline: none;
+	border: 2px solid var(--violet);
+	border-radius: 1.4em;
+	background-color: white;
+	cursor: pointer;
+	transition: background-color .1s, color .1s;
+	text-transform: uppercase;
+	color: var(--violet);
+	font-family: Open Sans;
+	font-size: 1.4em;
+	font-weight: bold;
+}
+
+
+.admin-btn .label,
+.admin-btn .icon-arrow {
+	backface-visibility: hidden;
+	perspective: 1000;
+	transform: translateX(1.5em);
+}
+
+.admin-btn .label {
+	display: inline-block;
+	transition: transform .5s cubic-bezier(0.86, 0, 0.07, 1);
+}
+
+.admin-btn .icon-arrow {
+	top: 0.9em;
+	width: 2em;
+	height: 0.5em;
+	fill: var(--violet);
+	transition: transform .5s cubic-bezier(0.86, 0, 0.07, 1), opacity .4s cubic-bezier(0.86, 0, 0.07, 1), fill .2s;
+}
+
+.admin-btn .icon-arrow.before {
+	position: absolute;
+	left: 0.8em;
+	margin-right: 1em;
+	transform-origin: left center;
+}
+
+.admin-btn .icon-arrow.after {
+	position: absolute;
+	right: 0.8em;
+	opacity: 0;
+	margin-left: 1em;
+	transform: translateX(-2em) scaleX(0.1);
+	transform-origin: right center;
+}
+
+.admin-btn:hover .label {
+	transform: translateX(-1.5em);
+}
+
+.admin-btn:hover .icon-arrow.before {
+	opacity: 0;
+	transform: translateX(1.5em) scaleX(0.1);
+}
+
+.admin-btn:hover .icon-arrow.after {
+	opacity: 1;
+	transform: translateX(-1em) scaleX(1);
+}
+
+.admin-btn:active {
+	background-color: #2c1ce0;
+	color: white;
+}
+
+.admin-btn:active .icon-arrow {
+	fill: white;
+}
+
+/*=====  End of Admin button  ======*/
+
+
+
+
+/*=============================================
+=            Logging            =
+=============================================*/
+
+.logging {
+	display: inline-flex;
+	position: absolute;
+	bottom: 2em;
+	align-items: center;
+	cursor: pointer;
+}
+
+.logging-text {
+	margin-left: 8px;
+	color: var(--disable);
+	font-size: 0.8em;
+	font-weight: bold;
+}
+
+.toggle {
+	position: relative;
+	width: 2.2em;
+	height: 1.1em;
+	overflow: hidden;
+	border-radius: 0.6em;
+	background: var(--disable);
+	isolation: isolate;
+}
+
+.toggle-inner {
+	position: absolute;
+	top: 0.1em;
+	left: 0.1em;
+	z-index: 2;
+	width: 2em;
+	height: 0.9em;
+	overflow: hidden;
+	border-radius: 15px;
+}
+
+.active-bg {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 200%;
+	height: 100%;
+	background: var(--violet);
+	transform: translate3d(-100%, 0, 0);
+	transition: transform 0.05s linear 0.17s;
+}
+
+.toggle-state {
+	display: none;
+}
+
+.indicator {
+	width: 200%;
+	height: 100%;
+	border-radius: 13px;
+	background: white;
+	transform: translate3d(-75%, 0, 0);
+	transition: transform 0.35s cubic-bezier(0.85, 0.05, 0.18, 1.35);
+}
+
+.toggle-state:checked ~ .active-bg {
+	transform: translate3d(-50%, 0, 0);
+}
+
+.toggle-state:checked ~ .toggle-inner .indicator {
+	transform: translate3d(25%, 0, 0);
+}
+
+
+/*=====  End of Logging  ======*/
