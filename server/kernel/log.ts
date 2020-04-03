@@ -1,18 +1,18 @@
-const colors = require('colors/safe');
+import colors from 'colors/safe';
 
 /**
  * Сообщение пользователю служебной информации (логирование)
- * @param {String} type Тип сообщения
- * @param {String} message Сообщение
+ * @param type Тип сообщения
+ * @param message Сообщение
  */
-function log( message, type, path ) {
+function log( type: string, message: string | Error, path?: string ) {
 	if( message instanceof Error )
 		switch (type) {
-			case 'error':
-				console.error( colors.red( message ) );
+			case 'Error':
+				console.error( message );
 				break;
-			case 'warn':
-				console.warn( colors.yellow( message ) );
+			case 'Warn':
+				console.warn( message );
 				break;
 		
 			default:
@@ -20,7 +20,7 @@ function log( message, type, path ) {
 				break;
 	}
 	else {
-		let colorFunc;
+		let colorFunc: ( str: string ) => string;
 		switch (type) {
 			case 'INFO':
 				colorFunc = colors.black.bgCyan;
@@ -49,8 +49,8 @@ function log( message, type, path ) {
 				colorFunc = colors.white;
 				break;
 		}
-		console.log( colorFunc( type ), colorFunc( path !== undefined ? (path + ': ') : '' ), colorFunc( message ) );
+		console.log( colorFunc( type ), colorFunc( path !== undefined ? ( path + ': ' ) : '' ), colorFunc( message ) );
 	}
 }
 
-module.exports = log;
+export default log;

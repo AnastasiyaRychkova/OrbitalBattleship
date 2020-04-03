@@ -1,0 +1,15 @@
+{
+	"extends": "../tsconfig.json",
+	"compilerOptions": {
+		"target": "ES2019",
+		"module": "commonjs",
+		"lib": ["ES2019"],
+		"outDir": "../../build/server",
+		"types": [
+			"node",
+			"socket.io"
+		],
+		
+		"resolveJsonModule": true
+	}
+}

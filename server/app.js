@@ -213,10 +213,10 @@ function leaveTheMatch( id ) {
 
 	// извещение клиентов в hall о добавлении нового игрока
 	info.socket.broadcast.to( hallStr ).emit( 'refreshResults', {
-		'action': 'add', 
-		'data': [ { 
-			'id': id, 
-			'name': info.name 
+		'action': 'add',
+		'data': [ {
+			'id': id,
+			'name': info.name
 		} ] 
 	} );
 
@@ -238,19 +238,19 @@ function getClientsInHall( reqId, bWithInvitations ) {
 	const reqInfo = clients.get( reqId );
 	const clientList = [];
 	let getInfo = bWithInvitations ? ( cId, cInfo ) => {
-			clientList.push( 
+			clientList.push(
 				{
-					'id': cId, 
-					'name': cInfo.name, 
+					'id': cId,
+					'name': cInfo.name,
 					'bIsInvited': cInfo.inviters.has( reqId ),
 					'bIsInviting': reqInfo.inviters.has( cId ) 
 				} 
 			);
 		}
 	: ( cId, cInfo ) => {
-			clientList.push( 
+			clientList.push(
 				{
-					'id': cId, 
+					'id': cId,
 					'name': cInfo.name
 				} 
 			);
@@ -280,8 +280,7 @@ UE4.on( 'connect', function( socket ) {
 
 	const myId = socket.id;
 	let myInfo = null;
-	
-	
+
 
 
 	// Пользователь перешел в состояние Online, передает свое имя и ожидает список доступных соперников
@@ -309,9 +308,9 @@ UE4.on( 'connect', function( socket ) {
 
 			// извещение всех находящихся в комнате о присоединении нового клиента
 			socket.broadcast.to( hallStr ).emit( 'refreshResults', {
-				'action': 'add', 
-				'data': [ { 
-					'id': myId, 
+				'action': 'add',
+				'data': [ {
+					'id': myId,
 					'name': myName 
 					} ] 
 				} );
