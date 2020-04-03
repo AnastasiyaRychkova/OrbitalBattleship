@@ -13,7 +13,7 @@ class ElemConfig
 	/** Конфигурация элемента в бинарном виде */
 	private _config: Int32Array;
 
-	constructor( buf: Int32Array | number[] | undefined )
+	constructor( buf?: Int32Array | number[] )
 	{
 		if( buf === undefined )
 		{
@@ -44,6 +44,7 @@ class ElemConfig
 	/**
 	 * Сравнивает два элемента и возвращает истину только в том случае,
 	 * если они правильные и эквивалентные
+	 * 
 	 * @param elem1 Конфигурация первого элемента
 	 * @param elem2 Конфигурация второго элемента
 	 */
@@ -59,6 +60,7 @@ class ElemConfig
 
 	/**
 	 * Отмечен ли в данной конфигурации спин
+	 * 
 	 * @param spinNum Номер спина
 	 */
 	hasSpin( spinNum: number ): boolean
@@ -71,6 +73,7 @@ class ElemConfig
 
 	/**
 	 * Отметить спин в объекте конфигурации элемента
+	 * 
 	 * @param spinNum Порядковый номер спина
 	 * @param state Отмечен ли спин
 	 */
@@ -88,6 +91,7 @@ class ElemConfig
 
 	/**
 	 * Отметить спин
+	 * 
 	 * @param index Индекс спина
 	 */
 	private _add( index: number ): void
@@ -99,6 +103,7 @@ class ElemConfig
 
 	/**
 	 * Снять отметку со спина
+	 * 
 	 * @param index Индекс спина
 	 */
 	private _remove( index: number ): void
@@ -130,6 +135,7 @@ class ElemConfig
 	/**
 	 * Получить массив, отражающий полное состояние диаграммы:
 	 * отметки, попадания, промахи.
+	 * 
 	 * @param diagram Диаграмма
 	 * @param shots Выстрелы по переданной диаграмме
 	 */

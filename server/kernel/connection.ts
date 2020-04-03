@@ -15,7 +15,7 @@ import type { RegistrationMessage } from '../game/messages.js';
 const clientList = new Map<string, Client>();
 
 
-function listenOn( server: Server, Client: Client ): void
+function listenOn( server: Server ): void
 {
 	server.on(
 		'connection',

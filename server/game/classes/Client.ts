@@ -1,3 +1,4 @@
+import IUser from './User.js';
 import Player from './Player.js';
 import Game from "./Game.js";
 import {
@@ -16,7 +17,7 @@ import type {
 } from '../messages.js';
 
 
-class Client
+class Client implements IUser
 {
 	/**
 	 * Текущее соединение игрока
@@ -128,7 +129,7 @@ class Client
 	 * и при повторном подключении клиента после разрыва соединения,
 	 * т.е. на событие connection, когда раннее было событие disconnection
 	 */
-	private _bindBasicEvents(): void
+	bindEvents(): void
 	{
 		console.log( 'bindBasicEvents' );
 		//TODO: Повесить слушателей на основные сетевые события
@@ -180,7 +181,7 @@ class Client
 		clientList.forEach(
 			( client ) =>
 			{
-				if( client !== this && !client.bIsOnline && client.bHasUnfinishedGame )
+				if ( client !== this && !client.bIsOnline && client.bHasUnfinishedGame )
 					list.push( getRow( client ) );
 			}
 		);
@@ -208,7 +209,7 @@ class Client
 	onInvite( name: string, callback: ( bIsItSent: boolean ) => void )
 	{
 		// Приглашение отправлено клиентом, который имеет неоконченную игру
-		if( this.bHasUnfinishedGame )
+		if ( this.bHasUnfinishedGame )
 		{
 			log(
 				this._name,
@@ -221,7 +222,7 @@ class Client
 
 		const client: Client | undefined = clientList.get( name );
 
-		if( client === undefined || !client.bIsOnline || client.bHasUnfinishedGame )
+		if ( client === undefined || !client.bIsOnline || client.bHasUnfinishedGame )
 		{
 			log(
 				'Error',
@@ -239,7 +240,7 @@ class Client
 		);
 
 		// Если оба игрока пригласили друг друга, то можно начинать игру
-		if( client._inviters.has( this ) )
+		if ( client._inviters.has( this ) )
 		{
 			const game = new Game( this, client );
 		}
