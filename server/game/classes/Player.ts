@@ -290,7 +290,7 @@ class Player implements IUser
 			if ( ready === 2 )
 				setTimeout(
 					this._game.toMatch.bind( this._game ),
-					gameConfig.checkResultWaiting // FIXME:
+					gameConfig.checkResultWaiting
 				);
 
 		}

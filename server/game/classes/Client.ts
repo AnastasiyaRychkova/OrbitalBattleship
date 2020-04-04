@@ -269,4 +269,12 @@ class Client implements IUser
 	}
 }
 
+/**
+ * Контейнер для хранения информации о клиентах
+ */
+const clientList = new Map<string, Client>();
+
 export default Client;
+export {
+	clientList,
+}

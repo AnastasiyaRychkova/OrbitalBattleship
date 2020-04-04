@@ -1,5 +1,4 @@
 import log from './log.js';
-import Client from '../game/classes/Client.js';
 
 import type {
 	Server,
@@ -7,15 +6,16 @@ import type {
 } from 'socket.io';
 import type { RegistrationMessage } from '../game/messages.js';
 
+type ClientType = {
+	readonly bIsOnline: boolean;
+
+	new ( socket: Socket, name: string ): unknown;
+
+	onReconnection( newSocket: Socket, data: RegistrationMessage ): void;
+}
 
 
-/**
- * Контейнер для хранения информации о клиентах
- */
-const clientList = new Map<string, Client>();
-
-
-function listenOn( server: Server ): void
+function listenOn( server: Server, Client: ClientType, clientList: Map<string, unknown> ): void
 {
 	server.on(
 		'connection',
@@ -39,7 +39,7 @@ function listenOn( server: Server ): void
 				'registration',
 				( data: RegistrationMessage, callback: ( bIsBusy: boolean ) => void ) =>
 				{
-					const client: Client | undefined = clientList.get( data.name );
+					const client: ClientType | undefined = clientList.get( data.name ) as ClientType;
 
 					if( client && client.bIsOnline )
 					{
@@ -84,5 +84,4 @@ function listenOn( server: Server ): void
 
 export {
 	listenOn,
-	clientList,
 }
