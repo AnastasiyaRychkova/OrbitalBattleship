@@ -1,6 +1,6 @@
-import Client from './Client.js';
+import gameConfig from "../../config.json";
+import { default as Client, clientList } from './Client.js';
 import Player from './Player.js';
-import { clientList } from '../../kernel/connection.js';
 import { io } from "../../kernel/server.js";
 import { EState } from '../../../common/general.js';
 
@@ -31,6 +31,11 @@ class Game
 	 */
 	private _rightMove: number;
 
+	/** Таймер самоуничтожения */
+	private _selfDestructionTimer: NodeJS.Timeout | undefined;
+
+	static readonly NUMBER_OF_PLAYERS = 2;
+
 
 	constructor( client1: Client, client2: Client )
 	{
@@ -42,9 +47,6 @@ class Game
 		];
 		this._readyPlayers 	= 0;
 		this._rightMove 	= -1;
-
-		client1.initGame( this._players[ 0 ] );
-		client2.initGame( this._players[ 1 ] );
 
 		clientList.forEach(
 			( client: Client ) =>
@@ -99,7 +101,7 @@ class Game
 			&& this._players[ this._rightMove ] === currPlayer
 		)
 		{
-			this._rightMove = ( this._rightMove + 1 ) % 2;
+			this._rightMove = ( this._rightMove + 1 ) % Game.NUMBER_OF_PLAYERS;
 		}
 	}
 
@@ -165,18 +167,96 @@ class Game
 
 	private _toMatch(): void
 	{
-		this._players.forEach( player => player.initMatch() );
-
 		this._rightMove = Math.round( Math.random() );
 		this._readyPlayers = 0;
 
-		this._players.forEach(
-			player => player.socket?.emit(
-				'changeState',
-				player.createStateObject()
-			)
+		this._players.forEach( player => player.initState( EState.Match ) );
+	}
+
+
+	toCelebration( instigator: Player, elemNumber?: number ): void
+	{
+		const instigatorIndex: number = this._players.indexOf( instigator );
+
+		if ( instigatorIndex < 0 )
+			return;
+		
+		const bIsWinner: boolean = elemNumber === undefined
+			? false
+			: this.getOpponent( instigator ).elemGuessing( elemNumber );
+
+		this._rightMove = bIsWinner
+							? instigatorIndex
+							: ( instigatorIndex + 1 ) % Game.NUMBER_OF_PLAYERS;
+
+		this._players.forEach( player => player.initState( EState.Celebration ) );
+
+		const loserIndex: number = ( this._rightMove + 1 ) % Game.NUMBER_OF_PLAYERS;
+		log(
+			'MATCH RESULT',
+			`\n===================\
+			\nWinner: ${ this._players[ this._rightMove ].name }\
+			\nElement: ${ this._players[ this._rightMove ].element }\
+			\n\
+			\nOpponent: ${ this._players[ loserIndex ].name }\
+			\nElement: ${ this._players[ loserIndex ].element }\
+			\n===================`,
+		);
+
+
+		setTimeout(
+			( player: Player ) => player.destroy(),
+			gameConfig.celebrationWaiting,
+			this._players[ loserIndex ]
 		);
 	}
+
+
+	/**
+	 * Закончить игру
+	 * 
+	 * Уничтожает данные игры и переводит клиентов в состояние Online.
+	 */
+	destroy(): void
+	{
+		// Можно вызвать только один раз
+		this.destroy = () => {};
+		this.delayedSelfDestruction = () => {};
+		// Если есть работающий таймер, то его необходимо остановить
+		this.preventSelfDestruction();
+
+		// Оборвать все связи между объектами,
+		// чтобы игру и 2х игроков мог подобрать мусорщик
+		this._players.forEach( ( player ) => player.destroy() );
+		this._players = [];
+	}
+
+	/**
+	 * Установить таймер самоуничтожения
+	 */
+	delayedSelfDestruction(): void
+	{
+		this.preventSelfDestruction();
+
+		this._selfDestructionTimer = setTimeout(
+			( game: Game ) => game.destroy(),
+			gameConfig.gameDestructionWaiting,
+			this
+		);
+	}
+
+	/**
+	 * Остановить таймер самоуничтожения, если тот был заведен
+	 */
+	preventSelfDestruction(): void
+	{
+		if ( this._selfDestructionTimer )
+		{
+			clearTimeout( this._selfDestructionTimer );
+			this._selfDestructionTimer = undefined;
+		}
+	}
+
 } // ---------------------------------------------
 
 export default Game;

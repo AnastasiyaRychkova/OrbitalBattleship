@@ -5,7 +5,6 @@ import {
 	EState,
 	ETeam,
 } from '../../../common/general.js';
-import { clientList } from '../../kernel/connection.js';
 import log from '../../kernel/log.js';
 
 import type { Socket } from 'socket.io';
@@ -49,7 +48,9 @@ class Client implements IUser
 		this._socket 	= socket;
 		this._name 		= name;
 		this._inviters	= new WeakSet<Client>();
-		this._player		= undefined;
+		this._player	= undefined;
+
+		this.updateClient();
 	}
 
 	get name(): string
@@ -116,10 +117,16 @@ class Client implements IUser
 		this._player = player;
 		this._inviters = new WeakSet<Client>();
 
-		this._socket?.emit(
-			'changeState',
-			player.createStateObject(),
-		);
+		this.updateClient();
+	}
+
+	updateClient(): void
+	{
+		if ( this.bIsOnline )
+			this._socket?.emit(
+				'changeState',
+				this.createStateObject()
+			);
 	}
 
 	/**
@@ -266,6 +273,13 @@ class Client implements IUser
 			// Отправителю сообщить, что приглашение отправлено
 			callback( true );
 		}
+	}
+
+	finishMatch(): void
+	{
+		this._player = undefined;
+
+		this.updateClient();
 	}
 }
 

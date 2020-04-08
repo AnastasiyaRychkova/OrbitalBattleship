@@ -6,16 +6,18 @@ import type {
 } from 'socket.io';
 import type { RegistrationMessage } from '../game/messages.js';
 
-type ClientType = {
+
+type ClientInstance = {
 	readonly bIsOnline: boolean;
-
-	new ( socket: Socket, name: string ): unknown;
-
 	onReconnection( newSocket: Socket, data: RegistrationMessage ): void;
-}
+};
+
+type ClientStatic = {
+	new ( socket: Socket, name: string ): ClientInstance;
+};
 
 
-function listenOn( server: Server, Client: ClientType, clientList: Map<string, unknown> ): void
+function listenOn( server: Server, Client: ClientStatic, clientList: Map<string, ClientInstance> ): void
 {
 	server.on(
 		'connection',
@@ -39,7 +41,7 @@ function listenOn( server: Server, Client: ClientType, clientList: Map<string, u
 				'registration',
 				( data: RegistrationMessage, callback: ( bIsBusy: boolean ) => void ) =>
 				{
-					const client: ClientType | undefined = clientList.get( data.name ) as ClientType;
+					const client: ClientInstance | undefined = clientList.get( data.name );
 
 					if( client && client.bIsOnline )
 					{

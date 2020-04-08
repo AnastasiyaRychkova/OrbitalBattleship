@@ -24,7 +24,7 @@ from '../messages.js';
 class Player implements IUser
 {
 	/** Основная информация об игроке */
-	private _client: Client;
+	private _client: Client | undefined;
 
 	/** Основная информация об игроке */
 	private _game: Game;
@@ -58,32 +58,45 @@ class Player implements IUser
 		this._diagramCheck = false;
 		this._shots 	= undefined;
 
-		client.socket?.emit(
-			'changeState',
-			this.createStateObject(),
-		);
+		this._client.initGame( this );
+
+		this.updateClient();
 
 		//TODO: Bind game events
 	}
 
 	get name(): string
 	{
-		return this._client.name;
+		return this._client ? this.name : "Unknown";
 	}
 
 	get bIsOnline(): boolean
 	{
-		return this._client.bIsOnline;
+		return this._client ? this._client.bIsOnline : false;
 	}
 
 	get socket(): Socket | undefined
 	{
-		return this._client.socket;
+		return this._client ? this._client.socket : undefined;
 	}
 
 	get state(): EState
 	{
 		return this._state;
+	}
+
+	elemGuessing( elemNumber: number ): boolean
+	{
+		return this._element === undefined
+					? false
+					: this._element.number === elemNumber;
+	}
+
+	get element(): string
+	{
+		return this._element === undefined
+					? ''
+					: `${ this._element.symbol } [${ this._element.number }] (${ this._element.name })`;
 	}
 
 
@@ -148,10 +161,27 @@ class Player implements IUser
 		//TODO: Повесить слушателей на игровые события
 	}
 
-	initMatch(): void
+	/**
+	 * Перейти в новое состояние игры и синхронизировать клиента
+	 * 
+	 * @param state Новое состояние игры
+	 */
+	initState( state: EState ): void
 	{
-		this._state = EState.Match;
-		this._shots = new ElemConfig();
+		this._state = state;
+		if ( state === EState.Match )
+			this._shots = new ElemConfig();
+		this.updateClient();
+	}
+
+	
+	updateClient(): void
+	{
+		if ( this.bIsOnline )
+			this._client!.socket?.emit(
+				'changeState',
+				this.createStateObject()
+			);
 	}
 
 
@@ -173,7 +203,10 @@ class Player implements IUser
 		{
 			log(
 				'Cheater',
-				`Event instigator does not have appropriate rights ( 'name': ${ this._client.name }, 'state': ${ this._state } )`,
+				`Event instigator does not have appropriate rights (\
+				\n  'name': ${ this.name },\
+				\n  'state': ${ this._state }\
+				\n)`,
 				'onElemSelection'
 			);
 			return;
@@ -183,10 +216,11 @@ class Player implements IUser
 		{
 			log(
 				'Cheater',
-				`Player has chosen the element yet ( 
-					'name': ${ this._client.name }, 
-					'player element': ${ this._element.symbol }[${ this._element.number }], 
-					'request': ${ elemNumber } )`,
+				`Player has chosen the element yet (\
+				\n  'name': ${ this.name },\
+				\n  'player element': ${ this._element.symbol }[${ this._element.number }],\
+				\n  'request': ${ elemNumber }\
+				\n)`,
 				'onElemSelection'
 			);
 			return;
@@ -196,9 +230,10 @@ class Player implements IUser
 		{
 			log(
 				'Error',
-				`Player selected the invalid element ( 
-					'name': ${ this._client.name }, 
-					'number': ${ elemNumber } )`,
+				`Player selected the invalid element (\
+				\n  'name': ${ this.name },\
+				\n  'number': ${ elemNumber }\
+				\n)`,
 				'onElemSelection'
 			);
 			return;
@@ -207,21 +242,18 @@ class Player implements IUser
 		this._element = periodicTable[ elemNumber - 1 ];
 
 		log(
-			this._client.name,
-			`Element was selected: 
-				Number: ${ this._element.number }, 
-				Name:   ${ this._element.name }, 
-				Symbol: ${ this._element.symbol }, 
-				Config: ${ this._element.config }`,
+			this.name,
+			`Element was selected:\
+			\n  Number: ${ this._element.number },\
+			\n  Name:   ${ this._element.name },\
+			\n  Symbol: ${ this._element.symbol },\
+			\n  Config: ${ this._element.config }`,
 			'ElementSelection'
 		);
 
 		this._state = EState.Preparing;
 
-		this._client.socket?.emit(
-			'changeState',
-			this.createStateObject(),
-		);
+		this.updateClient();
 
 		this._diagram = new ElemConfig();
 
@@ -244,7 +276,10 @@ class Player implements IUser
 		{
 			log(
 				'Cheater',
-				`Event instigator does not have appropriate rights ( 'name': ${ this._client.name }, 'state': ${ this._state } )`,
+				`Event instigator does not have appropriate rights (\
+				\n  'name': ${ this.name },\
+				\n  'state': ${ this._state }\
+				\n)`,
 				'onCheckConfig'
 			);
 			callback( false );
@@ -271,23 +306,23 @@ class Player implements IUser
 		{ // правильно
 			const ready: number = this._game.registerReadiness();
 			log(
-				this._client.name,
-				`Checking filling the diagram. 
-					Result: true, 
-					Ready players: ${ ready },
-					D: ${ this._diagram!.toArray() } `,
+				this.name,
+				`Checking filling the diagram.\
+				\n  Result: true,\
+				\n  Ready players: ${ ready },\
+				\n  D: ${ this._diagram!.toArray() }`,
 				'onCheckConfig'
 			);
 			this._diagramCheck = true;
 			callback( true );
 
-			if ( !this._game.getOpponent( this )._client.bIsOnline )
+			if ( !this._game.getOpponent( this ).bIsOnline )
 			{
-				this._client.socket?.emit( 'opDisconnection ' );
+				this._client!.socket?.emit( 'opDisconnection ' );
 				return;
 			}
 
-			if ( ready === 2 )
+			if ( ready === Game.NUMBER_OF_PLAYERS )
 				setTimeout(
 					this._game.toMatch.bind( this._game ),
 					gameConfig.checkResultWaiting
@@ -297,11 +332,11 @@ class Player implements IUser
 		else // неправильно
 		{
 			log(
-				this._client.name,
-				`Checking filling the diagram. 
-					Result: false, 
-					D: ${ this._diagram!.toArray() } 
-					E: ${ this._element?.config.toArray() }`,
+				this.name,
+				`Checking filling the diagram.\
+				\n  Result: false,\
+				\n  D: ${ this._diagram!.toArray() }\
+				\n  E: ${ this._element?.config.toArray() }`,
 				'onCheckConfig'
 			);
 			callback( false );
@@ -329,13 +364,14 @@ class Player implements IUser
 		{
 			log(
 				'Cheater',
-				`Event instigator is in an invalid state ( 
-					'name': ${ this.name }, 
-					'state': ${ this._state }
-				)`,
+				`Event instigator is in an invalid state (\
+				\n  'name': ${ this.name },\
+				\n  'state': ${ this._state }\
+				\n)`,
 				'onShot'
 			);
 			callback( false );
+			this.updateClient();
 			return;
 		}
 
@@ -344,12 +380,13 @@ class Player implements IUser
 		{
 			log(
 				'Cheater',
-				`Event instigator does not have the right move (
-					'name': ${ this.name }
-				)`,
+				`Event instigator does not have the right move (\
+				\n  'name': ${ this.name }\
+				\n)`,
 				'onShot'
 			);
 			callback( false );
+			this.updateClient();
 			return;
 		}
 
@@ -359,22 +396,21 @@ class Player implements IUser
 		{
 			log(
 				'Cheater',
-				`Invalid value of spin number (
-					'name': ${ this.name },
-					'spin': ${ spin }
-				)`,
-				'onShot' );
+				`Invalid value of spin number (\
+				\n  'name': ${ this.name },\
+				\n  'spin': ${ spin }\
+				\n)`,
+				'onShot'
+			);
 			callback( false );
+			this.updateClient();
 			return;
 		}
 
 		if ( this._shots?.hasSpin( spin ) )
 		{
 			callback( false );
-			this.socket?.emit(
-				'changeState',
-				this.createStateObject()
-			)
+			this.updateClient();
 			return;
 		}
 
@@ -410,6 +446,121 @@ class Player implements IUser
 		
 		return this._element!.config.hasSpin( spin );
 	}
+
+
+	onNameElement( elemNumber: number ): void
+	{
+		if ( this._state !== EState.Match )
+		{
+			log(
+				'Cheater',
+				`Event instigator is in an invalid state (\
+				\n  'name': ${ this.name },\
+				\n  'state': ${ this._state }\
+				\n)`,
+				'onNameElement'
+			);
+			this.updateClient();
+			return;
+		}
+
+		// Имеет ли игрок право хода
+		if ( this._game.hasRightMove( this ) )
+		{
+			log(
+				'Cheater',
+				`Event instigator does not have the right move (\
+				\n  'name': ${ this.name }\
+				\n)`,
+				'onNameElement'
+			);
+			this.updateClient();
+			return;
+		}
+
+		/* Проверить вхождение переданного значения номера спина 
+		в допустимый диапазон */
+		if ( elemNumber < 1 || elemNumber > 118 )
+		{
+			log(
+				'Cheater',
+				`Invalid value of element number (\
+				\n  'name': ${ this.name },\
+				\n  'number': ${ elemNumber }\
+				\n)`,
+				'onNameElement'
+			);
+			this.updateClient();
+			return;
+		}
+
+		log(
+			this.name,
+			`Wants to name element >> ${ elemNumber }`,
+			'onNameElement'
+		);
+
+		this._game.toCelebration( this, elemNumber );
+	}
+
+
+	/**
+	 * Событие окончания игры.
+	 * 
+	 * Может быть вызвано только победителем
+	 * только в самом конце матча (EState.Celebration)
+	 */
+	onEndGame(): void
+	{
+		if ( this._state !== EState.Celebration )
+		{
+			log(
+				'Cheater',
+				`Event instigator is in an invalid state (\
+				\n  'name': ${ this.name },\
+				\n  'state': ${ this._state }\
+				\n)`,
+				'onEndGame'
+			);
+			this.updateClient();
+			return;
+		}
+
+		// Является ли игрок победителем
+		if ( this._game.hasRightMove( this ) )
+		{
+			log(
+				'Cheater',
+				`Event instigator is not a winner (\
+				\n  'name': ${ this.name }\
+				\n)`,
+				'onEndGame'
+			);
+			this.updateClient();
+			return;
+		}
+
+		log(
+			this.name,
+			'Winner confirmed the end of the game',
+			'onEndGame'
+		);
+
+
+	}
+
+
+	destroy(): void
+	{
+		this.destroy = () => {};
+		if ( this._client )
+		{
+			this._client.finishMatch();
+			this._client = undefined;
+		}
+		this._game = null as unknown as Player[ '_game' ];
+	}
+
 }
 
 export default Player;

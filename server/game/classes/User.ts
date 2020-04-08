@@ -8,6 +8,7 @@ interface IUser
 	readonly socket: Socket | undefined;
 	bindEvents(): void;
 	createStateObject(): UpdateStateMessage;
+	updateClient(): void;
 }
 
 export default IUser;

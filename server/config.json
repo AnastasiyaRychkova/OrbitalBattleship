@@ -1,5 +1,6 @@
 {
 	"port": 8081,
 	"checkResultWaiting": 5000,
-	"celebrationWaiting": 120000
+	"celebrationWaiting": 120000,
+	"gameDestructionWaiting": 300000
 }
