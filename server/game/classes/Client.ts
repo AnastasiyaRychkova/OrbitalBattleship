@@ -9,7 +9,6 @@ import log from '../../kernel/log.js';
 
 import type { Socket } from 'socket.io';
 import type {
-	RegistrationMessage,
 	UpdateStateMessage,
 	ClientInfoRow,
 	RefreshListMessage,
@@ -144,15 +143,29 @@ class Client implements IUser
 
 
 	/**
-	 * Восстановить состояние клиента на основе данных, хранящихся на сервере
+	 * Переподключение клиента.
+	 * 
+	 * 1. Останавливается таймер самоуничтожения игры, если был заведен.
+	 * 2. Противник получает уведомление о восстановлении связи, если он онлайн.
+	 * 3. Заново вешаются слушатели на новый сокет.
+	 * 4. Клиент синхронизируется.
+	 * 
 	 * @param newSocket Новая сессия
-	 * @param data Данные, пришедшие от клиента
 	 */
-	onReconnection( newSocket: Socket, data: RegistrationMessage ): void
+	onReconnection( newSocket: Socket ): void
 	{
 		this._socket = newSocket;
 
-		/*TODO: Восстановление состояния клиента и оповещение соперника */
+		this._player && this._player.onReconnection();
+
+		this.bindEvents();
+		this.updateClient();
+	}
+
+
+	onDisconnection(): void
+	{
+		// TODO: Отключение игрока
 	}
 
 	/**
@@ -213,6 +226,16 @@ class Client implements IUser
 		callback( list );
 	}
 
+	/**
+	 * Пригласить клиента совместную на игру.
+	 * 
+	 * Если оба клиента выразили обоюдное желание сыграть друг с другом,
+	 * начнется игра для этой пары клиентов.
+	 * Остальные неиграющие игроки получат команду на удаление из списка потенциальных игроков ушедших играть клиентов.
+	 * 
+	 * @param name Имя игрока, которого данный клиент хочет пригласить
+	 * @param callback Функция, которая будет вызвана на клиенте. Принимает булево значение, было ли отправлено приглашение
+	 */
 	onInvite( name: string, callback: ( bIsItSent: boolean ) => void )
 	{
 		// Приглашение отправлено клиентом, который имеет неоконченную игру
@@ -223,7 +246,8 @@ class Client implements IUser
 				'Can not send invitation because the client has an unfinished game',
 				'onInvite',
 			);
-			// TODO: добавить отправку команды Update State
+			callback( false );
+			this.updateClient();
 			return;
 		}
 
@@ -249,7 +273,7 @@ class Client implements IUser
 		// Если оба игрока пригласили друг друга, то можно начинать игру
 		if ( client._inviters.has( this ) )
 		{
-			const game = new Game( this, client );
+			new Game( this, client );
 		}
 		else // если второй игрок еще не приглашал текущего
 		{
@@ -275,11 +299,49 @@ class Client implements IUser
 		}
 	}
 
+	/**
+	 * Закончить матч.
+	 * 
+	 * Обнуляется ссылка на игрока, и отсылается сообщение клиенту
+	 * о переходе в состояние Online.
+	 */
 	finishMatch(): void
 	{
 		this._player = undefined;
 
 		this.updateClient();
+	}
+
+
+	onDisconnect(): void
+	{
+		this._socket = undefined;
+		if ( this._player )
+			this._player.onDisconnect();
+		else
+		{
+			const message: RefreshListMessage = {
+				action: 'remove',
+				data: [
+					{
+						name: this.name,
+						bIsInvited: false,
+						bIsInviting: false,
+					}
+				],
+			}
+
+			// Отправить всем неиграющим клиентам команду на удаление клиента
+			clientList.forEach(
+				( client ) => {
+					if ( client.bIsOnline && !client.bHasUnfinishedGame )
+						client.socket?.emit(
+							'refreshResults',
+							message,
+						)
+				}
+			);
+		}
 	}
 }
 

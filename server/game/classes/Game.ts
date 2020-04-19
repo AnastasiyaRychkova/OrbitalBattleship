@@ -1,7 +1,6 @@
 import gameConfig from "../../config.json";
 import { default as Client, clientList } from './Client.js';
 import Player from './Player.js';
-import { io } from "../../kernel/server.js";
 import { EState } from '../../../common/general.js';
 
 import {
@@ -72,9 +71,15 @@ class Game
 			],
 		}
 
-		io.emit(
-			'refreshResults',
-			message,
+		// Отправить всем неиграющим клиентам команду на удаление 2х клиентов
+		clientList.forEach(
+			( client ) => {
+				if ( client.bIsOnline && !client.bHasUnfinishedGame )
+					client.socket?.emit(
+						'refreshResults',
+						message,
+					)
+			}
 		);
 	}
 
@@ -173,7 +178,18 @@ class Game
 		this._players.forEach( player => player.initState( EState.Match ) );
 	}
 
-
+	/**
+	 * Завершить матч, после того, как один из игроков решил назвать
+	 * загаданный противником химический элемент.
+	 * 
+	 * Если `elemNumber` не был передан, то это расценивается
+	 * как желание игрока сдаться.
+	 * В таком случае победа автоматически достается противнику.
+	 * Победитель будет обладать правом хода, т.е. правом закончить игру.
+	 * 
+	 * @param instigator Инициатор завершения матча
+	 * @param elemNumber Предполагаемый номер загаданного оппонентом элемента
+	 */
 	toCelebration( instigator: Player, elemNumber?: number ): void
 	{
 		const instigatorIndex: number = this._players.indexOf( instigator );
@@ -203,7 +219,8 @@ class Game
 			\n===================`,
 		);
 
-
+		/* Отпустить проигравшего через заданный временной промежуток,
+		если этого раньше не сделает соперник-победитель */
 		setTimeout(
 			( player: Player ) => player.destroy(),
 			gameConfig.celebrationWaiting,

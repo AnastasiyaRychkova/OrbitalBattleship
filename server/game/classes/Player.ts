@@ -61,8 +61,6 @@ class Player implements IUser
 		this._client.initGame( this );
 
 		this.updateClient();
-
-		//TODO: Bind game events
 	}
 
 	get name(): string
@@ -148,18 +146,6 @@ class Player implements IUser
 		}
 	}
 
-	/**
-	 * Повесить слушателей на игровые события
-	 * 
-	 * Вызывается при создании объекта _игры_
-	 * и при повторном подключении клиента после разрыва соединения,
-	 * т.е. на событие connection, когда раннее было событие disconnection
-	 */
-	bindEvents(): void
-	{
-		console.log( "bindGameEvents" );
-		//TODO: Повесить слушателей на игровые события
-	}
 
 	/**
 	 * Перейти в новое состояние игры и синхронизировать клиента
@@ -174,7 +160,6 @@ class Player implements IUser
 		this.updateClient();
 	}
 
-	
 	updateClient(): void
 	{
 		if ( this.bIsOnline )
@@ -182,6 +167,22 @@ class Player implements IUser
 				'changeState',
 				this.createStateObject()
 			);
+	}
+
+
+	onReconnection(): void
+	{
+		this._game.preventSelfDestruction();
+		const opponent: Player = this._game.getOpponent( this );
+
+		if ( opponent.bIsOnline )
+			opponent.socket?.emit( 'opConnection' );
+	}
+
+
+	onDisconnect(): void
+	{
+		
 	}
 
 
@@ -407,6 +408,7 @@ class Player implements IUser
 			return;
 		}
 
+		// Делался ли выстрел по этому спину ранее
 		if ( this._shots?.hasSpin( spin ) )
 		{
 			callback( false );
@@ -447,7 +449,15 @@ class Player implements IUser
 		return this._element!.config.hasSpin( spin );
 	}
 
-
+	/**
+	 * Попытка игрока отгадать элемент, загаданный противником
+	 * 
+	 * Вне зависимости от того, отгадал игрок элемент или нет,
+	 * матч считается законченным, и оба игрока отправляются в состояние Celebration
+	 * для объявления итогов.
+	 * 
+	 * @param elemNumber Номер названного элемента
+	 */
 	onNameElement( elemNumber: number ): void
 	{
 		if ( this._state !== EState.Match )
@@ -546,21 +556,40 @@ class Player implements IUser
 			'onEndGame'
 		);
 
-
+		this._game.destroy();
 	}
 
-
+	/**
+	 * Окончить игру, оборвав связи между объектами, чтобы данный объект мог подобрать мусорщик.
+	 * 
+	 * Если игру завешает только один игрок, а второй остается,
+	 * то объект не будет уничтожен, потому что останется ссылка в объекте `_game`.
+	 */
 	destroy(): void
 	{
 		this.destroy = () => {};
 		if ( this._client )
 		{
-			this._client.finishMatch();
+			this._client.finishMatch(); // отправить клиентов в состояние Online
 			this._client = undefined;
 		}
 		this._game = null as unknown as Player[ '_game' ];
 	}
 
+	/**
+	 * Покинуть игру.
+	 * 
+	 * Если противник онлайн, значит игрок хочет сдаться,
+	 * в противном случае это означает, что игрок не хочет дожидаться подключения
+	 * противника, поэтому игра уничтожается, и игрок переходит состояние Online.
+	 */
+	onFlyAway(): void
+	{
+		if ( this._game.getOpponent( this ).bIsOnline )
+			this._game.toCelebration( this );
+		else
+			this._game.destroy();
+	}
 }
 
 export default Player;

@@ -5,11 +5,12 @@ import type {
 	Socket,
 } from 'socket.io';
 import type { RegistrationMessage } from '../game/messages.js';
+import EState from '../../common/EState.js';
 
 
 type ClientInstance = {
 	readonly bIsOnline: boolean;
-	onReconnection( newSocket: Socket, data: RegistrationMessage ): void;
+	onReconnection( newSocket: Socket ): void;
 };
 
 type ClientStatic = {
@@ -43,6 +44,7 @@ function listenOn( server: Server, Client: ClientStatic, clientList: Map<string,
 				{
 					const client: ClientInstance | undefined = clientList.get( data.name );
 
+					// Имя занято игроком, который сейчас online и прошел регистрацию
 					if( client && client.bIsOnline )
 					{
 						log(
@@ -52,11 +54,14 @@ function listenOn( server: Server, Client: ClientStatic, clientList: Map<string,
 						);
 
 						callback( false );
+						if ( data.state !== EState.Registration )
+							socket.disconnect( true );
 						return;
 					}
 
 					callback( true );
 					
+					// Сохранилась информация о клиенте с таким именем
 					if( client )
 					{
 						log(
@@ -65,9 +70,9 @@ function listenOn( server: Server, Client: ClientStatic, clientList: Map<string,
 							'Registration'
 						);
 
-						client.onReconnection( socket, data );
+						client.onReconnection( socket );
 					}
-					else
+					else // Подключился новый клиент
 					{
 						log(
 							socket.id,
