@@ -1,0 +1,123 @@
+html {
+	--violet: #493AF8;
+	--grey: #858585;
+	--disable: #c4c4c4;
+	--hoveredRow: #DAD8FF;
+	--background: #F3F2FA;
+	font-family: Open Sans;
+	font-size: 12px;
+}
+
+
+body {
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+	justify-content: center;
+	margin: 0 auto;
+	width: 550px;
+	height: 280px;
+	padding: 0;
+}
+
+h1 {
+	margin: 0;
+	padding: 0;
+	text-align: center;
+	text-transform: uppercase;
+	color: var(--grey);
+	font-size: 1.6em;
+	font-weight: 900;
+}
+
+#reason {
+	margin: 1em 0 1.6em;
+	width: 500px;
+	height: 8em;
+	padding: 0.5em 1em;
+	overflow: auto;
+	background-color: var(--background);
+	color: var(--grey);
+	font-size: 0.8em;
+}
+
+#reason::-webkit-scrollbar-track {
+	-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+	background-color: #F5F5F5;
+}
+
+#reason::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
+	background-color: var(--background);
+}
+
+#reason::-webkit-scrollbar-thumb {
+	background-color: var(--grey);
+}
+
+#question {
+	margin: 0 0 1.2em;
+	text-transform: uppercase;
+	color: var(--violet);
+	font-weight: 500;
+}
+
+button {
+	display: block;
+	outline: none;
+	cursor: pointer;
+}
+
+.selection-buttons {
+	display: flex;
+	justify-content: center;
+}
+
+.select-btn {
+	box-sizing: border-box;
+	width: 11.4em;
+	height: 2.2em;
+	border: 2px solid var(--violet);
+	transition: letter-spacing .4s;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	font-family: Open Sans;
+	font-weight: 500;
+}
+
+.send-report-btn {
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+	margin-right: 4em;
+}
+
+#send-btn {
+	margin: 0 0 0.25em;
+	background-color: var(--violet);
+	color: white;
+}
+
+.select-btn:hover {
+	letter-spacing: 0.07em;
+}
+
+#close-btn {
+	background-color: white;
+	color: var(--violet);
+}
+
+#open-report-btn {
+	padding: 0;
+	border: none;
+	border-bottom: 1px solid var(--grey);
+	background: none;
+	color: var(--grey);
+	font-size: 0.9em;
+}
+
+#open-report-btn:hover {
+	border-bottom-color: #2e2e2e;
+	color: #2e2e2e;
+}

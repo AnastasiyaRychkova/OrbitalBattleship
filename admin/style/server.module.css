@@ -1,0 +1,208 @@
+#server
+{
+	flex: 1 1 40%;
+}
+
+#server .header
+{
+	align-items: center;
+	flex-direction: row-reverse;
+	justify-content: space-between;
+	border-bottom: 1px solid var(--b-g3);
+}
+
+.ipv4-address
+{
+	display: flex;
+	align-items: center;
+	flex: 1 1 auto;
+	justify-content: flex-end;
+	margin-right: 18%;
+	margin-left: -1.2em;
+	max-width: 16em;
+	padding-right: 1em;
+	border-top-right-radius: 1.1em;
+	border-bottom-right-radius: 1.1em;
+	background-color: var(--substrate);
+	line-height: 2.2em;
+	letter-spacing: 0.06em;
+	font-size: 1.1em;
+	font-weight: bold;
+}
+
+.address-logo
+{
+	margin-right: 0.6em;
+	width: 1.5em;
+	height: 1.5em;
+	background-image: url('../img/ip2.png');
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+
+
+#server .list-header
+{
+	margin-right: calc(13px + 1.1em);
+}
+
+#server .list-header > .name
+{
+	margin-left: 1.05em;
+}
+
+.list-header > .state
+{
+	margin: 0 0.85em;
+	width: 3em;
+	text-align: center;
+}
+
+.game-list
+{
+	height: calc(100vh - 12.4em);
+	padding: 0;
+	overflow-y: scroll;
+	list-style: none;
+}
+
+.game
+{
+	margin: 8px 0;
+	margin-right: 6px;
+	padding: 0.75em 0.5em;
+	border: 1.5px solid transparent;
+	background-color: var(--b-g3);
+}
+
+.game:hover
+{
+	border: 1.5px solid var(--selection);
+}
+
+.list-header,
+.player
+{
+	display: flex;
+	justify-content: flex-end;
+}
+
+.player
+{
+	align-items: center;
+	height: 2em;
+	padding: 0.4em 0.4em;
+/* 	border: 1.5px solid transparent; */
+	cursor: pointer;
+}
+
+.player:hover
+{
+	background-color: var(--selection);
+/* 	border: 1.5px solid var(--blue); */
+	color: var(--blue);
+}
+
+.player[data-rm="true"]:first-child
+{
+	border-left: 3px solid var(--blue);
+}
+
+.player[data-rm="true"]:last-child
+{
+	border-left: 3px solid var(--red);
+}
+
+.player[data-disable="true"]
+{
+	cursor: default;
+	color: var(--disable);
+}
+
+.player[data-disable="true"]:hover
+{
+	background-color: var(--b-g3);
+}
+
+.player[data-offline="true"]
+{
+	color: var(--disable);
+}
+
+.player[data-offline="true"] .name::after
+{
+	margin-left: 1em;
+	color: var(--red);
+	content: "Offline";
+}
+
+.player > div
+{
+	flex-shrink: 1;
+}
+
+.player:first-child
+{
+	margin-bottom: 0.5em;
+}
+
+.name
+{
+	flex-grow: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.state
+{
+	background-image: url('../img/game-state.png');
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+.player > .state
+{
+	margin: 0 1em;
+	width: 2em;
+	height: 2em;
+}
+
+.player > .element
+{
+	width: 3.5em;
+	text-transform: capitalize;
+	font-size: 1.2em;
+}
+
+.player > .element > sub
+{
+	font-size: 0.7em;
+}
+
+.element
+{
+	width: 5em;
+	text-align: center;
+}
+
+.state.match
+{
+	background-position-x: 66%;
+}
+
+.state.preparing
+{
+	background-position-x: 33%;
+}
+
+.state.celebration
+{
+	background-position-x: 100%;
+}
+
+.state.void
+{
+	background-image: none;
+}

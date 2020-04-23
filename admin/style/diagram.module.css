@@ -1,0 +1,766 @@
+#diagram
+{
+	display: flex;
+	position: absolute;
+	top: calc(4.8em + 1px);
+	left: 0;
+	flex-direction: column;
+	z-index: 100;
+	width: 100vw;
+	height: calc(100% - 4.6em - 1px);
+	background-color: var(--b-g4);
+}
+
+#diagram[data-close="true"]
+{
+	display: none;
+}
+
+.player-info
+{
+	display: flex;
+	position: relative;
+	align-items: center;
+	height: 3.8em;
+	padding: 0 3.8em;
+	border-bottom: 1px solid var(--selection);
+}
+
+.player-info-mini
+{
+	position: absolute;
+	top: 3.8em;
+	margin-left: -2em;
+	padding-left: 1.8em;
+	border-left: 3px solid var(--team-color);
+	list-style: none;
+}
+
+.player-info-mini > li
+{
+	display: flex;
+	align-items: center;
+	margin-bottom: 1em;
+	height: 2.2em;
+}
+
+.aggregate
+{
+	display: flex;
+	flex-grow: 1;
+	justify-content: flex-end;
+}
+
+#d-close
+{
+	right: 0;
+	width: 1.2em;
+	height: 1.2em;
+	padding: 0;
+	outline: none;
+	border: 2px solid var(--blue);
+	border-radius: 50%;
+	background-color: transparent;
+	cursor: pointer;
+	transition: color ease .3s, background-color ease .3s;
+	line-height: 1em;
+	color: var(--blue);
+	font-size: 1.6em;
+}
+
+#d-close:hover
+{
+	background-color: var(--blue);
+	color: white;
+}
+
+#d-close:active
+{
+	background-color: var(--blue-error);
+}
+
+.player-info > .state
+{
+	margin-right: 1.4em;
+	width: 2.4em;
+	height: 2.4em;
+}
+
+#diagram[data-team="Actinoids"]
+{
+	--team-color: var(--red);
+	--team-color-error: var(--red-error);
+	--op-color: var(--blue);
+}
+
+#diagram[data-team="Lanthanoids"]
+{
+	--team-color: var(--blue);
+	--team-color-error: var(--blue-error);
+	--op-color: var(--red);
+}
+
+#diagram-grid[data-match="true"] .on
+{
+	--arrow-fill: var(--team-color);
+	--arrow-stroke: var(--team-color);
+}
+
+#diagram-grid[data-match="true"] .miss
+{
+	--arrow-fill: white;
+	--arrow-stroke: var(--op-color);
+}
+
+#diagram-grid[data-match="true"] .hit
+{
+	--arrow-fill: var(--op-color);
+	--arrow-stroke: var(--op-color);
+}
+
+
+#diagram-grid[data-match="false"] .on
+{
+	--arrow-fill: var(--team-color-error);
+	--arrow-stroke: var(--team-color-error);
+}
+
+#diagram-grid[data-match="false"] .miss
+{
+	--arrow-fill: white;
+	--arrow-stroke: var(--team-color);
+}
+
+#diagram-grid[data-match="false"] .hit
+{
+	--arrow-fill: var(--team-color);
+	--arrow-stroke: var(--team-color);
+}
+
+.team
+{
+	margin-left: 1.4em;
+	width: 0.8em;
+	height: 0.8em;
+	border-radius: 50%;
+	background-color: var(--team-color);
+}
+
+.info-icon
+{
+	--icon-activation: var(--selection);
+	margin-right: 1.4em;
+	width: 2.2em;
+	height: 2.2em;
+}
+
+.info-icon[data-active="true"]
+{
+	--icon-activation: var(--bold);
+}
+
+.info-name
+{
+	visibility: hidden;
+	opacity: 0;
+	transition: all .3s;
+}
+
+.info-icon:hover + .info-name
+{
+	visibility: visible;
+	opacity: 1;
+}
+
+#element
+{
+	margin-left: -0.8em;
+	width: 3em;
+	height: inherit;
+	text-align: center;
+	text-transform: capitalize;
+	font-size: 1.4em;
+}
+
+#element > sub
+{
+	font-size: 0.6em;
+}
+
+
+
+.cell
+{
+	position: relative;
+	height: 0;
+	padding: 0;
+	padding-top: 90%;
+	border: 2px solid var(--b-g2);
+	border-left: none;
+	background-color: var(--b-g3);
+}
+
+.ship + .cell
+{
+	border-left: 2px solid var(--b-g2);
+}
+
+.ship
+{
+	padding-top: 0.2em;
+	line-height: calc(1em + 0.1vw);
+	color: var(--b-g2);
+	font-size: calc(1em + 0.1vw);
+}
+
+.cell > span
+{
+	position: absolute;
+	top: 0;
+	width: 100%;
+	text-align: center;
+}
+
+.cell > svg
+{
+	position: absolute;
+	top: 0;
+	width: 50%;
+}
+
+.cell > svg:last-child
+{
+	right: 0;
+	transform: rotate(180deg);
+}
+
+.diagram-field
+{
+	display: flex;
+	align-content: flex-start;
+	flex-grow: 1;
+	justify-content: center;
+	margin-right: 8px;
+	padding: 2em 3vw;
+}
+
+#diagram-grid
+{
+	
+	display: grid;
+	flex-grow: 1;
+	margin: 0 0 auto;
+	grid-template-columns: 2fr 1fr 2fr 2fr 2fr 1fr 2fr 2fr 2fr 2fr 2fr 1fr 2fr 2fr 2fr 2fr 2fr 2fr 2fr 1fr 2fr 2fr 2fr 2fr 2fr 2fr 2fr 1fr 2fr 2fr 2fr 2fr 2fr 1fr 2fr 2fr 2fr;
+	grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+
+
+#d0
+{
+	grid-column: 1;
+	grid-row: 15;
+}
+
+#d1s
+{
+	grid-column: 1;
+	grid-row: 16;
+}
+
+.col1
+{
+	grid-column: 2;
+	grid-row: 1/17;
+}
+
+.d2up
+{
+	grid-column: 3/6;
+	grid-row: 1/11;
+}
+
+#d4
+{
+	grid-column: 3;
+	grid-row: 11;
+}
+
+#d6
+{
+	grid-column: 4;
+	grid-row: 11;
+}
+
+#d8
+{
+	grid-column: 5;
+	grid-row: 11;
+}
+
+#d2p
+{
+	grid-column: 3;
+	grid-row: 12;
+}
+
+.d2pd
+{
+	grid-column: 4/6;
+	grid-row: 12;
+}
+
+.d2sl
+{
+	grid-column: 3;
+	grid-row: 13/15;
+}
+
+#d2
+{
+	grid-column: 4;
+	grid-row: 13;
+}
+
+#d2s
+{
+	grid-column: 4;
+	grid-row: 14;
+}
+
+.d2sr
+{
+	grid-column: 5;
+	grid-row: 13/15;
+}
+
+.d2down
+{
+	grid-column: 3/6;
+	grid-row: 15/17;
+}
+
+.col2
+{
+	grid-column: 6;
+	grid-row: 1/17;
+}
+
+#d20
+{
+	grid-column: 7;
+	grid-row: 7;
+}
+
+#d22
+{
+	grid-column: 8;
+	grid-row: 7;
+}
+
+#d24
+{
+	grid-column: 9;
+	grid-row: 7;
+}
+
+#d26
+{
+	grid-column: 10;
+	grid-row: 7;
+}
+
+#d28
+{
+	grid-column: 11;
+	grid-row: 7;
+}
+
+#d3d
+{
+	grid-column: 7;
+	grid-row: 8;
+}
+
+#d12
+{
+	grid-column: 8;
+	grid-row: 9;
+}
+
+#d14
+{
+	grid-column: 9;
+	grid-row: 9;
+}
+
+#d16
+{
+	grid-column: 10;
+	grid-row: 9;
+}
+
+#d3p
+{
+	grid-column: 8;
+	grid-row: 10;
+}
+
+#d10
+{
+	grid-column: 9;
+	grid-row: 11;
+}
+
+#d3s
+{
+	grid-column: 9;
+	grid-row: 12;
+}
+
+#d56
+{
+	grid-column: 13;
+	grid-row: 3;
+}
+
+#d58
+{
+	grid-column: 14;
+	grid-row: 3;
+}
+
+#d60
+{
+	grid-column: 15;
+	grid-row: 3;
+}
+
+#d62
+{
+	grid-column: 16;
+	grid-row: 3;
+}
+
+#d64
+{
+	grid-column: 17;
+	grid-row: 3;
+}
+
+#d66
+{
+	grid-column: 18;
+	grid-row: 3;
+}
+
+#d68
+{
+	grid-column: 19;
+	grid-row: 3;
+}
+
+#d4f
+{
+	grid-column: 13;
+	grid-row: 4;
+}
+
+#d38
+{
+	grid-column: 14;
+	grid-row: 5;
+}
+
+#d40
+{
+	grid-column: 15;
+	grid-row: 5;
+}
+
+#d42
+{
+	grid-column: 16;
+	grid-row: 5;
+}
+
+#d44
+{
+	grid-column: 17;
+	grid-row: 5;
+}
+
+#d46
+{
+	grid-column: 18;
+	grid-row: 5;
+}
+
+#d4d
+{
+	grid-column: 14;
+	grid-row: 6;
+}
+
+#d30
+{
+	grid-column: 15;
+	grid-row: 7;
+}
+
+#d32
+{
+	grid-column: 16;
+	grid-row: 7;
+}
+
+#d34
+{
+	grid-column: 17;
+	grid-row: 7;
+}
+
+#d4p
+{
+	grid-column: 15;
+	grid-row: 8;
+}
+
+#d18
+{
+	grid-column: 16;
+	grid-row: 9;
+}
+
+#d4s
+{
+	grid-column: 16;
+	grid-row: 10;
+}
+
+#d88
+{
+	grid-column: 21;
+	grid-row: 1;
+}
+
+#d90
+{
+	grid-column: 22;
+	grid-row: 1;
+}
+
+#d92
+{
+	grid-column: 23;
+	grid-row: 1;
+}
+
+#d94
+{
+	grid-column: 24;
+	grid-row: 1;
+}
+
+#d96
+{
+	grid-column: 25;
+	grid-row: 1;
+}
+
+#d98
+{
+	grid-column: 26;
+	grid-row: 1;
+}
+
+#d100
+{
+	grid-column: 27;
+	grid-row: 1;
+}
+
+#d5f
+{
+	grid-column: 21;
+	grid-row: 2;
+}
+
+#d70
+{
+	grid-column: 22;
+	grid-row: 3;
+}
+
+#d72
+{
+	grid-column: 23;
+	grid-row: 3;
+}
+
+#d74
+{
+	grid-column: 24;
+	grid-row: 3;
+}
+
+#d76
+{
+	grid-column: 25;
+	grid-row: 3;
+}
+
+#d78
+{
+	grid-column: 26;
+	grid-row: 3;
+}
+
+#d5d
+{
+	grid-column: 22;
+	grid-row: 4;
+}
+
+#d48
+{
+	grid-column: 23;
+	grid-row: 5;
+}
+
+#d50
+{
+	grid-column: 24;
+	grid-row: 5;
+}
+
+#d52
+{
+	grid-column: 25;
+	grid-row: 5;
+}
+
+#d5p
+{
+	grid-column: 23;
+	grid-row: 6;
+}
+
+#d36
+{
+	grid-column: 24;
+	grid-row: 7;
+}
+
+#d5s
+{
+	grid-column: 24;
+	grid-row: 8;
+}
+
+#d102
+{
+	grid-column: 29;
+	grid-row: 1;
+}
+
+#d104
+{
+	grid-column: 30;
+	grid-row: 1;
+}
+
+#d106
+{
+	grid-column: 31;
+	grid-row: 1;
+}
+
+#d108
+{
+	grid-column: 32;
+	grid-row: 1;
+}
+
+#d110
+{
+	grid-column: 33;
+	grid-row: 1;
+}
+
+#d6d
+{
+	grid-column: 29;
+	grid-row: 2;
+}
+
+#d80
+{
+	grid-column: 30;
+	grid-row: 3;
+}
+
+#d82
+{
+	grid-column: 31;
+	grid-row: 3;
+}
+
+#d84
+{
+	grid-column: 32;
+	grid-row: 3;
+}
+
+#d6p
+{
+	grid-column: 30;
+	grid-row: 4;
+}
+
+#d54
+{
+	grid-column: 31;
+	grid-row: 5;
+}
+
+#d6s
+{
+	grid-column: 31;
+	grid-row: 6;
+}
+
+#d112
+{
+	grid-column: 35;
+	grid-row: 1;
+}
+
+#d114
+{
+	grid-column: 36;
+	grid-row: 1;
+}
+
+#d116
+{
+	grid-column: 37;
+	grid-row: 1;
+}
+
+#d7p
+{
+	grid-column: 35;
+	grid-row: 2;
+}
+
+#d86
+{
+	grid-column: 36;
+	grid-row: 3;
+}
+
+#d7s
+{
+	grid-column: 36;
+	grid-row: 4;
+}

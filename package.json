@@ -2,22 +2,34 @@
   "name": "orbitalbattleshipserver",
   "version": "1.0.0",
   "description": "Server for VR multiplayer game",
+  "private": true,
   "main": "app.js",
   "dependencies": {
     "colors": "^1.4.0",
     "ip": "^1.1.5",
     "socket.io": "^2.3.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/ip": "^1.1.0",
+    "@types/node": "^13.9.5",
+    "@types/socket.io": "^2.1.4",
+    "typescript": "^3.8.3"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:server": "cd server && tsc",
+    "build:client": "cd sources/client && tsc",
+    "build": "npm run build:server && npm run build:client",
+    "watch:server": "npm run build:server -- --watch",
+    "watch:client": "npm run build:client -- --watch",
+    "start": "node build/index.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AnastasiyaRychkova/OrbitalBattleship.git"
   },
   "author": "Anastasia Rychkova",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/AnastasiyaRychkova/OrbitalBattleship/issues"
   },

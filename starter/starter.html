@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Orbital Battleship</title>
+	<link rel="stylesheet" href="style/style.css">
+</head>
+
+<body>
+	<svg version="1.1" id="Слой_2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="100" height="100" class="logo" viewBox="0 0 120 120" style="enable-background:new 0 0 120 120;" xml:space="preserve">
+		<polygon class="logo-arrow" points="53,107 53,101 35,101 35,43 29,43 41,24 57,49 65,49 41,12 17,49 29,49 29,107 " />
+		<polygon class="logo-arrow" points="80,108 104,71 92,71 92,13 68,13 68,19 86,19 86,77 92,77 80,96 " />
+	</svg>
+	<h1 class="visibility-hidden">Orbital battleship</h1>
+	<section class="server-address">
+		<h2>Server address</h2>
+		<div class="address-row">
+			<ul>
+				<li id="address-0">192</li>
+				<li>.</li>
+				<li id="address-1">168</li>
+				<li>.</li>
+				<li id="address-2">0</li>
+				<li>.</li>
+				<li id="address-3">173</li>
+				<li>:</li>
+			</ul>
+			<input type="number" min="1024" max="65535" id="port" value="8081">
+		</div>
+	</section>
+	<button type="button" class="main-action" id="start-server-btn">
+		<div class="play-btn"></div>
+		<svg viewbox="0 0 140 140" x="0px" y="0px" width="50" height="50" class="play-icon">
+			<polygon id="shape" points="50,40 100,70 100,70 50,100, 50,40" style="fill:white;">
+				<animate id="animate_to_stop" begin="indefinite" fill="freeze" attributeName="points" dur="500ms" to="45,45 95,45 95,95, 45,95 45,45" keySplines="
+					0.1 0.8 0.2 1; 
+					0.1 0.8 0.2 1; 
+					0.1 0.8 0.2 1; 
+					0.1 0.8 0.2 1; 
+					0.1 0.8 0.2 1; 
+					0.1 0.8 0.2 1" keyTimes="0;0.22;0.33;0.55;0.66;0.88;1" calcMode="spline" />
+
+				<animate id="animate_to_start" begin="indefinite" fill="freeze" attributeName="points" dur="500ms" to="50,40 100,70 100,70 50,100, 50,40" keySplines="
+					0.1 0.8 0.2 1; 
+					0.1 0.8 0.2 1; 
+					0.1 0.8 0.2 1; 
+					0.1 0.8 0.2 1; 
+					0.1 0.8 0.2 1; 
+					0.1 0.8 0.2 1" keyTimes="0;0.22;0.33;0.55;0.66;0.88;1" calcMode="spline" />
+			</polygon>
+		</svg>
+		<span id="btn-name">Start server</span>
+	</button>
+
+	<button type="button" class="admin-btn">
+		<svg class="icon-arrow before">
+			<use xlink:href="#arrow"></use>
+		</svg>
+		<span class="label">Admin</span>
+		<svg class="icon-arrow after">
+			<use xlink:href="#arrow"></use>
+		</svg>
+	</button>
+
+	<svg style="display: none;">
+		<defs>
+			<symbol id="arrow" viewBox="0 0 35 15">
+				<title>Arrow</title>
+				<path d="M27.172 5L25 2.828 27.828 0 34.9 7.071l-7.07 7.071L25 11.314 27.314 9H0V5h27.172z " />
+			</symbol>
+		</defs>
+	</svg>
+
+	<label class="logging">
+		<div class="toggle">
+			<input class="toggle-state" type="checkbox" name="check" value="check" />
+			<div class="toggle-inner">
+				<div class="indicator"></div>
+			</div>
+			<div class="active-bg"></div>
+		</div>
+		<div class="logging-text">Logging</div>
+	</label>
+</body>
+<script src="script/appearance.js"></script>
+</html>
