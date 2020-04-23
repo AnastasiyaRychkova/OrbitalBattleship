@@ -1,0 +1,165 @@
+#statistics
+{
+	position: relative;
+	flex: 1 1 60%;
+}
+
+#statistics .header
+{
+	align-items: center;
+	justify-content: flex-start;
+	height: 4.6em;
+	border-bottom: 1px solid var(--b-g1);
+}
+
+.client-counter
+{
+	display: flex;
+	margin-left: 3em;
+	padding: 0;
+	list-style: none;
+	color: var(--disable);
+	font-size: 1.2em;
+	font-weight: bold;
+}
+
+.client-counter li
+{
+	display: flex;
+	align-items: center;
+}
+
+.online-players
+{
+	margin-right: 2em;
+}
+
+.client-counter .logo
+{
+	margin-right: 0.5em;
+	width: 1.35em;
+	height: 1.4em;
+}
+
+.online-players .logo
+{
+	background-image: url(../img/client-counter.png);
+	background-size: cover;
+}
+
+.all-players .logo
+{
+	background-image: url(../img/client-counter.png);
+	background-position: right;
+	background-size: cover;
+}
+
+#statistics .list-header
+{
+	padding-right: calc(13px + 1.4em);
+	padding-left: calc(4px + 1.3em);
+}
+
+
+.client-list
+{
+	height: calc(100vh - 12.4em);
+	padding: 0;
+	list-style: none;
+	color: var(--p);
+	font-weight: 600;
+	counter-reset: li;
+}
+
+.client
+{
+	display: flex;
+	position: relative;
+	align-items: center;
+	justify-content: flex-end;
+	margin: 0.4em 0;
+	margin-right: 8px;
+	margin-left: 1.6em;
+	height: 2.2em;
+	padding: 0 1em;
+	border-left: 4px solid var(--blue);
+	background-color: var(--b-g4);
+}
+
+.client:hover
+{
+	background-color: var(--selection);
+}
+
+.client::before
+{
+	display: flex;
+	position: absolute;
+	top: 0;
+	left: -1.6em;
+	align-items: center;
+	height: 100%;
+	color: var(--disable);
+	font-size: 0.88em;
+	content: counter(li);
+	counter-increment: li;
+}
+
+.client:nth-child(-n+3)::before
+{
+	color: var(--bold);
+}
+
+.client:first-child
+{
+	margin-top: 8px;
+}
+
+#statistics .list-header > span
+{
+	width: 5.88em;
+	text-align: center;
+	line-height: 1.2em;
+}
+
+.client > span
+{
+	width: 5em;
+	text-align: center;
+}
+
+.client[data-offline="true"]
+{
+	border-left-color: transparent;
+}
+
+.dimension
+{
+	font-size: 0.8em;
+}
+
+.client > span:first-child,
+#statistics .list-header > span:first-child
+{
+	flex-grow: 1;
+	overflow: hidden;
+	text-align: left;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+#statistics .bg
+{
+	position: absolute;
+	top: 0;
+	z-index: -1;
+	width: 100%;
+	height: 100%;
+	background-color: var(--b-g3);
+}
+
+/* .client-list > li span,
+.client-list > li button
+{
+	
+} */

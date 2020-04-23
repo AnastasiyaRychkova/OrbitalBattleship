@@ -4,8 +4,709 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Orbital Battleship – Admin</title>
+	<link rel="stylesheet" href="style/style.global.css">
+	<link rel="stylesheet" href="style/diagram.module.css">
+	<link rel="stylesheet" href="style/server.module.css">
+	<link rel="stylesheet" href="style/statistics.module.css">
 </head>
 <body>
-	
+	<h1>Orbital Battleship</h1>
+	<section id="server">
+		<div class="header">
+			<h2>Server</h2>
+			<div class="ipv4-address">
+				<div class="address-logo"></div>
+				<span>192.168.0.0:8000</span>
+			</div>
+		</div>
+		<div class="main">
+			<div class="list-header">
+				<div class="name">Name</div>
+				<div class="state">Game state</div>
+				<div class="element">Element</div>
+			</div>
+			<ul class="game-list scroll">
+				<li class="game">
+					<div class="player">
+						<div class="name">Somebody name text string</div>
+						<div class="state pt"></div>
+						<div class="element"><sub>??</sub>??</div>
+					</div>
+					<div class="player">
+						<div class="name">Player1</div>
+						<div class="state preparing"></div>
+						<div class="element"><sub>17</sub>Cl</div>
+					</div>
+				</li>
+				<li class="game">
+					<div class="player" data-rm="true">
+						<div class="name">Player2</div>
+						<div class="state match"></div>
+						<div class="element"><sub>8</sub>O</div>
+					</div>
+					<div class="player" data-offline="true">
+						<div class="name">Player3</div>
+						<div class="state match"></div>
+						<div class="element"><sub>118</sub>Og</div>
+					</div>
+				</li>
+				<li class="game">
+					<div class="player" data-disable="true">
+						<div class="name">Player4</div>
+						<div class="state void"></div>
+						<div class="element"><sub>8</sub>O</div>
+					</div>
+					<div class="player" data-disable="false" data-rm="true" data-offline="false">
+						<div class="name">Somebody name text string2</div>
+						<div class="state celebration" ></div>
+						<div class="element"><sub>17</sub>Cl</div>
+					</div>
+				</li>
+			</ul>
+			<span style="display: none">No games</span>
+		</div>
+	</section>
+	<section id="statistics">
+		<div class="header">
+			<h2>Statistics</h2>
+			<ul class="client-counter">
+				<li class="online-players">
+					<div class="logo"></div>
+					<span>0</span>
+				</li>
+				<li class="all-players">
+					<div class="logo"></div>
+					<span>0</span>
+				</li>
+			</ul>
+		</div>
+		<div class="main">
+			<div class="list-header">
+				<span class="name">Name</span>
+				<span>Games</span>
+				<span>Victories</span>
+				<span>Total<br>time<br><span class="dimension">[min]</span></span>
+				<span>AVG<br><span class="dimension">[min]</span></span>
+			</div>
+			<ol class="client-list scroll">
+				<li class="client" data-offline="true">
+					<span>Player3</span>
+					<span>14</span>
+					<span>11</span>
+					<span>58</span>
+					<span>4</span>
+				</li>
+				<li class="client">
+					<span>Somebody name text string</span>
+					<span>14</span>
+					<span>11</span>
+					<span>58</span>
+					<span>4</span>
+				</li>
+				<li class="client">
+					<span>Player2</span>
+					<span>17</span>
+					<span>11</span>
+					<span>50</span>
+					<span>3</span>
+				</li>
+				<li class="client">
+					<span>Player4</span>
+					<span>18</span>
+					<span>11</span>
+					<span>69</span>
+					<span>4</span>
+				</li>
+				<li class="client">
+					<span>Somebody name text string1</span>
+					<span>15</span>
+					<span>10</span>
+					<span>71</span>
+					<span>5</span>
+				</li>
+				<li class="client">
+					<span>Somebody name text string2</span>
+					<span>14</span>
+					<span>9</span>
+					<span>64</span>
+					<span>5</span>
+				</li>
+			</ol>
+		</div>
+		<div class="bg"></div>
+	</section>
+	<section id="diagram" data-close="false" data-team="Lanthanoids">
+		<div class="player-info">
+			<div class="state pt"></div>
+			<h2>Player2</h2>
+			<div class="team"></div>
+			<ul class="player-info-mini">
+				<li>
+					<div class="info-icon">
+						<div id="element">
+							<sub>115</sub>Mc
+						</div>
+					</div>
+					<span class="info-name">Element</span>
+				</li>
+				<li>
+					<svg class="info-icon" id="d-check" data-active="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+						<path d="M100,20a80,80,0,1,0,80,80A80,80,0,0,0,100,20Zm0,144A64,64,0,1,1,151,61L91,122,57,82,45,92l45,52,69-70a64,64,0,0,1-59,89Z" style="fill: var(--icon-activation, #e5e8eb)"/>
+					</svg>
+					<span class="info-name">Checked</span>
+				</li>
+				<li>
+					<svg class="info-icon" id="rm" data-active="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+						<circle cx="100" cy="99" r="8" style="fill: var(--icon-activation, #e5e8eb)"/>
+						<path d="M180,92a80,80,0,0,0-72-72V5H93V20A80,80,0,0,0,21,92H6v15H21a80,80,0,0,0,72,72v15h15V179a80,80,0,0,0,72-72h14V92ZM143,72l-26,28,26,27,10-10-10-10h21a64,64,0,0,1-56,56V152H93v12a64,64,0,0,1-56-56H57L47,117l10,10L84,99,58,72,48,82,57,92H36A64,64,0,0,1,93,35V47h15V35a64,64,0,0,1,56,56H144l9-10Z" style="fill: var(--icon-activation, #e5e8eb)"/>
+					</svg>
+					<span class="info-name">Right move</span>
+				</li>
+			</ul>
+			<div class="aggregate">
+				<button type="button" id="d-close">×</button>
+			</div>
+		</div>
+		<div class="diagram-field scroll">
+			<div id="diagram-grid" data-match="false">
+				<!-- 1s -->
+				<div class="ship" id="d1s">1s</div>
+				<div class="cell" id="d0">
+					<svg class="off" id="a0" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a1" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+			
+				<!-- 2s -->
+				<div class="ship" id="d2s">2s</div>
+				<div class="cell" id="d2">
+					<svg class="off" id="a2" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a3" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+			
+				<!-- 2p -->
+				<div class="ship" id="d2p">2p</div>
+				<div class="cell" id="d4">
+					<svg class="off" id="a4" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a5" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d6">
+					<svg class="off" id="a6" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a7" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d8">
+					<svg class="off" id="a8" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a9" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+			
+				<!-- 3s -->
+				<div class="ship" id="d3s">3s</div>
+				<div class="cell" id="d10">
+					<svg class="off" id="a10" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a11" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+			
+				<!-- 3p -->
+				<div class="ship" id="d3p">3p</div>
+				<div class="cell" id="d12">
+					<svg class="off" id="a12" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a13" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d14">
+					<svg class="off" id="a14" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a15" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d16">
+					<svg class="off" id="a16" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a17" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+			
+				<!-- 4s -->
+				<div class="ship" id="d4s">4s</div>
+				<div class="cell" id="d18">
+					<svg class="off" id="a18" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a19" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+			
+				<!-- 3d -->
+				<div class="ship" id="d3d">3d</div>
+				<div class="cell" id="d20">
+					<svg class="off" id="a20" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a21" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d22">
+					<svg class="off" id="a22" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a23" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d24">
+					<svg class="off" id="a24" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a25" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d26">
+					<svg class="off" id="a26" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a27" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d28">
+					<svg class="off" id="a28" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a29" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+			
+				<!-- 4p -->
+				<div class="ship" id="d4p">4p</div>
+				<div class="cell" id="d30">
+					<svg class="off" id="a30" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a31" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d32">
+					<svg class="off" id="a32" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a33" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d34">
+					<svg class="off" id="a34" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a35" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+			
+				<!-- 5s -->
+				<div class="ship" id="d5s">5s</div>
+				<div class="cell" id="d36">
+					<svg class="off" id="a36" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a37" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+			
+				<!-- 4d -->
+				<div class="ship" id="d4d">4d</div>
+				<div class="cell" id="d38">
+					<svg class="off" id="a38" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="on" id="a39" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d40">
+					<svg class="miss" id="a40" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="hit" id="a41" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d42">
+					<svg class="on" id="a42" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a43" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d44">
+					<svg class="off" id="a44" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a45" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d46">
+					<svg class="off" id="a46" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a47" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+			
+				<!-- 5p -->
+				<div class="ship" id="d5p">5p</div>
+				<div class="cell" id="d48">
+					<svg class="off" id="a48" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a49" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d50">
+					<svg class="off" id="a50" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a51" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d52">
+					<svg class="off" id="a52" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a53" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+			
+				<!-- 6s -->
+				<div class="ship" id="d6s">6s</div>
+				<div class="cell" id="d54">
+					<svg class="off" id="a54" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a55" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+			
+				<!-- 4f -->
+				<div class="ship" id="d4f">4f</div>
+				<div class="cell" id="d56">
+					<svg class="off" id="a56" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a57" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d58">
+					<svg class="off" id="a58" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a59" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d60">
+					<svg class="off" id="a60" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a61" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d62">
+					<svg class="off" id="a62" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a63" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d64">
+					<svg class="off" id="a64" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a65" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d66">
+					<svg class="off" id="a66" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a67" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d68">
+					<svg class="off" id="a68" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a69" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+			
+				<!-- 5d -->
+				<div class="ship" id="d5d">5d</div>
+				<div class="cell" id="d70">
+					<svg class="off" id="a70" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a71" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d72">
+					<svg class="off" id="a72" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a73" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d74">
+					<svg class="off" id="a74" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a75" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d76">
+					<svg class="off" id="a76" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a77" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d78">
+					<svg class="off" id="a78" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a79" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+			
+				<!-- 6p -->
+				<div class="ship" id="d6p">6p</div>
+				<div class="cell" id="d80">
+					<svg class="off" id="a80" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a81" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d82">
+					<svg class="off" id="a82" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a83" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d84">
+					<svg class="off" id="a84" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a85" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+			
+				<!-- 7s -->
+				<div class="ship" id="d7s">7s</div>
+				<div class="cell" id="d86">
+					<svg class="off" id="a86" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a87" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+			
+				<!-- 5f -->
+				<div class="ship" id="d5f">5f</div>
+				<div class="cell" id="d88">
+					<svg class="off" id="a88" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a89" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d90">
+					<svg class="off" id="a90" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a91" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d92">
+					<svg class="off" id="a92" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a93" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d94">
+					<svg class="off" id="a94" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a95" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d96">
+					<svg class="off" id="a96" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a97" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d98">
+					<svg class="off" id="a98" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a99" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d100">
+					<svg class="off" id="a100" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a101" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+			
+				<!-- 6d -->
+				<div class="ship" id="d6d">6d</div>
+				<div class="cell" id="d102">
+					<svg class="off" id="a102" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a103" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d104">
+					<svg class="off" id="a104" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a105" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d106">
+					<svg class="off" id="a106" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a107" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d108">
+					<svg class="off" id="a108" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a109" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d110">
+					<svg class="off" id="a110" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a111" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+			
+				<!-- 7p -->
+				<div class="ship" id="d7p">7p</div>
+				<div class="cell" id="d112">
+					<svg class="off" id="a112" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a113" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d114">
+					<svg class="off" id="a114" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a115" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+				<div class="cell" id="d116">
+					<svg class="off" id="a" id="a116" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+					<svg class="off" id="a" id="a117" viewBox="0 0 50 100">
+						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
+					</svg>
+				</div>
+			
+			</div>
+		</div>
+
+		<svg style="display: none;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 100">
+			<symbol id="arrow">
+				<polygon points="44 39 34 39 34 86 21 86 21 39 12 39 28 14 44 39" style="fill: var(--arrow-fill, #e5e8eb)"/>
+				<path d="M36,87H20V41H9L28,11,47,41H36ZM23,84h9V38h8L28,17,15,38h8Z" style="fill: var(--arrow-stroke, #e5e8eb)"/>
+			</symbol>
+		</svg>
+	</section>
 </body>
 </html>
