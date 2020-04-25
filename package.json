@@ -5,9 +5,11 @@
   "private": true,
   "main": "app.js",
   "dependencies": {
+    "@types/socket.io-client": "^1.4.32",
     "colors": "^1.4.0",
     "ip": "^1.1.5",
-    "socket.io": "^2.3.0"
+    "socket.io": "^2.3.0",
+    "socket.io-client": "^2.3.0"
   },
   "devDependencies": {
     "@types/ip": "^1.1.0",
@@ -18,10 +20,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:server": "cd server && tsc",
-    "build:client": "cd sources/client && tsc",
+    "build:admin": "cd admin && tsc",
     "build": "npm run build:server && npm run build:client",
     "watch:server": "npm run build:server -- --watch",
-    "watch:client": "npm run build:client -- --watch",
+    "watch:admin": "npm run build:admin -- --watch",
     "start": "node build/index.js"
   },
   "repository": {

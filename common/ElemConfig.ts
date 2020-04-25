@@ -1,4 +1,3 @@
-import log from '../server/kernel/log.js';
 import SpinState from './SpinState.js';
 
 /**
@@ -82,11 +81,6 @@ class ElemConfig
 		if( spinNum >= 1 && spinNum <= 118 )
 			state ? this._add( spinNum - 1 )
 				  :	this._remove( spinNum - 1 );
-		else
-			log(
-				'Error',
-				new Error( `Write: Invalid element number : ${spinNum}` )
-			);
 	}
 
 	/**
@@ -123,9 +117,10 @@ class ElemConfig
 		let spin: number = 0;
 		do
 		{
-			const i = spin / 4 | 0;
+			const i = spin / 32 | 0;
 			const j = spin % 32;
-			result[ spin ] = this._config[ i ] >> j & 1;
+			result[ spin ] = ( this._config[ i ] >> j ) & 1;
+			spin++;
 		}
 		while( spin < 118 );
 

@@ -1,14 +1,3 @@
-html {
-	--violet: #493AF8;
-	--grey: #858585;
-	--disable: #c4c4c4;
-	--hoveredRow: #DAD8FF;
-	--background: #F3F2FA;
-	text-transform: uppercase;
-	font-family: Open Sans;
-	font-size: 14px;
-}
-
 .visibility-hidden {
 	position: absolute;
 	margin: -1px;
@@ -20,38 +9,69 @@ html {
 	clip: rect(0, 0, 0, 0);
 }
 
+/* * {
+	border: 0.5px solid #c0c0c079;
+} */
+
 body {
+		/* Color styles */
+	--disable: #bbbec1;
+	--bold: #767a82;
+	--substrate: #f8f8f8;
+	--selection: #e5e8eb;
+	--b-g4: #ffffff;
+	--blue: #2489ff;
+	--grey: #858585;
+	--disable: #c4c4c4;
+	--hoveredRow: #DAD8FF;
+	--background: #F3F2FA;
+	display: flex;
+	width: 100vw;
+	height: 100vh;
+	min-height: 40em;
+	overflow: hidden;
+	justify-content: center;
+	align-items: center;
+	padding: 0;
+	margin: 0;
+
+	text-transform: uppercase;
+	color: var(--bold);
+	font-family: Open Sans;
+	font-size: 14px;
+	background-color: var(--b-g4);
+}
+
+::selection {
+	background: var(--selection);
+}
+
+main
+{
 	display: flex;
 	position: relative;
 	align-items: center;
 	flex-direction: column;
-	margin: 0 auto;
-	width: 500px;
-	height: 550px;
-	padding: 0;
-}
-
-::selection {
-	background: var(--hoveredRow);
-	/* Safari */
 }
 
 .logo {
 	display: block;
-	margin: 3em auto 2.3em;
+	position: absolute;
+	top: -9em;
+	margin:0 auto;
 	width: 6em;
 	height: 6em;
-	border: 0.25em solid var(--hoveredRow);
+	border: 0.25em solid var(--selection);
 }
 
 .logo-arrow {
-	fill: var(--hoveredRow);
+	fill: var(--selection);
 }
 
 h2 {
 	margin-top: 0;
 	margin-bottom: 0.8em;
-	color: var(--grey);
+	color: var(--disable);
 	font-size: 1.3em;
 	font-weight: 900;
 }
@@ -62,7 +82,7 @@ h2 {
 	flex-direction: column;
 	margin-bottom: 2em;
 	padding: 2em 2.4em 2.4em;
-	background-color: var(--background);
+	background-color: var(--substrate);
 	color: var(--disable);
 }
 
@@ -84,8 +104,9 @@ input[type="number"] {
 	width: 2.7em;
 	height: 1.3em;
 	border: 2px solid var(--disable);
+	border-radius: 4px;
 	line-height: 1.2em;
-	color: var(--grey);
+	color: var(--bold);
 	font-size: 1.3em;
 }
 
@@ -104,24 +125,24 @@ input[type="number"] {
 	width: 4.2em;
 	padding: 0;
 	outline: none;
-	border-color: var(--hoveredRow);
-	background-color: var(--background);
-	transition: background-color 1s, border-color 1s, color 1s;
+	border-color: var(--disable);
+	background-color: transparent;
+	transition: border-color 1s, color 1s;
 	text-align: center;
 	font-family: Open Sans;
 	font-size: 1.3em;
 	font-weight: 500;
+	color: var(--bold);
 }
 
 input[type="number"]:focus {
-	border-color: var(--violet);
-	background-color: white;
-	color: var(--violet);
+	border-color: var(--blue);
+	color: var(--blue);
 }
 
 .server-address:hover input[type="number"] {
-	border-color: var(--violet);
-	color: var(--violet);
+	border-color: var(--blue);
+	color: var(--blue);
 }
 
 input::-webkit-outer-spin-button,
@@ -142,7 +163,7 @@ input::-webkit-inner-spin-button {
 	border: none;
 	border-radius: 1.4em;
 	text-transform: uppercase;
-	color: var(--violet);
+	color: var(--blue);
 	font-family: Open Sans;
 	font-weight: bold;
 }
@@ -167,14 +188,14 @@ input::-webkit-inner-spin-button {
 }
 
 .main-action:active {
-	background-color: #3525ec;
+	background-color: var(--blue);
 }
 
 .play-btn {
 	position: absolute;
 	top: 0;
 	z-index: -1;
-	background-color: var(--violet);
+	background-color: var(--blue);
 	transform: translateX(-11.2em);
 	transition: transform 0.3s;
 }
@@ -203,13 +224,13 @@ input::-webkit-inner-spin-button {
 	width: 12.4em;
 	height: 2.4em;
 	outline: none;
-	border: 2px solid var(--violet);
+	border: 2px solid var(--blue);
 	border-radius: 1.4em;
 	background-color: white;
 	cursor: pointer;
 	transition: background-color .1s, color .1s;
 	text-transform: uppercase;
-	color: var(--violet);
+	color: var(--blue);
 	font-family: Open Sans;
 	font-size: 1.4em;
 	font-weight: bold;
@@ -232,7 +253,7 @@ input::-webkit-inner-spin-button {
 	top: 0.9em;
 	width: 2em;
 	height: 0.5em;
-	fill: var(--violet);
+	fill: var(--blue);
 	transition: transform .5s cubic-bezier(0.86, 0, 0.07, 1), opacity .4s cubic-bezier(0.86, 0, 0.07, 1), fill .2s;
 }
 
@@ -267,7 +288,7 @@ input::-webkit-inner-spin-button {
 }
 
 .admin-btn:active {
-	background-color: #2c1ce0;
+	background-color: var(--blue);
 	color: white;
 }
 
@@ -326,7 +347,7 @@ input::-webkit-inner-spin-button {
 	left: 0;
 	width: 200%;
 	height: 100%;
-	background: var(--violet);
+	background: var(--blue);
 	transform: translate3d(-100%, 0, 0);
 	transition: transform 0.05s linear 0.17s;
 }

@@ -2,3 +2,5 @@
 node_modules/
 package-lock.json
 OB.code-workspace
+build/
+admin/script/

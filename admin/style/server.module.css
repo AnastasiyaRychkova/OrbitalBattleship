@@ -162,6 +162,11 @@
 	background-size: cover;
 }
 
+.list-header > .state
+{
+	background: none;
+}
+
 .player > .state
 {
 	margin: 0 1em;

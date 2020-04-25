@@ -72,11 +72,11 @@
 			<ul class="client-counter">
 				<li class="online-players">
 					<div class="logo"></div>
-					<span>0</span>
+					<span>4</span>
 				</li>
 				<li class="all-players">
 					<div class="logo"></div>
-					<span>0</span>
+					<span>6</span>
 				</li>
 			</ul>
 		</div>
@@ -96,35 +96,35 @@
 					<span>58</span>
 					<span>4</span>
 				</li>
-				<li class="client">
+				<li class="client" data-offline="false">
 					<span>Somebody name text string</span>
 					<span>14</span>
 					<span>11</span>
 					<span>58</span>
 					<span>4</span>
 				</li>
-				<li class="client">
+				<li class="client" data-offline="false">
 					<span>Player2</span>
 					<span>17</span>
 					<span>11</span>
 					<span>50</span>
 					<span>3</span>
 				</li>
-				<li class="client">
+				<li class="client" data-offline="false">
 					<span>Player4</span>
 					<span>18</span>
 					<span>11</span>
 					<span>69</span>
 					<span>4</span>
 				</li>
-				<li class="client">
+				<li class="client" data-offline="true">
 					<span>Somebody name text string1</span>
 					<span>15</span>
 					<span>10</span>
 					<span>71</span>
 					<span>5</span>
 				</li>
-				<li class="client">
+				<li class="client" data-offline="false">
 					<span>Somebody name text string2</span>
 					<span>14</span>
 					<span>9</span>
@@ -135,22 +135,22 @@
 		</div>
 		<div class="bg"></div>
 	</section>
-	<section id="diagram" data-close="false" data-team="Lanthanoids">
+	<section id="diagram" data-close="true" data-team="Actinoids" data-online="true">
 		<div class="player-info">
-			<div class="state pt"></div>
-			<h2>Player2</h2>
+			<div class="state pt" id="player-state"></div>
+			<h2 id="player-name">Player3</h2>
 			<div class="team"></div>
 			<ul class="player-info-mini">
 				<li>
 					<div class="info-icon">
 						<div id="element">
-							<sub>115</sub>Mc
+							<sub>21</sub>Sc
 						</div>
 					</div>
 					<span class="info-name">Element</span>
 				</li>
 				<li>
-					<svg class="info-icon" id="d-check" data-active="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+					<svg class="info-icon" id="d-check" data-active="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
 						<path d="M100,20a80,80,0,1,0,80,80A80,80,0,0,0,100,20Zm0,144A64,64,0,1,1,151,61L91,122,57,82,45,92l45,52,69-70a64,64,0,0,1-59,89Z" style="fill: var(--icon-activation, #e5e8eb)"/>
 					</svg>
 					<span class="info-name">Checked</span>
@@ -172,10 +172,10 @@
 				<!-- 1s -->
 				<div class="ship" id="d1s">1s</div>
 				<div class="cell" id="d0">
-					<svg class="off" id="a0" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="0" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a1" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="1" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
@@ -183,10 +183,10 @@
 				<!-- 2s -->
 				<div class="ship" id="d2s">2s</div>
 				<div class="cell" id="d2">
-					<svg class="off" id="a2" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="2" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a3" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="3" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
@@ -194,26 +194,26 @@
 				<!-- 2p -->
 				<div class="ship" id="d2p">2p</div>
 				<div class="cell" id="d4">
-					<svg class="off" id="a4" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="4" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a5" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="5" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d6">
-					<svg class="off" id="a6" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="6" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a7" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="7" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d8">
-					<svg class="off" id="a8" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="8" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a9" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="9" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
@@ -221,10 +221,10 @@
 				<!-- 3s -->
 				<div class="ship" id="d3s">3s</div>
 				<div class="cell" id="d10">
-					<svg class="off" id="a10" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="10" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a11" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="11" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
@@ -232,26 +232,26 @@
 				<!-- 3p -->
 				<div class="ship" id="d3p">3p</div>
 				<div class="cell" id="d12">
-					<svg class="off" id="a12" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="12" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a13" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="13" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d14">
-					<svg class="off" id="a14" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="14" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a15" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="15" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d16">
-					<svg class="off" id="a16" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="16" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a17" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="17" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
@@ -259,10 +259,10 @@
 				<!-- 4s -->
 				<div class="ship" id="d4s">4s</div>
 				<div class="cell" id="d18">
-					<svg class="off" id="a18" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="18" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a19" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="19" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
@@ -270,42 +270,42 @@
 				<!-- 3d -->
 				<div class="ship" id="d3d">3d</div>
 				<div class="cell" id="d20">
-					<svg class="off" id="a20" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="20" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a21" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="21" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d22">
-					<svg class="off" id="a22" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="22" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a23" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="23" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d24">
-					<svg class="off" id="a24" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="24" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a25" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="25" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d26">
-					<svg class="off" id="a26" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="26" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a27" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="27" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d28">
-					<svg class="off" id="a28" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="28" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a29" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="29" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
@@ -313,26 +313,26 @@
 				<!-- 4p -->
 				<div class="ship" id="d4p">4p</div>
 				<div class="cell" id="d30">
-					<svg class="off" id="a30" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="30" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a31" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="31" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d32">
-					<svg class="off" id="a32" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="32" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a33" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="33" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d34">
-					<svg class="off" id="a34" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="34" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a35" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="35" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
@@ -340,10 +340,10 @@
 				<!-- 5s -->
 				<div class="ship" id="d5s">5s</div>
 				<div class="cell" id="d36">
-					<svg class="off" id="a36" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="36" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a37" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="37" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
@@ -351,42 +351,42 @@
 				<!-- 4d -->
 				<div class="ship" id="d4d">4d</div>
 				<div class="cell" id="d38">
-					<svg class="off" id="a38" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="38" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="on" id="a39" viewBox="0 0 50 100">
+					<svg data-spin-state="on" data-spin="39" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d40">
-					<svg class="miss" id="a40" viewBox="0 0 50 100">
+					<svg data-spin-state="miss" data-spin="40" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="hit" id="a41" viewBox="0 0 50 100">
+					<svg data-spin-state="hit" data-spin="41" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d42">
-					<svg class="on" id="a42" viewBox="0 0 50 100">
+					<svg data-spin-state="on" data-spin="42" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a43" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="43" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d44">
-					<svg class="off" id="a44" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="44" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a45" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="45" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d46">
-					<svg class="off" id="a46" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="46" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a47" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="47" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
@@ -394,26 +394,26 @@
 				<!-- 5p -->
 				<div class="ship" id="d5p">5p</div>
 				<div class="cell" id="d48">
-					<svg class="off" id="a48" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="48" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a49" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="49" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d50">
-					<svg class="off" id="a50" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="50" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a51" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="51" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d52">
-					<svg class="off" id="a52" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="52" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a53" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="53" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
@@ -421,10 +421,10 @@
 				<!-- 6s -->
 				<div class="ship" id="d6s">6s</div>
 				<div class="cell" id="d54">
-					<svg class="off" id="a54" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="54" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a55" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="55" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
@@ -432,58 +432,58 @@
 				<!-- 4f -->
 				<div class="ship" id="d4f">4f</div>
 				<div class="cell" id="d56">
-					<svg class="off" id="a56" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="56" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a57" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="57" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d58">
-					<svg class="off" id="a58" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="58" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a59" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="59" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d60">
-					<svg class="off" id="a60" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="60" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a61" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="61" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d62">
-					<svg class="off" id="a62" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="62" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a63" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="63" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d64">
-					<svg class="off" id="a64" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="64" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a65" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="65" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d66">
-					<svg class="off" id="a66" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="66" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a67" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="67" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d68">
-					<svg class="off" id="a68" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="68" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a69" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="69" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
@@ -491,42 +491,42 @@
 				<!-- 5d -->
 				<div class="ship" id="d5d">5d</div>
 				<div class="cell" id="d70">
-					<svg class="off" id="a70" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="70" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a71" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="71" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d72">
-					<svg class="off" id="a72" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="72" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a73" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="73" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d74">
-					<svg class="off" id="a74" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="74" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a75" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="75" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d76">
-					<svg class="off" id="a76" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="76" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a77" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="77" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d78">
-					<svg class="off" id="a78" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="78" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a79" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="79" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
@@ -534,26 +534,26 @@
 				<!-- 6p -->
 				<div class="ship" id="d6p">6p</div>
 				<div class="cell" id="d80">
-					<svg class="off" id="a80" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="80" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a81" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="81" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d82">
-					<svg class="off" id="a82" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="82" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a83" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="83" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d84">
-					<svg class="off" id="a84" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="84" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a85" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="85" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
@@ -561,10 +561,10 @@
 				<!-- 7s -->
 				<div class="ship" id="d7s">7s</div>
 				<div class="cell" id="d86">
-					<svg class="off" id="a86" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="86" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a87" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="87" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
@@ -572,58 +572,58 @@
 				<!-- 5f -->
 				<div class="ship" id="d5f">5f</div>
 				<div class="cell" id="d88">
-					<svg class="off" id="a88" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="88" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a89" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="89" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d90">
-					<svg class="off" id="a90" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="90" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a91" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="91" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d92">
-					<svg class="off" id="a92" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="92" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a93" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="93" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d94">
-					<svg class="off" id="a94" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="94" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a95" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="95" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d96">
-					<svg class="off" id="a96" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="96" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a97" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="97" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d98">
-					<svg class="off" id="a98" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="98" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a99" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="99" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d100">
-					<svg class="off" id="a100" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="100" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a101" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="101" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
@@ -631,42 +631,42 @@
 				<!-- 6d -->
 				<div class="ship" id="d6d">6d</div>
 				<div class="cell" id="d102">
-					<svg class="off" id="a102" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="102" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a103" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="103" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d104">
-					<svg class="off" id="a104" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="104" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a105" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="105" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d106">
-					<svg class="off" id="a106" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="106" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a107" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="107" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d108">
-					<svg class="off" id="a108" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="108" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a109" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="109" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d110">
-					<svg class="off" id="a110" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="110" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a111" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="111" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
@@ -674,26 +674,26 @@
 				<!-- 7p -->
 				<div class="ship" id="d7p">7p</div>
 				<div class="cell" id="d112">
-					<svg class="off" id="a112" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="112" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a113" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="113" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d114">
-					<svg class="off" id="a114" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="114" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a115" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="115" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
 				<div class="cell" id="d116">
-					<svg class="off" id="a" id="a116" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="116" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
-					<svg class="off" id="a" id="a117" viewBox="0 0 50 100">
+					<svg data-spin-state="off" data-spin="117" viewBox="0 0 50 100">
 						<use xlink:href = "#arrow" x = "0" y = "0" viewBox="0 0 50 100"/>
 					</svg>
 				</div>
@@ -708,5 +708,8 @@
 			</symbol>
 		</svg>
 	</section>
+
+	<script type="module" src="./script/admin/src/admin.js"></script>
 </body>
+
 </html>

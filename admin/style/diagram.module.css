@@ -100,38 +100,38 @@
 	--op-color: var(--red);
 }
 
-#diagram-grid[data-match="true"] .on
+#diagram-grid[data-match="true"] svg[data-spin-state="on"]
 {
 	--arrow-fill: var(--team-color);
 	--arrow-stroke: var(--team-color);
 }
 
-#diagram-grid[data-match="true"] .miss
+#diagram-grid[data-match="true"] svg[data-spin-state="miss"]
 {
 	--arrow-fill: white;
 	--arrow-stroke: var(--op-color);
 }
 
-#diagram-grid[data-match="true"] .hit
+#diagram-grid[data-match="true"] svg[data-spin-state="hit"]
 {
 	--arrow-fill: var(--op-color);
 	--arrow-stroke: var(--op-color);
 }
 
 
-#diagram-grid[data-match="false"] .on
+#diagram-grid[data-match="false"] svg[data-spin-state="on"]
 {
 	--arrow-fill: var(--team-color-error);
 	--arrow-stroke: var(--team-color-error);
 }
 
-#diagram-grid[data-match="false"] .miss
+#diagram-grid[data-match="false"] svg[data-spin-state="miss"]
 {
 	--arrow-fill: white;
 	--arrow-stroke: var(--team-color);
 }
 
-#diagram-grid[data-match="false"] .hit
+#diagram-grid[data-match="false"] svg[data-spin-state="hit"]
 {
 	--arrow-fill: var(--team-color);
 	--arrow-stroke: var(--team-color);
@@ -144,6 +144,11 @@
 	height: 0.8em;
 	border-radius: 50%;
 	background-color: var(--team-color);
+}
+
+#diagram[data-online="false"] .team
+{
+	background-color: var(--disable);
 }
 
 .info-icon
