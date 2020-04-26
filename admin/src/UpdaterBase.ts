@@ -1,4 +1,4 @@
-import type { ClientData } from './types.js';
+import type { ClientData, ClientStatistics } from './types.js';
 import { UserInfo } from '../../common/messages.js';
 
 class UpdaterBase
@@ -7,10 +7,11 @@ class UpdaterBase
 	 * Обновить статус подключения клиента (online/offline)
 	 * @param name Имя клиента
 	 * @param bIsOnline Статус подключения
+	 * @param statistics Общая статистика игрока
 	 */
-	updateClient( name: string, bIsOnline: boolean ): void
+	updateClient( name: string, bIsOnline: boolean, statistics?: ClientStatistics ): void
 	{
-		console.log( 'Error: updateClient: Updater has no this method realization\n', name, bIsOnline );
+		console.log( 'Error: updateClient: Updater has no this method realization\n', name, bIsOnline, statistics );
 	}
 
 	/**
@@ -27,7 +28,7 @@ class UpdaterBase
 	 * @param total Количество игроков, о которых имеется информация на сервере
 	 * @param online Количество online игроков
 	 */
-	updateClientCounter( total: number, online: number ): void
+	updateClientCounter( online: number, total: number ): void
 	{
 		console.log( 'Error: updateClientCounter: Updater has no this method realization\n', total, online );
 	}

@@ -1,10 +1,27 @@
-import DiagramUpdater from "./DiagramUpdater.js";
+import StatUpdater from "./StatUpdater.js";
 
-const updater: DiagramUpdater = new DiagramUpdater();
+const updater: StatUpdater = new StatUpdater();
 
 console.log( 'Updater ready!' );
 
-updater.updateDiagramHidden( false, {
+updater.updateClient(
+	'Player3',
+	false,
+	{
+		counter: {
+			games: 10,
+			victories: 5,
+		},
+		timing: {
+			totalTime: 35,
+			AVGTime: 4,
+		}
+	}
+);
+
+updater.updateClientCounter( 5, 7 );
+
+/* updater.updateDiagramHidden( false, {
 	client: {
 		name: 'New Player',
 		bIsOnline: true,
@@ -24,4 +41,4 @@ updater.updateDiagramHidden( false, {
 			symbol: 'Au',
 		},
 	}
-} );
+} ); */

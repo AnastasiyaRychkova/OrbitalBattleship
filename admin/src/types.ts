@@ -13,14 +13,17 @@ type ClientData = {
 	diagramCheck?: boolean,
 	diagram?: DiagramView,
 	rightMove?: boolean,
-	games?: number,
-	victories?: number,
 };
 
-type ClientTiming = {
-	name: string,
-	totalTime: number,
-	AVGTime: number,
+type ClientStatistics = {
+	counter?: {
+		games: number,
+		victories: number,
+	},
+	timing?: {
+		totalTime: number,
+		AVGTime: number,
+	}
 };
 
 type DiagramView = {
@@ -31,6 +34,6 @@ type DiagramView = {
 
 export type {
 	ClientData,
-	ClientTiming,
+	ClientStatistics,
 	DiagramView,
 }
