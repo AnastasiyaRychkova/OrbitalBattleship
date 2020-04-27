@@ -4,18 +4,27 @@ import type { PlayerGameInfo, ClientData } from './types.js';
 import { ChemicalElement } from "../../common/messages.js";
 import { ETeam } from "../../common/ETeam.js";
 
+type ControllerType = {
+	openDiagram( event: Event ): void;
+}
+
 class GameUpdater extends UpdaterBase
 {
-	
+	/** Список текущих игр */
 	private list: HTMLUListElement;
 
-	constructor( address: string )
+	/** Метод, который необходимо повесить на элемент игрока, чтобы открыть окно диаграммы */
+	openDiagram: ( event: Event ) => void;
+
+	constructor( controller: ControllerType, address: string )
 	{
 		super();
 
 		( document.querySelector( '.ipv4-address > span' ) as HTMLSpanElement ).textContent = address;
 
 		this.list = document.getElementById( 'game-list' ) as HTMLUListElement;
+
+		this.openDiagram = controller.openDiagram;
 	}
 
 	newGame( gameId: string, player1: PlayerGameInfo, player2: PlayerGameInfo ): void
@@ -26,7 +35,7 @@ class GameUpdater extends UpdaterBase
 		if ( player1.team !== ETeam.Actinoids )
 			[ player1, player2 ] = [ player2, player1 ];
 
-		this.list.insertAdjacentHTML( 
+		this.list.insertAdjacentHTML(
 			"beforeend",
 			`<li class="game" id="${gameId}">\
 			\n	<div class="player" id="${'g-'+player1.name}" data-online="${player1.bIsOnline}" data-rm="${player1.rightMove}" data-disable="false">\
@@ -40,7 +49,16 @@ class GameUpdater extends UpdaterBase
 			\n		<div class="element"><sub>${player2.element.number}</sub>${player2.element.symbol}</div>\
 			\n	</div>\
 			\n</li>`
-		)
+		);
+
+		document.getElementById( 'g-'+player1.name )?.addEventListener(
+			'click',
+			this.openDiagram
+		);
+		document.getElementById( 'g-'+player2.name )?.addEventListener(
+			'click',
+			this.openDiagram
+		);
 	}
 
 	removeGame( gameId: string ): void

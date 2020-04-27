@@ -5,6 +5,11 @@ import DiagramUpdater from "./DiagramUpdater.js";
 import type { ClientData, ClientStatistics, PlayerGameInfo } from './types.js';
 import type { UserInfo } from '../../common/messages.js';
 
+type ControllerType = {
+	openDiagram( event: Event ): void;
+}
+
+/** Модуль, обновляющий интерфейс согласно внутреннему представлению */
 class Updater extends UpdaterBase
 {
 	private statistics: StatUpdater;
@@ -13,12 +18,12 @@ class Updater extends UpdaterBase
 
 	private diagram: DiagramUpdater;
 
-	constructor( address: string )
+	constructor( controller: ControllerType, address: string )
 	{
 		super();
 
 		this.statistics = new StatUpdater();
-		this.games = new GameUpdater( address );
+		this.games = new GameUpdater( controller, address );
 		this.diagram = new DiagramUpdater();
 	}
 

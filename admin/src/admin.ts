@@ -1,10 +1,10 @@
-import GameUpdater from "./GameUpdater.js";
-/* import EState from "../../common/EState.js";
-import { ETeam } from "../../common/ETeam.js"; */
+/* import Updater from "./Updater.js"; */
+import EState from "../../common/EState.js";
+/* import { ETeam } from "../../common/ETeam.js"; */
 
-const updater: GameUpdater = new GameUpdater( '192.168.0.173:5500');
+/* const updater: Updater = new Updater( '192.168.0.173:5500'); */
 
-console.log( 'Updater ready!' );
+console.log( 'Updater ready!', EState.Online );
 
 /* updater.newGame( 
 	'player21player55',
