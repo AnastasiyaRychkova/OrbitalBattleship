@@ -1,4 +1,4 @@
-import type { ClientData, ClientStatistics } from './types.js';
+import type { ClientData, ClientStatistics, PlayerGameInfo } from './types.js';
 import { UserInfo } from '../../common/messages.js';
 
 class UpdaterBase
@@ -49,7 +49,7 @@ class UpdaterBase
 	 * @param player1 Первый участник
 	 * @param player2 Второй участник
 	 */
-	newGame( gameId: string, player1: UserInfo, player2: UserInfo ): void
+	newGame( gameId: string, player1: PlayerGameInfo, player2: PlayerGameInfo ): void
 	{
 		console.log( 'Error: newGame: Updater has no this method realization\n', gameId, player1, player2 );
 	}

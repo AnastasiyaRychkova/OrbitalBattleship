@@ -1,5 +1,5 @@
 import UpdaterBase from "./UpdaterBase.js";
-import { ClientData, DiagramView } from "./types.js";
+import type { ClientData, DiagramView } from "./types.js";
 import { EState, ETeam, ElemConfig, SpinState } from '../../common/general.js';
 import type { ChemicalElement, UserInfo } from '../../common/messages.js';
 
@@ -106,9 +106,6 @@ class DiagramUpdater extends UpdaterBase
 
 				case 'diagram':
 					this.updDiagram( clientData as DiagramView );
-					break;
-			
-				default:
 					break;
 			}
 			

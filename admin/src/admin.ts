@@ -1,10 +1,62 @@
-import StatUpdater from "./StatUpdater.js";
+import GameUpdater from "./GameUpdater.js";
+import EState from "../../common/EState.js";
+import { ETeam } from "../../common/ETeam.js";
 
-const updater: StatUpdater = new StatUpdater();
+const updater: GameUpdater = new GameUpdater( '192.168.0.173:5500');
 
 console.log( 'Updater ready!' );
 
-updater.updateClient(
+updater.newGame( 
+	'player21player55',
+	{
+		name: 'player55',
+		bIsOnline: false,
+		state: EState.PeriodicTable,
+		team: ETeam.Lanthanoids,
+		element: {
+			number: 17,
+			name: 'Chlor',
+			symbol: 'Cl',
+		},
+		rightMove: false,
+	},
+	{
+		name: 'player21',
+		bIsOnline: true,
+		state: EState.Preparing,
+		team: ETeam.Actinoids,
+		element: {
+			number: 8,
+			name: 'Oxygen',
+			symbol: 'O',
+		},
+		rightMove: true,
+	}
+);
+
+updater.updateClient( 'player2', false );
+updater.updatePlayer(
+	{
+		name: 'player3',
+		bIsOnline: true,
+		state: EState.Celebration,
+		element: {
+			number: 17,
+			name: 'Chlor',
+			symbol: 'Cl',
+		},
+		diagramCheck: true,
+	}
+);
+
+updater.updatePlayer(
+	{
+		name: 'player1',
+		state: EState.Online,
+	}
+);
+
+/* updater.updateClient(
 	'Player3',
 	false,
 	{
@@ -19,7 +71,7 @@ updater.updateClient(
 	}
 );
 
-updater.updateClientCounter( 5, 7 );
+updater.updateClientCounter( 5, 7 ); */
 
 /* updater.updateDiagramHidden( false, {
 	client: {

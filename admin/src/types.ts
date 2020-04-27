@@ -31,9 +31,19 @@ type DiagramView = {
 	base: number[],
 }
 
+type PlayerGameInfo = {
+	name: string,
+	bIsOnline: boolean,
+	state: EState,
+	team: ETeam,
+	element: ChemicalElement,
+	rightMove: boolean,
+}
+
 
 export type {
 	ClientData,
 	ClientStatistics,
 	DiagramView,
+	PlayerGameInfo,
 }

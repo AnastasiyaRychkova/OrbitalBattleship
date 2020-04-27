@@ -25,32 +25,32 @@
 				<div class="state">Game state</div>
 				<div class="element">Element</div>
 			</div>
-			<ul class="game-list scroll">
+			<ul class="game-list scroll" id="game-list">
 				<li class="game">
 					<div class="player">
 						<div class="name">Somebody name text string</div>
 						<div class="state pt"></div>
 						<div class="element"><sub>??</sub>??</div>
 					</div>
-					<div class="player">
+					<div class="player" id="g-player1" data-disable="false">
 						<div class="name">Player1</div>
 						<div class="state preparing"></div>
 						<div class="element"><sub>17</sub>Cl</div>
 					</div>
 				</li>
-				<li class="game">
-					<div class="player" data-rm="true">
-						<div class="name">Player2</div>
+				<li class="game" id="player1player2">
+					<div class="player" id="g-player2" data-online="true" data-rm="true" data-disable="false">
+						<div class="name">player2</div>
 						<div class="state match"></div>
 						<div class="element"><sub>8</sub>O</div>
 					</div>
-					<div class="player" data-offline="true">
-						<div class="name">Player3</div>
+					<div class="player" id="g-player3" data-online="false" data-rm="false" data-disable="false">
+						<div class="name">player3</div>
 						<div class="state match"></div>
 						<div class="element"><sub>118</sub>Og</div>
 					</div>
 				</li>
-				<li class="game">
+				<li class="game" id="player4player5">
 					<div class="player" data-disable="true">
 						<div class="name">Player4</div>
 						<div class="state void"></div>

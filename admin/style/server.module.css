@@ -125,12 +125,12 @@
 	background-color: var(--b-g3);
 }
 
-.player[data-offline="true"]
+.player[data-online="false"]
 {
 	color: var(--disable);
 }
 
-.player[data-offline="true"] .name::after
+.player[data-online="false"] .name::after
 {
 	margin-left: 1em;
 	color: var(--red);
