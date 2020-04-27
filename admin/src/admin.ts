@@ -1,12 +1,12 @@
 import GameUpdater from "./GameUpdater.js";
-import EState from "../../common/EState.js";
-import { ETeam } from "../../common/ETeam.js";
+/* import EState from "../../common/EState.js";
+import { ETeam } from "../../common/ETeam.js"; */
 
 const updater: GameUpdater = new GameUpdater( '192.168.0.173:5500');
 
 console.log( 'Updater ready!' );
 
-updater.newGame( 
+/* updater.newGame( 
 	'player21player55',
 	{
 		name: 'player55',
@@ -54,7 +54,7 @@ updater.updatePlayer(
 		name: 'player1',
 		state: EState.Online,
 	}
-);
+); */
 
 /* updater.updateClient(
 	'Player3',

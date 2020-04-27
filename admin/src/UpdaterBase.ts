@@ -1,5 +1,5 @@
 import type { ClientData, ClientStatistics, PlayerGameInfo } from './types.js';
-import { UserInfo } from '../../common/messages.js';
+import type { UserInfo } from '../../common/messages.js';
 
 class UpdaterBase
 {

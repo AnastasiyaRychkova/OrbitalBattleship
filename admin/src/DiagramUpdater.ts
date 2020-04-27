@@ -6,50 +6,53 @@ import type { ChemicalElement, UserInfo } from '../../common/messages.js';
 
 class DiagramUpdater extends UpdaterBase
 {
+
+	private bHidden: boolean;
 	/** Имя клиента, информация о котором отображается в данном окне */
-	private name:		HTMLElement;
+	private name: HTMLElement;
 
 	/** Окно с диаграммой
 	 * * Закрыто ли: `[data-close = boolean]`
 	 * * Команда игрока: `[data-team = "Actinoids" | "Lanthanoids"]`
 	 * * Статус соединения: `[data-online = boolean]`
 	 */
-	private window:		HTMLElement;
+	private window: HTMLElement;
 
 	/** Элемент, отображающий иконку состояния 
 	 * * Состояние игры: `class="state periodictable|preparing|match|celebration"`
 	*/
-	private state: 		HTMLElement;
+	private state: HTMLElement;
 
 	/** Химический элемент, загаданный игроком
 	 * * Элемент: `.innerHTML( '<sub>${elem.number}</sub>${elem.symbol}' )`
 	 */
-	private element:	HTMLElement;
+	private element: HTMLElement;
 
 	/** Иконка, отображающая прошла ли диаграмма проверку 
 	 * * Корректность: `[data-active = boolean]`
 	*/
-	private check: 		HTMLElement;
+	private check: HTMLElement;
 
 	/** Иконка, отображающая имеет ли игрок право хода
 	 * * Право хода: `[data-active = boolean]`
 	 */
-	private rightMove:	HTMLElement;
+	private rightMove: HTMLElement;
 
 	/** Непосредственно сама диаграмма
 	 * * Начался ли матч: `[data-match = boolean]`
 	 */
-	private diagram:	HTMLElement;
+	private diagram: HTMLElement;
 
 	/** Массив со стрелками
 	 * * Состояние стрелки: `[data-spin-state = "off|on|hit|miss"]`
 	 * * Индекс спина: `[data-spin = number]`
 	 */
-	private spins:		HTMLCollectionOf<SVGSVGElement>;
+	private spins: HTMLCollectionOf<SVGSVGElement>;
 
 	constructor()
 	{
 		super();
+		this.bHidden 	= true;
 		this.name 		= document.getElementById( 'player-name' )!;
 
 		this.window 	= document.getElementById( 'diagram' )!;
@@ -63,7 +66,7 @@ class DiagramUpdater extends UpdaterBase
 
 	updateClient( name: string, bIsOnline: boolean ): void
 	{
-		if( name !== this.name.textContent )
+		if( this.bHidden || name !== this.name.textContent )
 			return;
 
 		this.window.setAttribute( 'data-online', bIsOnline.toString() );
@@ -71,7 +74,7 @@ class DiagramUpdater extends UpdaterBase
 
 	updatePlayer( player: ClientData ): void
 	{
-		if( name !== this.name.textContent )
+		if( this.bHidden || name !== this.name.textContent )
 			return;
 
 		for (const prop in player) {
@@ -136,6 +139,8 @@ class DiagramUpdater extends UpdaterBase
 
 			this.window.setAttribute( 'data-close', 'false' );
 		}
+
+		this.bHidden = newHidden;
 	}
 
 	/**
