@@ -1,10 +1,11 @@
-/* import Updater from "./Updater.js"; */
-import EState from "../../common/EState.js";
-/* import { ETeam } from "../../common/ETeam.js"; */
+import Controller from "./Controller.js";
+import AdminModel from "./AdminModel.js";
+import Updater from "./Updater.js";
 
-/* const updater: Updater = new Updater( '192.168.0.173:5500'); */
-
-console.log( 'Updater ready!', EState.Online );
+const controller: Controller = new Controller();
+const updater: Updater = new Updater( controller, '192.168.0.0:5500' );
+const model: AdminModel = new AdminModel( updater );
+controller.init( model );
 
 /* updater.newGame( 
 	'player21player55',
