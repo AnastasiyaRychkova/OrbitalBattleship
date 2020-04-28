@@ -1,4 +1,4 @@
-import type { ClientData, ClientStatistics, PlayerGameInfo } from './types.js';
+import type { PlayerUpdInfo, ClientStatistics, PlayerGameInfo } from './types.js';
 import type { UserInfo } from '../../common/messages.js';
 
 class UpdaterBase
@@ -18,7 +18,7 @@ class UpdaterBase
 	 * Обновить игровую информацию о клиенте
 	 * @param player Информация о клиенте, которую необходимо обновить
 	 */
-	updatePlayer( player: ClientData ): void
+	updatePlayer( player: PlayerUpdInfo ): void
 	{
 		console.log( 'Error: updatePlayer: Updater has no this method realization\n', name, player );
 	}
@@ -55,12 +55,12 @@ class UpdaterBase
 	}
 
 	/**
-	 * Удалить запись об игре
-	 * @param gameId ID удаляемой игры
+	 * Удалить запись об игроке
+	 * @param player Имя игрока
 	 */
-	removeGame( gameId: string ): void
+	removePlayer( name: string ): void
 	{
-		console.log( 'Error: newGame: Updater has no this method realization\n', gameId );
+		console.log( 'Error: newGame: Updater has no this method realization\n', name );
 	}
 }
 

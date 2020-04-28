@@ -21,7 +21,7 @@ class Controller
 			'click',
 			() =>
 			{
-				document.getElementById( 'diagram' )!.dataset.close = "true";
+				model.closeDiagram();
 			}
 		);
 	}

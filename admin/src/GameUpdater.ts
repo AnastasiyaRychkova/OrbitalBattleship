@@ -1,6 +1,6 @@
 import UpdaterBase from "./UpdaterBase.js";
 import EState from "../../common/EState.js";
-import type { PlayerGameInfo, ClientData } from './types.js';
+import type { PlayerGameInfo, PlayerUpdInfo } from './types.js';
 import { ChemicalElement } from "../../common/messages.js";
 import { ETeam } from "../../common/ETeam.js";
 
@@ -61,12 +61,26 @@ class GameUpdater extends UpdaterBase
 		);
 	}
 
-	removeGame( gameId: string ): void
+	removePlayer( name: string ): void
 	{
-		const game: HTMLElement | null = document.getElementById( gameId );
+		const player: HTMLElement | null = document.getElementById( 'g-'+name );
 
-		if ( game == null )
+		if ( player == null )
 			return;
+		player.removeEventListener( "click", this.openDiagram );
+
+		// Если оба игрока покинули игру, то необходимо игру удалить
+		const game: HTMLElement = player.parentElement!;
+		const opponent: Element | null = ( game.children.item( 0 )!.id === ( 'g-'+name ) ) ? game?.children.item( 1 ) : game?.children.item( 0 );
+		// Если оппонент еще не ушел, то оставить основную информацию
+		// и деактивировать
+		if ( opponent != null && opponent.id !== '' )
+		{
+			player.id = '';
+			player.dataset.disable = 'true';
+			( player.getElementsByClassName( 'state' )[0] as HTMLElement ).className = 'state void';
+			return;
+		}
 
 		game.remove();
 	}
@@ -78,35 +92,22 @@ class GameUpdater extends UpdaterBase
 		if ( client == null )
 			return;
 
-		client.setAttribute( 'data-online', bIsOnline.toString() );
+		client.dataset.online = bIsOnline.toString();
 	}
 
-	updatePlayer( player: ClientData ): void
+	updatePlayer( player: PlayerUpdInfo ): void
 	{
 		const client: HTMLElement | null = document.getElementById( 'g-'+player.name );
 
 		if ( client == null )
 			return;
 
-		// Если клиент покинул игру
-		if ( player.state !== undefined && player.state < EState.PeriodicTable )
-		{
-			client.id = '';
-			client.setAttribute( 'data-disable', 'true' );
-			( client.getElementsByClassName( 'state' )[0] as HTMLElement ).className = 'state void';
-			return;
-		}
-
 		for (const prop in player) {
-			const clientInfo = player[ prop as keyof ClientData ];
+			const clientInfo = player[ prop as keyof PlayerUpdInfo ];
 			if ( clientInfo === undefined )
 				continue;
 
 			switch ( prop ) {
-				case 'bIsOnline':
-					client.setAttribute( 'data-online', clientInfo.toString() );
-					break;
-
 				case 'state':
 					const state: HTMLElement = ( client.getElementsByClassName( 'state' )[0] ) as HTMLElement;
 					state.className = 'state ' + EState[ clientInfo as EState ].toLowerCase();
@@ -119,7 +120,7 @@ class GameUpdater extends UpdaterBase
 					break;
 
 				case 'rightMove':
-					client.setAttribute( 'data-rm', clientInfo.toString() );
+					client.dataset.rm = clientInfo.toString();
 					break;
 			}
 		}

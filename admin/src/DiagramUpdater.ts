@@ -1,7 +1,7 @@
 import UpdaterBase from "./UpdaterBase.js";
-import type { ClientData, DiagramView } from "./types.js";
+import type { PlayerUpdInfo } from "./types.js";
 import { EState, ETeam, ElemConfig, SpinState } from '../../common/general.js';
-import type { ChemicalElement, UserInfo } from '../../common/messages.js';
+import type { ChemicalElement, UserInfo, DiagramView } from '../../common/messages.js';
 
 
 class DiagramUpdater extends UpdaterBase
@@ -69,24 +69,20 @@ class DiagramUpdater extends UpdaterBase
 		if( this.bHidden || name !== this.name.textContent )
 			return;
 
-		this.window.setAttribute( 'data-online', bIsOnline.toString() );
+		this.updConnection( bIsOnline );
 	}
 
-	updatePlayer( player: ClientData ): void
+	updatePlayer( player: PlayerUpdInfo ): void
 	{
 		if( this.bHidden || name !== this.name.textContent )
 			return;
 
 		for (const prop in player) {
-			const clientData = player[ prop as keyof ClientData ];
+			const clientData = player[ prop as keyof PlayerUpdInfo ];
 			if ( clientData === undefined )
 				continue;
 
 			switch ( prop ) {
-				case 'bIsOnline':
-					this.updConnection( clientData as boolean );
-					break;
-
 				case 'state':
 					this.updState( clientData as EState );
 					break;
@@ -119,14 +115,14 @@ class DiagramUpdater extends UpdaterBase
 	{
 		if ( newHidden )
 		{
-			this.window.setAttribute( 'data-close', 'true' );
+			this.window.dataset.close = 'true';
 			this.updName( '' );
 		}
 		else
 		{
 			if ( info === undefined )
 				return;
-			console.log( info );
+
 			this.updName( info.client.name );
 			this.updConnection( info.client.bIsOnline );
 
@@ -137,10 +133,18 @@ class DiagramUpdater extends UpdaterBase
 			this.updDiagram( info.player.diagram );
 			this.updRightMove( info.player.rightMove );
 
-			this.window.setAttribute( 'data-close', 'false' );
+			this.window.dataset.close = 'false';
 		}
 
 		this.bHidden = newHidden;
+	}
+
+	removePlayer( name: string ): void
+	{
+		if ( this.bHidden || name !== this.name.textContent )
+			return;
+
+		this.updateDiagramHidden( true );
 	}
 
 	/**
@@ -158,7 +162,7 @@ class DiagramUpdater extends UpdaterBase
 	 */
 	private updConnection( bIsOnline: boolean ): void
 	{
-		this.window.setAttribute( 'data-online', bIsOnline.toString() );
+		this.window.dataset.online = bIsOnline.toString();
 	}
 
 	/**
@@ -167,7 +171,7 @@ class DiagramUpdater extends UpdaterBase
 	 */
 	private updState( state: EState ): void {
 		this.state.className = "state " + EState[ state ].toLowerCase();
-		this.diagram.setAttribute( 'data-match', state === EState.Match || state === EState.Celebration ? "true" : "false" );
+		this.diagram.dataset.match = ( state === EState.Match || state === EState.Celebration ).toString();
 	}
 
 	/**
@@ -176,7 +180,7 @@ class DiagramUpdater extends UpdaterBase
 	 */
 	private updTeam( team: ETeam ): void
 	{
-		this.window.setAttribute( 'data-team', ETeam[ team ] );
+		this.window.dataset.team = ETeam[ team ];
 	}
 
 	/**
@@ -197,7 +201,7 @@ class DiagramUpdater extends UpdaterBase
 	 */
 	private updDiagramCheck( checkResult: boolean ): void
 	{
-		this.check.setAttribute( 'data-active', checkResult.toString() );
+		this.check.dataset.active = checkResult.toString();
 	}
 
 	/**
@@ -206,7 +210,7 @@ class DiagramUpdater extends UpdaterBase
 	 */
 	private updRightMove( rightMove: boolean ): void
 	{
-		this.rightMove.setAttribute( 'data-active', rightMove.toString() );
+		this.rightMove.dataset.active = rightMove.toString();
 	}
 
 	/**
@@ -221,7 +225,7 @@ class DiagramUpdater extends UpdaterBase
 
 		for ( const spin of this.spins ) {
 			const i: number = parseInt( spin.getAttribute( 'data-spin' )! );
-			spin.setAttribute( 'data-spin-state', SpinState[ 2 * mainArray[ i ] + baseArray[ i ] ] );
+			spin.dataset.spinState = SpinState[ 2 * mainArray[ i ] + baseArray[ i ] ];
 		}
 	}
 }

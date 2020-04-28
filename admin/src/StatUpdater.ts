@@ -56,7 +56,7 @@ class StatUpdater extends UpdaterBase
 
 			if ( statistics?.counter )
 			{
-				if ( statistics.counter.games !== undefined )
+				if ( statistics.counter.games !== undefined ) // TODO: сортировка
 				{
 					li.getElementsByClassName( 'client-games' )[0].textContent = statistics.counter.games.toString();
 					li.getElementsByClassName( 'client-victories' )[0].textContent = statistics.counter.victories.toString();

@@ -1,6 +1,10 @@
 import EState from "./EState"
 import { ETeam } from "./ETeam"
-import { DiagramView } from "../admin/src/types";
+
+type DiagramView = {
+	main: number[],
+	base: number[],
+}
 
 /** Основная информация о клиенте */
 type ClientInfo = {
@@ -86,4 +90,5 @@ export type {
 	updateClientMessage,
 	newGameMessage,
 	removeGameMessage,
+	DiagramView,
 }

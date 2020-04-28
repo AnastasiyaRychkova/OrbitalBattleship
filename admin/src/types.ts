@@ -1,12 +1,11 @@
 import EState from "../../common/EState";
 import { ETeam } from "../../common/ETeam";
-import { ChemicalElement } from "../../common/messages";
+import { ChemicalElement, DiagramView } from "../../common/messages";
 
 
-type ClientData = {
+type PlayerUpdInfo = {
 	name: string,
-	bIsOnline?: boolean,
-	gameId?: string,
+	gameId: string,
 	state?: EState,
 	team?: ETeam,
 	element?: ChemicalElement,
@@ -26,10 +25,6 @@ type ClientStatistics = {
 	}
 };
 
-type DiagramView = {
-	main: number[],
-	base: number[],
-}
 
 type PlayerGameInfo = {
 	name: string,
@@ -42,8 +37,7 @@ type PlayerGameInfo = {
 
 
 export type {
-	ClientData,
+	PlayerUpdInfo,
 	ClientStatistics,
-	DiagramView,
 	PlayerGameInfo,
 }
