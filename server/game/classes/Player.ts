@@ -21,6 +21,9 @@ import type
 }
 from '../messages.js';
 
+/**
+ * игровой профиль игрока
+ */
 class Player implements IUser
 {
 	/** Основная информация об игроке */
@@ -169,20 +172,36 @@ class Player implements IUser
 			);
 	}
 
-
+	/**
+	 * Восстановлено подключение к серверу.
+	 * 
+	 * * Если оппонент есть в сети, то его необходимо оповестить о подключении противника.
+	 * * В противном случае, обязательно нужно остановить таймер самоуничтожения игры.
+	 */
 	onReconnection(): void
 	{
-		this._game.preventSelfDestruction();
+		
 		const opponent: Player = this._game.getOpponent( this );
 
 		if ( opponent.bIsOnline )
 			opponent.socket?.emit( 'opConnection' );
+		else
+			this._game.preventSelfDestruction();
 	}
 
-
+	/**
+	 * Событие отключения клиента от сервера
+	 * 
+	 * * Если противник онлайн, то его необходимо оповестить об отключении игрока.
+	 * * Если противник отключился раньше, то для игры необходимо установить таймер самоуничтожения, который сработает, если никто из игроков раньше не вернется. Время таймера задано в конфигурационном файле.
+	 */
 	onDisconnect(): void
 	{
-		
+		const opponent: Player = this._game.getOpponent( this );
+		if ( opponent.bIsOnline )
+			opponent.socket?.emit( 'opDisconnection' );
+		else
+			this._game.delayedSelfDestruction();
 	}
 
 

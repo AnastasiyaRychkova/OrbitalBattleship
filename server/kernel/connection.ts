@@ -40,7 +40,7 @@ function listenOn( server: Server, Client: ClientStatic, clientList: Map<string,
 			 */
 			socket.on(
 				'registration',
-				( data: RegistrationMessage, callback: ( bIsBusy: boolean ) => void ) =>
+				( { data }: RegistrationMessage, callback: ( bIsBusy: boolean ) => void ) =>
 				{
 					const client: ClientInstance | undefined = clientList.get( data.name );
 
@@ -83,6 +83,14 @@ function listenOn( server: Server, Client: ClientStatic, clientList: Map<string,
 						clientList.set( data.name, new Client( socket, data.name ) );
 					}
 					
+				}
+			);
+
+			socket.on(
+				'error',
+				( error ) =>
+				{
+					console.error( error );
 				}
 			);
 		}

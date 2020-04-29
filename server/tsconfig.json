@@ -4,10 +4,11 @@
 		"target": "ES2019",
 		"module": "commonjs",
 		"lib": ["ES2019"],
-		"outDir": "../../build/server",
+		"outDir": "../../server/build",
 		"types": [
 			"node",
-			"socket.io"
+			"socket.io",
+			"ip",
 		],
 		
 		"resolveJsonModule": true

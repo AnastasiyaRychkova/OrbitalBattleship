@@ -12,6 +12,7 @@ import type {
 	UpdateStateMessage,
 	ClientInfoRow,
 	RefreshListMessage,
+	AnyClientMessage,
 } from '../messages.js';
 
 
@@ -30,7 +31,7 @@ class Client implements IUser
 	/**
 	 * Приглашающие на игру клиенты
 	 */
-	private _inviters: WeakSet<Client>;
+	private _inviters: Set<Client>;
 
 	/**
 	 * Ссылка на объект игрока, т.е. на объект, содержащий информацию по текущему матчу клиента
@@ -46,7 +47,7 @@ class Client implements IUser
 	{
 		this._socket 	= socket;
 		this._name 		= name;
-		this._inviters	= new WeakSet<Client>();
+		this._inviters	= new Set<Client>();
 		this._player	= undefined;
 
 		this.updateClient();
@@ -72,6 +73,10 @@ class Client implements IUser
 		return this._player !== undefined;
 	}
 
+	/**
+	 * Удалить клиента из списка приглашающих
+	 * @param inviter Приглашающий клиент
+	 */
 	removeInviter( inviter: Client ): void
 	{
 		this._inviters.delete( inviter );
@@ -114,11 +119,14 @@ class Client implements IUser
 	initGame( player: Player ): void
 	{
 		this._player = player;
-		this._inviters = new WeakSet<Client>();
+		this._inviters.clear();
 
 		this.updateClient();
 	}
 
+	/**
+	 * Синхронизировать клиента с сервером
+	 */
 	updateClient(): void
 	{
 		if ( this.bIsOnline )
@@ -137,8 +145,63 @@ class Client implements IUser
 	 */
 	bindEvents(): void
 	{
-		console.log( 'bindBasicEvents' );
-		//TODO: Повесить слушателей на основные сетевые события
+		const client: Client = this;
+
+		this.socket?.on(
+			'clientMessage',
+			( message: AnyClientMessage, callback? ) =>
+			{
+				switch ( message.type ) {
+					case 'refreshList':
+						client.onRefreshList( callback )
+						break;
+					
+					case 'invite':
+						client.onInvite( message.data.name, callback );
+						break;
+
+					case 'registration':
+						break;
+
+					case 'elemSelection':
+						client._player?.onElemSelection( message.data.elemNumber );
+						break;
+					
+					case 'checkConfig':
+						client._player?.onCheckConfig( message.data.config, callback );
+						break;
+					
+					case 'shot':
+						client._player?.onShot( message.data.spin, callback );
+						break;
+
+					case 'nameElement':
+						client._player?.onNameElement( message.data.elemNumber );
+						break;
+
+					case 'endGame':
+						client._player?.onEndGame();
+						break;
+
+					case 'flyAway':
+						client._player?.onFlyAway();
+						break;
+				}
+			}
+		);
+
+		this.socket?.on(
+			'disconnect',
+			( reason: string ) =>
+			{
+				log(
+					'Event',
+					'Client disconnected. Reason: '+reason,
+					client._name
+				);
+				client.onDisconnect();
+			}
+		)
 	}
 
 
@@ -162,11 +225,6 @@ class Client implements IUser
 		this.updateClient();
 	}
 
-
-	onDisconnection(): void
-	{
-		// TODO: Отключение игрока
-	}
 
 	/**
 	 * Получить список неиграющих online клиентов
@@ -214,7 +272,7 @@ class Client implements IUser
 	 * @param data Заглушка. Пустой объект
 	 * @param callback Функция, которая будет вызвана на клиенте. Принимает готовый список
 	 */
-	onRefreshList( data: unknown, callback: ( list: ClientInfoRow[] ) => void ): void
+	async onRefreshList( callback: ( list: ClientInfoRow[] ) => void ): Promise<void>
 	{
 		log(
 			this._name,
@@ -227,7 +285,7 @@ class Client implements IUser
 	}
 
 	/**
-	 * Пригласить клиента совместную на игру.
+	 * Пригласить клиента на совместную игру.
 	 * 
 	 * Если оба клиента выразили обоюдное желание сыграть друг с другом,
 	 * начнется игра для этой пары клиентов.
@@ -312,7 +370,13 @@ class Client implements IUser
 		this.updateClient();
 	}
 
-
+	/**
+	 * Отключение клиента от сервера
+	 * 
+	 * 1. Отчищает ссылку на сокет.
+	 * 2. Если соединение оборвалось во время матча, то необходимо оповестить об отключении оппонента.
+	 * 3. Если клиент не играл, то его необходимо удалить из списка приглашающих, а также необходимо оповестить о его уходе остальных неиграющих клиентов
+	 */
 	onDisconnect(): void
 	{
 		this._socket = undefined;
@@ -335,10 +399,13 @@ class Client implements IUser
 			clientList.forEach(
 				( client ) => {
 					if ( client.bIsOnline && !client.bHasUnfinishedGame )
+					{
+						client.removeInviter( this );
 						client.socket?.emit(
 							'refreshResults',
 							message,
-						)
+						);
+					}
 				}
 			);
 		}
