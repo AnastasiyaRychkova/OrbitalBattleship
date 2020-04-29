@@ -39,34 +39,37 @@ class StatUpdater extends UpdaterBase
 					<span class="client-avg-time">4</span>
 				</li>
 			 */
+			
 			this.list.insertAdjacentHTML(
 				"beforeend",
-				`<li class="client" data-online="${bIsOnline}">\
+				`<li class="client" data-online="${bIsOnline}" data-rating="0">\
 				\n	<span class="client-name">${name}</span>\
-				\n	<span class="client-games">${( statistics && statistics.counter ) ? statistics.counter.games : 0}</span>\
-				\n	<span class="client-victories">${( statistics && statistics.counter ) ? statistics.counter.victories : 0}</span>\
-				\n	<span class="client-total-time">${( statistics && statistics.timing ) ? statistics.timing.totalTime : 0}</span>\
-				\n	<span class="client-avg-time">${( statistics && statistics.timing ) ? statistics.timing.AVGTime : 0}</span>\
+				\n	<span class="client-games">0</span>\
+				\n	<span class="client-victories">0</span>\
+				\n	<span class="client-total-time">0</span>\
+				\n	<span class="client-avg-time">0</span>\
 				\n</li>`
 			);
 		}
 		else
 		{
-			li.setAttribute( 'data-online', bIsOnline.toString() );
+			li.dataset.online = bIsOnline.toString();
 
 			if ( statistics?.counter )
 			{
-				if ( statistics.counter.games !== undefined ) // TODO: сортировка
-				{
-					li.getElementsByClassName( 'client-games' )[0].textContent = statistics.counter.games.toString();
-					li.getElementsByClassName( 'client-victories' )[0].textContent = statistics.counter.victories.toString();
-
-				}
-
 				if ( statistics.timing !== undefined )
 				{
 					li.getElementsByClassName( 'client-total-time' )[0].textContent = statistics.timing.totalTime.toString();
 					li.getElementsByClassName( 'client-avg-time' )[0].textContent = statistics.timing.AVGTime.toString();
+				}
+
+				if ( statistics.counter.games !== undefined )
+				{
+					li.getElementsByClassName( 'client-games' )[0].textContent = statistics.counter.games.toString();
+					li.getElementsByClassName( 'client-victories' )[0].textContent = statistics.counter.victories.toString();
+					li.dataset.rating = StatUpdater.countRating( statistics.counter.games, statistics.counter.victories, statistics.timing!.totalTime ).toString();
+
+					this.sort();
 				}
 			}
 		}
@@ -76,6 +79,38 @@ class StatUpdater extends UpdaterBase
 	{
 		this.totalClients.textContent = total.toString();
 		this.onlineClients.textContent = online.toString();
+	}
+
+
+	private sort()
+	{
+		this.list.querySelectorAll
+		const nodeList = this.list.children;
+		var itemsArray: HTMLElement[] = [];
+		for (var i = 0; i < nodeList.length; i++)
+			itemsArray.push( this.list.removeChild( nodeList[i] ) as HTMLElement );
+
+		itemsArray.sort(
+			( nodeA: HTMLElement, nodeB: HTMLElement ) =>
+			{
+				const numberA = parseInt( nodeA.dataset.rating! );
+				const numberB = parseInt( nodeB.dataset.rating! );
+				if ( numberA < numberB ) return -1;
+				if ( numberA > numberB ) return 1;
+				return 0;
+			}
+		)
+		.forEach(
+			( node: HTMLElement ) =>
+			{
+				this.list.append( node );
+			}
+		);
+	}
+
+	private static countRating( games: number, victories: number, totalTime: number ): number
+	{
+		return victories / games * totalTime / games;
 	}
 }
 
