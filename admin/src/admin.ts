@@ -1,11 +1,14 @@
 import Controller from "./Controller.js";
 import AdminModel from "./AdminModel.js";
 import Updater from "./Updater.js";
+import { connect } from "./connection.js";
 
 const controller: Controller = new Controller();
 const updater: Updater = new Updater( controller, '192.168.0.0:5500' );
 const model: AdminModel = new AdminModel( updater );
 controller.init( model );
+
+connect( 'http://localhost:8081', model );
 
 /* updater.newGame( 
 	'player21player55',

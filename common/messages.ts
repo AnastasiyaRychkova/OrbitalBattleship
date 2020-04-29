@@ -62,7 +62,8 @@ type addClientMessage = {
 type updateClientMessage = {
 	action: 'updateClient',
 	game: GameInfo,
-	info: UserInfo,
+	info1: UserInfo,
+	info2?: UserInfo,
 };
 
 type newGameMessage = {
@@ -70,11 +71,6 @@ type newGameMessage = {
 	game: 	 GameInfo,
 	player1: UserInfo,
 	player2: UserInfo,
-}
-
-type removeGameMessage = {
-	action: 'removeGame',
-	game:	GameInfo,
 }
 
 /*=====  End of Server message  ======*/
@@ -89,6 +85,5 @@ export type {
 	addClientMessage,
 	updateClientMessage,
 	newGameMessage,
-	removeGameMessage,
 	DiagramView,
 }
