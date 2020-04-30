@@ -12,7 +12,7 @@ import {
 import type { RefreshListMessage }  from '../messages.js';
 
 import log from '../../kernel/log.js';
-import { toAdmin } from "./admin";
+import { toAdmin } from "../../kernel/admin";
 
 /**
  * Информация об игре

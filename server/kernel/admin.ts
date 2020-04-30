@@ -1,6 +1,5 @@
 import { Socket } from "socket.io";
-import type { AnyServerMessage, addClientMessage } from '../../../common/messages.js';
-import Client from "./Client.js";
+import type { AnyServerMessage } from '../../common/messages.js';
 
 
 let admin: Socket | null = null;

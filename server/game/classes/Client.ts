@@ -6,7 +6,7 @@ import {
 	ETeam,
 } from '../../../common/general.js';
 import log from '../../kernel/log.js';
-import { toAdmin } from './admin.js';
+import { toAdmin } from '../../kernel/admin.js';
 
 import type { Socket } from 'socket.io';
 import type {

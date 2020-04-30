@@ -17,7 +17,7 @@ import type { Socket } from 'socket.io';
 import type { ChemicalElement } from './PeriodicTable.js';
 import type { UpdateStateMessage } from '../messages.js';
 import type { PlayerInfo } from "../../../common/messages.js";
-import { toAdmin } from "./admin.js";
+import { toAdmin } from "../../kernel/admin.js";
 
 /**
  * игровой профиль игрока
