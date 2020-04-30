@@ -6,6 +6,7 @@ import {
 	ETeam,
 } from '../../../common/general.js';
 import log from '../../kernel/log.js';
+import { toAdmin } from './admin.js';
 
 import type { Socket } from 'socket.io';
 import type {
@@ -14,6 +15,7 @@ import type {
 	RefreshListMessage,
 	AnyClientMessage,
 } from '../messages.js';
+import type { UserInfo } from '../../../common/messages.js';
 
 
 class Client implements IUser
@@ -26,7 +28,7 @@ class Client implements IUser
 	/**
 	 * Имя игрока (идентификатор)
 	 */
-	private _name: string;
+	readonly name: string;
 
 	/**
 	 * Приглашающие на игру клиенты
@@ -46,16 +48,18 @@ class Client implements IUser
 	constructor( socket: Socket, name: string )
 	{
 		this._socket 	= socket;
-		this._name 		= name;
+		this.name 		= name;
 		this._inviters	= new Set<Client>();
 		this._player	= undefined;
 
-		this.updateClient();
-	}
+		toAdmin(
+			{
+				action: 'addClient',
+				name: name,
+			}
+		);
 
-	get name(): string
-	{
-		return this._name;
+		this.updateClient();
 	}
 
 	get bIsOnline(): boolean
@@ -197,11 +201,51 @@ class Client implements IUser
 				log(
 					'Event',
 					'Client disconnected. Reason: '+reason,
-					client._name
+					client.name
 				);
 				client.onDisconnect();
 			}
 		)
+	}
+
+	/**
+	 * Создать объект для отправки администратору
+	 * @param stateObject Объект, подготовленный для отправки клиенту
+	 */
+	createUserInfo(): UserInfo
+	{
+		if ( this._player !== undefined )
+		{
+			return {
+				client: {
+					name: this.name,
+					bIsOnline: this.bIsOnline,
+				},
+				player: this._player.createPlayerInfo(),
+			};
+		}
+
+		return {
+			client: {
+				name: this.name,
+				bIsOnline: this.bIsOnline,
+			},
+			player: {
+				state: EState.Online,
+				team: ETeam.None,
+				element: {
+					number: -1,
+					name: '',
+					symbol: '',
+				},
+				diagramCheck: false,
+				rightMove: false,
+				diagram: {
+					main: [ 0, 0, 0, 0 ],
+					base: [ 0, 0, 0, 0 ],
+				},
+			},
+		};
 	}
 
 
@@ -219,7 +263,14 @@ class Client implements IUser
 	{
 		this._socket = newSocket;
 
-		this._player && this._player.onReconnection();
+		if ( this._player )
+			this._player.onReconnection();
+		else
+			toAdmin( {
+				action: 'updateClient',
+				game: '',
+				info1: this.createUserInfo(),
+			} );
 
 		this.bindEvents();
 		this.updateClient();
@@ -240,7 +291,7 @@ class Client implements IUser
 			? ( client: Client ) =>
 			{
 				return {
-					name: client._name,
+					name: client.name,
 					bIsInvited: this._inviters.has( client ),
 					bIsInviting: client._inviters.has( this ),
 				};
@@ -248,7 +299,7 @@ class Client implements IUser
 			: ( client: Client ) =>
 			{
 				return {
-					name: client._name,
+					name: client.name,
 					bIsInvited: false,
 					bIsInviting: false,
 				}
@@ -275,7 +326,7 @@ class Client implements IUser
 	async onRefreshList( callback: ( list: ClientInfoRow[] ) => void ): Promise<void>
 	{
 		log(
-			this._name,
+			this.name,
 			'The client asks for a list of all non-playing connected clients',
 			'RefreshList'
 		);
@@ -300,7 +351,7 @@ class Client implements IUser
 		if ( this.bHasUnfinishedGame )
 		{
 			log(
-				this._name,
+				this.name,
 				'Can not send invitation because the client has an unfinished game',
 				'onInvite',
 			);
@@ -315,7 +366,7 @@ class Client implements IUser
 		{
 			log(
 				'Error',
-				`${ this._name } is trying to invite invalid client <${ name }>`,
+				`${ this.name } is trying to invite invalid client <${ name }>`,
 				'onInvite'
 			);
 			callback( false );
@@ -323,7 +374,7 @@ class Client implements IUser
 		}
 
 		log(
-			this._name,
+			this.name,
 			`Sent invitation to <${ name }>`,
 			'onInvite',
 		);
@@ -340,7 +391,7 @@ class Client implements IUser
 				action: 'add',
 				data: [
 					{
-						name: this._name,
+						name: this.name,
 						bIsInvited: false,
 						bIsInviting: true,
 					}
@@ -409,6 +460,12 @@ class Client implements IUser
 				}
 			);
 		}
+
+		toAdmin( {
+			action: 'updateClient',
+			game: this._player ? this._player.gameId : '',
+			info1: this.createUserInfo(),
+		} );
 	}
 }
 

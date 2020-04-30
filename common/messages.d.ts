@@ -1,13 +1,13 @@
 import EState from "./EState"
 import { ETeam } from "./ETeam"
 
-type DiagramView = {
+export type DiagramView = {
 	main: number[],
 	base: number[],
 }
 
 /** Основная информация о клиенте */
-type ClientInfo = {
+export type ClientInfo = {
 	/** Имя клиента и уникальный идентификатор */
 	name: string,
 	/** Есть ли связь с клиентом */
@@ -15,7 +15,7 @@ type ClientInfo = {
 };
 
 /** Игровая информация о клиенте */
-type PlayerInfo = {
+export type PlayerInfo = {
 	/** Состояние игры */
 	state: EState,
 	/** Команда ( синие / красные ) */
@@ -31,15 +31,15 @@ type PlayerInfo = {
 };
 
 /** Game ID */
-type GameInfo = string;
+export type GameInfo = string;
 
-type UserInfo = {
+export type UserInfo = {
 	client: ClientInfo,
 	player: PlayerInfo,
 }
 
 /** Химический элемент */
-type ChemicalElement = {
+export type ChemicalElement = {
 	/** Порядковый номер элемента */
 	number: number;
 	/** Название элемента */
@@ -54,36 +54,36 @@ type ChemicalElement = {
 =            Server message            =
 =============================================*/
 
-type addClientMessage = {
+export type addClientMessage = {
 	action: 'addClient',
 	name: string,
 };
 
-type updateClientMessage = {
+export type updateClientMessage = {
 	action: 'updateClient',
 	game: GameInfo,
 	info1: UserInfo,
 	info2?: UserInfo,
 };
 
-type newGameMessage = {
+export type newGameMessage = {
 	action: 'newGame',
 	game: 	 GameInfo,
 	player1: UserInfo,
 	player2: UserInfo,
 }
 
+export type removeGameMessage = {
+	action: 'removeGame',
+	game: 	GameInfo,
+}
+
 /*=====  End of Server message  ======*/
 
 
 
-export type {
-	ClientInfo,
-	PlayerInfo,
-	UserInfo,
-	ChemicalElement,
-	addClientMessage,
-	updateClientMessage,
-	newGameMessage,
-	DiagramView,
-}
+export type AnyServerMessage =
+	| addClientMessage
+	| updateClientMessage
+	| newGameMessage
+	| removeGameMessage;

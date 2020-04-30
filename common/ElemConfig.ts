@@ -128,21 +128,44 @@ class ElemConfig
 	}
 
 	/**
+	 * Преобразовать в числовой массив.
+	 * Небезопасен!
+	 */
+	toNumArray(): number[]
+	{
+		return [
+			this._config[0],
+			this._config[1],
+			this._config[2],
+			this._config[3],
+		];
+	}
+
+	/**
 	 * Получить массив, отражающий полное состояние диаграммы:
 	 * отметки, попадания, промахи.
 	 * 
 	 * @param diagram Диаграмма
 	 * @param shots Выстрелы по переданной диаграмме
 	 */
-	static getDiagramState( diagram: ElemConfig, shots: ElemConfig ): SpinState[]
+	static getDiagramState( diagram: ElemConfig, shots: ElemConfig, onlyResult: boolean = false ): SpinState[]
 	{
 		const result: SpinState[] = [ 118 ];
 		
 		const diagramArray = diagram.toArray();
 		const shotsArray = shots.toArray();
 
+		const calcState: (i: number) => number = onlyResult ?
+			( i: number ) =>
+			{
+				const state: number = 2 * shotsArray[ i ] + diagramArray[ i ];
+				return state === SpinState.on ? SpinState.off : state;
+			}
+			:
+			( i: number ) => 2 * shotsArray[ i ] + diagramArray[ i ];
+
 		for( let i = 0; i < 118; i++ )
-			result[ i ] = 2 * shotsArray[ i ] + diagramArray[ i ];
+			result[ i ] = calcState( i );
 		
 		return result;
 	}

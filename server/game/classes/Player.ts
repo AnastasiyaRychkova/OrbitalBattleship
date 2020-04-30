@@ -15,11 +15,9 @@ from '../../../common/general.js';
 
 import type { Socket } from 'socket.io';
 import type { ChemicalElement } from './PeriodicTable.js';
-import type
-{
-	UpdateStateMessage,
-}
-from '../messages.js';
+import type { UpdateStateMessage } from '../messages.js';
+import type { PlayerInfo } from "../../../common/messages.js";
+import { toAdmin } from "./admin.js";
 
 /**
  * игровой профиль игрока
@@ -39,16 +37,16 @@ class Player implements IUser
 	private _team: ETeam;
 
 	/** Выбранный элемент */
-	private _element: ChemicalElement | undefined;
+	private _element: ChemicalElement;
 
 	/** Диаграмма, заполненная игроком */
-	private _diagram: ElemConfig | undefined;
+	private _diagram: ElemConfig;
 
 	/** Диаграмма, заполненная игроком */
 	private _diagramCheck: boolean;
 
 	/** Выстрелы игрока по диаграмме соперника */
-	private _shots: ElemConfig | undefined;
+	private _shots: ElemConfig;
 
 	constructor( game: Game, client: Client, team: ETeam )
 	{
@@ -56,10 +54,15 @@ class Player implements IUser
 		this._game 		= game;
 		this._state 	= EState.PeriodicTable;
 		this._team 		= team;
-		this._element 	= undefined;
-		this._diagram 	= undefined;
+		this._element 	= {
+			name: '',
+			number: -1,
+			symbol: '',
+			config: new ElemConfig(),
+		};
+		this._diagram 	= new ElemConfig();
 		this._diagramCheck = false;
-		this._shots 	= undefined;
+		this._shots 	= new ElemConfig();
 
 		this._client.initGame( this );
 
@@ -88,16 +91,50 @@ class Player implements IUser
 
 	elemGuessing( elemNumber: number ): boolean
 	{
-		return this._element === undefined
-					? false
-					: this._element.number === elemNumber;
+		return this._element.number === elemNumber;
 	}
 
 	get element(): string
 	{
-		return this._element === undefined
-					? ''
-					: `${ this._element.symbol } [${ this._element.number }] (${ this._element.name })`;
+		return `${ this._element.symbol } [${ this._element.number }] (${ this._element.name })`;
+	}
+
+	get gameId(): string
+	{
+		return this._game.id;
+	}
+
+	get client(): Client | undefined
+	{
+		return this._client;
+	}
+
+	/**
+	 * Создать объект для отправки администратору
+	 * 
+	 * Может принимать объект для клиента, чтобы позаимствовать у него уже вычисленные поля
+	 * 
+	 * @param stateObject Объект, подготовленный для отправки клиенту
+	 */
+	createPlayerInfo(): PlayerInfo
+	{
+		/* До начала матча admin накладывает диаграмму игрока на диаграмму элемента,
+		после начала – выстрелы соперника поверх диаграммы игрока */
+		return {
+			state: this._state,
+			team: this._team,
+			element: {
+				number: this._element.number,
+				name: this._element.name,
+				symbol: this._element.symbol,
+			},
+			diagramCheck: this._diagramCheck,
+			rightMove: this._game.hasRightMove( this ),
+			diagram: {
+				main: this._state > EState.Preparing ? this._game.getOpponent( this )._shots.toNumArray() : this._diagram.toNumArray(),
+				base: this._state > EState.Preparing ? this._diagram.toNumArray() : this._element.config.toNumArray(),
+			}
+		}
 	}
 
 
@@ -112,40 +149,20 @@ class Player implements IUser
 		return {
 			state: this._state,
 			team: this._team,
-			element: this._element === undefined
-				? {
-					number: -1,
-					name: "",
-					symbol: "",
-				}
-				: {
-					number: this._element.number,
-					name: this._element.name,
-					symbol: this._element.symbol,
-				},
-			diagram: this._diagram === undefined
-				? []
-				: opponent._shots === undefined
-					? this._diagram.toArray()
-					: ElemConfig.getDiagramState( this._diagram, opponent._shots ),
+			element: {
+				number: this._element.number,
+				name: this._element.name,
+				symbol: this._element.symbol,
+			},
+			diagram: ElemConfig.getDiagramState( this._diagram, opponent._shots ),
 			diagramCheck: this._diagramCheck,
-			opDiagram: opponent._diagram === undefined
-				? []
-				: this._shots === undefined
-					? opponent._diagram.toArray()
-					: ElemConfig.getDiagramState( opponent._diagram, this._shots ),
+			opDiagram: ElemConfig.getDiagramState( opponent._diagram, this._shots, true ),
 			rightMove: this._game.hasRightMove( this ),
-			opElement: opponent._element === undefined ?
-				{
-					number: -1,
-					name: "",
-					symbol: "",
-				} :
-				{
-					number: opponent._element.number,
-					name: opponent._element.name,
-					symbol: opponent._element.symbol,
-				},
+			opElement: {
+				number: opponent._element.number,
+				name: opponent._element.name,
+				symbol: opponent._element.symbol,
+			},
 		}
 	}
 
@@ -158,8 +175,6 @@ class Player implements IUser
 	initState( state: EState ): void
 	{
 		this._state = state;
-		if ( state === EState.Match )
-			this._shots = new ElemConfig();
 		this.updateClient();
 	}
 
@@ -187,6 +202,12 @@ class Player implements IUser
 			opponent.socket?.emit( 'opConnection' );
 		else
 			this._game.preventSelfDestruction();
+		
+		toAdmin( {
+			action: 'updateClient',
+			game: this._game.id,
+			info1: this._client!.createUserInfo(),
+		} );
 	}
 
 	/**
@@ -232,7 +253,7 @@ class Player implements IUser
 			return;
 		}
 
-		if ( this._element !== undefined )
+		if ( this._element.number > 0 )
 		{
 			log(
 				'Cheater',
@@ -274,8 +295,11 @@ class Player implements IUser
 		this._state = EState.Preparing;
 
 		this.updateClient();
-
-		this._diagram = new ElemConfig();
+		toAdmin( {
+			action: 'updateClient',
+			game: this._game.id,
+			info1: this._client!.createUserInfo(),
+		} );
 
 	}
 
@@ -309,6 +333,11 @@ class Player implements IUser
 		this._diagram = new ElemConfig( config );
 
 		this._checkDiagram( callback );
+		toAdmin( {
+			action: 'updateClient',
+			game: this._game.id,
+			info1: this._client!.createUserInfo(),
+		} );
 	}
 
 	/**
@@ -322,7 +351,7 @@ class Player implements IUser
 	private _checkDiagram( callback: ( result: boolean ) => void ): void
 	{
 		// сравнить диаграмму и конфигурацию загаданного элемента
-		if ( ElemConfig.isEqual( this._diagram!, this._element!.config ) )
+		if ( ElemConfig.isEqual( this._diagram, this._element.config ) )
 		{ // правильно
 			const ready: number = this._game.registerReadiness();
 			log(
@@ -355,8 +384,8 @@ class Player implements IUser
 				this.name,
 				`Checking filling the diagram.\
 				\n  Result: false,\
-				\n  D: ${ this._diagram!.toArray() }\
-				\n  E: ${ this._element?.config.toArray() }`,
+				\n  D: ${ this._diagram.toArray() }\
+				\n  E: ${ this._element.config.toArray() }`,
 				'onCheckConfig'
 			);
 			callback( false );
@@ -428,7 +457,7 @@ class Player implements IUser
 		}
 
 		// Делался ли выстрел по этому спину ранее
-		if ( this._shots?.hasSpin( spin ) )
+		if ( this._shots.hasSpin( spin ) )
 		{
 			callback( false );
 			this.updateClient();
@@ -444,11 +473,18 @@ class Player implements IUser
 
 		callback( opponent._markOpShot( spin ) );
 		
-		this._shots?.write( spin, true );
+		this._shots.write( spin, true );
 		this._game.nextMove( this );
 
 		if ( !opponent.bIsOnline )
 			this.socket?.emit( 'opDisconnection' );
+		
+		toAdmin( {
+			action: 'updateClient',
+			game: this._game.id,
+			info1: this._client!.createUserInfo(),
+			info2: opponent._client!.createUserInfo(),
+		} );
 	}
 
 	/**
@@ -465,7 +501,7 @@ class Player implements IUser
 				spin
 			);
 		
-		return this._element!.config.hasSpin( spin );
+		return this._element.config.hasSpin( spin );
 	}
 
 	/**
@@ -589,6 +625,13 @@ class Player implements IUser
 		this.destroy = () => {};
 		if ( this._client )
 		{
+			if ( this._game.getOpponent( this ).bIsOnline )
+			toAdmin( {
+				action: 'updateClient',
+				game: this._game.id,
+				info1: this._client!.createUserInfo(),
+			} );
+			
 			this._client.finishMatch(); // отправить клиентов в состояние Online
 			this._client = undefined;
 		}

@@ -4,7 +4,7 @@
 		"target": "ES2019",
 		"module": "commonjs",
 		"lib": ["ES2019"],
-		"outDir": "../../server/build",
+		"outDir": "./build",
 		"types": [
 			"node",
 			"socket.io",

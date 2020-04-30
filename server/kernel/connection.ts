@@ -18,7 +18,21 @@ type ClientStatic = {
 };
 
 
-function listenOn( server: Server, Client: ClientStatic, clientList: Map<string, ClientInstance> ): void
+type InitData = {
+	Client: ClientStatic,
+	clientList: Map<string, ClientInstance>,
+	startAdmin: ( socket: Socket ) => void,
+}
+
+
+function listenOn(
+	server: Server,
+	{
+		Client,
+		clientList,
+		startAdmin,
+	}: InitData
+): void
 {
 	server.on(
 		'connection',
@@ -95,7 +109,17 @@ function listenOn( server: Server, Client: ClientStatic, clientList: Map<string,
 			);
 		}
 	);
+
+	server.of( 'admin' ).on(
+		'connect',
+		( socket: Socket ) =>
+		{
+			startAdmin( socket );
+		}
+	)
 }
+
+
 
 export {
 	listenOn,

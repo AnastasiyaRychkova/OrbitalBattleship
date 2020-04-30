@@ -12,6 +12,7 @@ import {
 import type { RefreshListMessage }  from '../messages.js';
 
 import log from '../../kernel/log.js';
+import { toAdmin } from "./admin";
 
 /**
  * Информация об игре
@@ -19,6 +20,9 @@ import log from '../../kernel/log.js';
  */
 class Game
 {
+	/** ID игры */
+	readonly id: string;
+
 	/** Массив участвующих в игре клиентов */
 	private _players: Player[];
 
@@ -38,6 +42,8 @@ class Game
 
 	constructor( client1: Client, client2: Client )
 	{
+		this.id = client1.name + client2.name;
+
 		const randomTeam: ETeam = getRandomTeam();
 
 		this._players = [
@@ -81,6 +87,13 @@ class Game
 					)
 			}
 		);
+
+		toAdmin( {
+			action: 'newGame',
+			game: this.id,
+			player1: client1.createUserInfo(),
+			player2: client2.createUserInfo()
+		} );
 	}
 
 	/**
@@ -163,9 +176,15 @@ class Game
 				> ${ this._players[ 1 ].name }`,
 			'toMatch'
 		)
-		return;
 
 		this._toMatch();
+		
+		toAdmin( {
+			action: 'updateClient',
+			game: this.id,
+			info1: this._players[0].client!.createUserInfo(),
+			info2: this._players[1].client!.createUserInfo(),
+		} );
 	}
 
 
@@ -226,6 +245,13 @@ class Game
 			gameConfig.celebrationWaiting,
 			this._players[ loserIndex ]
 		);
+
+		toAdmin( {
+			action: 'updateClient',
+			game: this.id,
+			info1: this._players[0].client!.createUserInfo(),
+			info2: this._players[1].client!.createUserInfo(),
+		} );
 	}
 
 
@@ -246,6 +272,10 @@ class Game
 		// чтобы игру и 2х игроков мог подобрать мусорщик
 		this._players.forEach( ( player ) => player.destroy() );
 		this._players = [];
+		toAdmin( {
+			action: 'removeGame',
+			game: 	this.id,
+		} );
 	}
 
 	/**
