@@ -1,5 +1,5 @@
 {
-  "name": "orbitalbattleshipserver",
+  "name": "orbital-battleship-server",
   "version": "1.0.0",
   "description": "Server for VR multiplayer game",
   "private": true,
@@ -24,7 +24,7 @@
     "build": "npm run build:server && npm run build:client",
     "watch:server": "npm run build:server -- --watch",
     "watch:admin": "npm run build:admin -- --watch",
-    "start": "node build/index.js"
+    "start": "node server/build/server/index.js"
   },
   "repository": {
     "type": "git",

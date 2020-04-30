@@ -25,8 +25,6 @@ type Info = {
 	}
 };
 
-// TODO: Добавить рейтинг в статистику
-// TODO: Обработка removeGame
 
 /**
  * Перевод миллисекунд в минуты с округлением
@@ -349,6 +347,20 @@ class AdminModel
 			player: newInfo.player,
 			startTime: startTime,
 		};
+	}
+
+	removeGame( gameId: string ): void
+	{
+		this.model.forEach(
+			( profile, name ) =>
+			{
+				if ( profile.game != null && profile.game.id === gameId )
+				{
+					profile.game = null;
+					this.updater.removePlayer( name );
+				}
+			}
+		);
 	}
 
 	/**

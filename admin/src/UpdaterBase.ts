@@ -60,7 +60,7 @@ class UpdaterBase
 	 */
 	removePlayer( name: string ): void
 	{
-		console.log( 'Error: newGame: Updater has no this method realization\n', name );
+		console.log( 'Error: removePlayer: Updater has no this method realization\n', name );
 	}
 }
 

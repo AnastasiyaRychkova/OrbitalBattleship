@@ -1,11 +1,11 @@
 import io from "socket.io-client";
-import { addClientMessage, updateClientMessage, newGameMessage, UserInfo } from "../../common/messages";
+import { addClientMessage, updateClientMessage, newGameMessage, UserInfo, removeGameMessage } from "../../common/messages";
 
 type AdminModelType = {
 	addClient( client: string ): void;
 	updateClient( info: UserInfo, gameId: string ): void;
 	newGame( gameId: string, player1: UserInfo, player2: UserInfo ): void;
-
+	removeGame( gameId: string ): void;
 }
 
 let socket: SocketIOClient.Socket;
@@ -23,25 +23,23 @@ function connect( address: string, model: AdminModelType )
 
 	socket.on(
 		'admin',
-		( message: addClientMessage | updateClientMessage | newGameMessage ) => {
+		( message: addClientMessage | updateClientMessage | newGameMessage | removeGameMessage ) => {
 			switch ( message.action ) {
 				case 'addClient':
-					model.addClient( ( message as addClientMessage ).name );
+					model.addClient( message.name );
 					break;
 
 				case 'updateClient':
-					{
-						const typedMessage = message as updateClientMessage;
-						model.updateClient( typedMessage.info1, typedMessage.game );
-						typedMessage.info2 && model.updateClient( typedMessage.info2, typedMessage.game );
-					}
+					model.updateClient( message.info1, message.game );
+						message.info2 && model.updateClient( message.info2, message.game );
 					break;
 
 				case 'newGame':
-					{
-						const typedMessage = message as newGameMessage;
-						model.newGame( typedMessage.game, typedMessage.player1, typedMessage.player2 )
-					}
+					model.newGame( message.game, message.player1, message.player2 )
+					break;
+
+				case 'removeGame':
+					model.removeGame( message.game )
 					break;
 			}
 		}
