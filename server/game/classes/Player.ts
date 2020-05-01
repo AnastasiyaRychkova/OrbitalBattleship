@@ -626,11 +626,11 @@ class Player implements IUser
 		if ( this._client )
 		{
 			if ( this._game.getOpponent( this ).bIsOnline )
-			toAdmin( {
-				action: 'updateClient',
-				game: this._game.id,
-				info1: this._client!.createUserInfo(),
-			} );
+				toAdmin( {
+					action: 'updateClient',
+					game: this._game.id,
+					info1: this._client!.createUserInfo(),
+				} );
 			
 			this._client.finishMatch(); // отправить клиентов в состояние Online
 			this._client = undefined;
@@ -647,6 +647,11 @@ class Player implements IUser
 	 */
 	onFlyAway(): void
 	{
+		log(
+			this.name,
+			'Client wants to fly away',
+			'Player::onFlyAway'
+		);
 		if ( this._game.getOpponent( this ).bIsOnline )
 			this._game.toCelebration( this );
 		else

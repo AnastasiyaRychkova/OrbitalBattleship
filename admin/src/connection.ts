@@ -1,4 +1,3 @@
-import io from "socket.io-client";
 import { addClientMessage, updateClientMessage, newGameMessage, UserInfo, removeGameMessage } from "../../common/messages";
 
 type AdminModelType = {

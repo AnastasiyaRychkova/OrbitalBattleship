@@ -52,6 +52,8 @@ class Client implements IUser
 		this._inviters	= new Set<Client>();
 		this._player	= undefined;
 
+		this.bindEvents();
+
 		toAdmin(
 			{
 				action: 'addClient',
@@ -150,23 +152,30 @@ class Client implements IUser
 	bindEvents(): void
 	{
 		const client: Client = this;
+		log(
+			this.name,
+			'Bind functions to socket events'
+		);
 
 		this.socket?.on(
 			'clientMessage',
 			( message: AnyClientMessage, callback? ) =>
 			{
+				log(
+					'Event',
+					`New client message: <${message.data}>`,
+					'onClientMessage'
+				);
 				switch ( message.type ) {
 					case 'refreshList':
 						client.onRefreshList( callback )
+						.catch( ( error ) => log( 'Error', error ) );
 						break;
 					
 					case 'invite':
 						client.onInvite( message.data.name, callback );
 						break;
-
-					case 'registration':
-						break;
-
+					
 					case 'elemSelection':
 						client._player?.onElemSelection( message.data.elemNumber );
 						break;
@@ -188,7 +197,7 @@ class Client implements IUser
 						break;
 
 					case 'flyAway':
-						client._player?.onFlyAway();
+						client.onFlyAway();
 						break;
 				}
 			}
@@ -320,7 +329,6 @@ class Client implements IUser
 
 	/**
 	 * Обновить список клиентов, с которыми можно поиграть
-	 * @param data Заглушка. Пустой объект
 	 * @param callback Функция, которая будет вызвана на клиенте. Принимает готовый список
 	 */
 	async onRefreshList( callback: ( list: ClientInfoRow[] ) => void ): Promise<void>
@@ -419,6 +427,22 @@ class Client implements IUser
 		this._player = undefined;
 
 		this.updateClient();
+	}
+
+	/**
+	 * Клиента прошел регистрацию на сервере и просит либо закончить игру, либо отключиться
+	 */
+	onFlyAway(): void
+	{
+		log(
+			this.name,
+			'Client wants to fly away',
+			'Client::onFlyAway'
+		);
+		if ( this._player )
+			this._player.onFlyAway();
+		else
+			this._socket?.disconnect( true );
 	}
 
 	/**

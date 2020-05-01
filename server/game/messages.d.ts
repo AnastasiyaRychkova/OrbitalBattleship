@@ -66,11 +66,8 @@ export type ClientInfoRow = {
 
 /** Регистрация на сервере */
 export type RegistrationMessage = {
-	type: 'registration',
-	data: {
-		name: string,
-		state: EState,
-	}
+	name: string,
+	state: EState,
 };
 
 /** Запрос на получение списка неиграющих онлайн клиентов */
@@ -135,7 +132,6 @@ export type FlyAwayMessage = {
 
 
 export type AnyClientMessage =
-	| RegistrationMessage
 	| ListRequestionMessage
 	| InviteMessage
 	| ElementSelectionMessage

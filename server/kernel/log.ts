@@ -23,7 +23,7 @@ function log( type: string, message: string | Error, path?: string ) {
 		let colorFunc: ( str: string ) => string;
 		switch (type) {
 			case 'INFO':
-				colorFunc = colors.black;
+				colorFunc = colors.yellow;
 				type += ':';
 				break;
 			case 'LOG':
