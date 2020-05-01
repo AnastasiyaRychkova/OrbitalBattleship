@@ -64,6 +64,14 @@ class Updater extends UpdaterBase
 		this.games.removePlayer( player );
 		this.diagram.removePlayer( player );
 	}
+
+	clear(): void
+	{
+		this.statistics.clear();
+		this.games.clear();
+		this.updateDiagramHidden( true );
+		this.updateClientCounter( 0, 0 );
+	}
 }
 
 export default Updater;

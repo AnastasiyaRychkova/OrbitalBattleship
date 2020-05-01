@@ -5,6 +5,7 @@ type AdminModelType = {
 	updateClient( info: UserInfo, gameId: string ): void;
 	newGame( gameId: string, player1: UserInfo, player2: UserInfo ): void;
 	removeGame( gameId: string ): void;
+	clear(): void;
 }
 
 let socket: SocketIOClient.Socket;
@@ -17,6 +18,7 @@ function connect( address: string, model: AdminModelType )
 		'connect',
 		() => {
 			console.log( 'Connection', address+'/admin' );
+			model.clear();
 		}
 	);
 

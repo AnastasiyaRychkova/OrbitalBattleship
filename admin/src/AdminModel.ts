@@ -8,7 +8,8 @@ type UpdaterType = {
 	updateClientCounter( online: number, total: number ): void;
 	updateDiagramHidden( newHidden: boolean, info?: UserInfo ): void;
 	newGame( gameId: string, player1: PlayerGameInfo, player2: PlayerGameInfo ): void;
-	removePlayer( name: string ): void
+	removePlayer( name: string ): void;
+	clear(): void;
 }
 
 type Info = {
@@ -387,6 +388,12 @@ class AdminModel
 					}
 				)
 		}
+	}
+
+	clear(): void
+	{
+		this.model.clear();
+		this.updater.clear();
 	}
 }
 

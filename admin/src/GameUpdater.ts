@@ -125,6 +125,12 @@ class GameUpdater extends UpdaterBase
 			}
 		}
 	}
+
+	clear(): void
+	{
+		while ( this.list.hasChildNodes() )
+			this.list.lastChild!.remove();
+	}
 }
 
 

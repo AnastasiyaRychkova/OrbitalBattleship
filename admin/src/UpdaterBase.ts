@@ -62,6 +62,14 @@ class UpdaterBase
 	{
 		console.log( 'Error: removePlayer: Updater has no this method realization\n', name );
 	}
+
+	/**
+	 * Сбросить к начальным значениям и отчистить списки
+	 */
+	clear(): void
+	{
+		console.log( 'Error: clear: Updater has no this method realization\n' );
+	}
 }
 
 export default UpdaterBase;

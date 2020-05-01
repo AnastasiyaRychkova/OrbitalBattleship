@@ -4,7 +4,7 @@ import type { ClientStatistics } from './types.js';
 class StatUpdater extends UpdaterBase
 {
 	/** Нумерованный список со статистикой о клиентах */
-	private list: HTMLElement;
+	private list: HTMLUListElement;
 
 	/** Счетчик онлайн клиентов */
 	private onlineClients: HTMLElement;
@@ -16,7 +16,7 @@ class StatUpdater extends UpdaterBase
 	{
 		super();
 
-		this.list = document.getElementById( 'client-list' )!;
+		this.list = document.getElementById( 'client-list' )! as HTMLUListElement;
 
 		this.onlineClients = document.querySelector( '.client-counter > .online-players > span' ) as HTMLElement;
 		this.totalClients = document.querySelector( '.client-counter > .all-players > span' ) as HTMLElement;
@@ -42,7 +42,7 @@ class StatUpdater extends UpdaterBase
 			
 			this.list.insertAdjacentHTML(
 				"beforeend",
-				`<li class="client" data-online="${bIsOnline}" data-rating="0">\
+				`<li id="${'cl-'+name}" class="client" data-online="${bIsOnline}" data-rating="0">\
 				\n	<span class="client-name">${name}</span>\
 				\n	<span class="client-games">0</span>\
 				\n	<span class="client-victories">0</span>\
@@ -111,6 +111,12 @@ class StatUpdater extends UpdaterBase
 	private static countRating( games: number, victories: number, totalTime: number ): number
 	{
 		return victories / games * totalTime / games;
+	}
+
+	clear(): void
+	{
+		while( this.list.hasChildNodes() )
+			this.list.lastChild!.remove();
 	}
 }
 
