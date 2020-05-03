@@ -11,17 +11,10 @@ class Controller
 	/** Открыть окно с диаграммой данного игрока */
 	openDiagram: ( event: Event ) => void;
 
-	constructor()
-	{
-		this.openDiagram = () => {
-			console.error( 'Controller was not initialized' );
-		}
-	}
-
-	init( model: AppModel )
+	constructor( model: AppModel )
 	{
 		this.openDiagram = ( event: Event ) => {
-			model.openDiagram( ( event.target as HTMLElement ).id.slice( 2 ) );
+			model.openDiagram( ( event.currentTarget as HTMLElement ).id.slice( 2 ) );
 		}
 
 		document.getElementById( 'd-close' )!.addEventListener(

@@ -25,6 +25,7 @@ function connect( address: string, model: AdminModelType )
 	socket.on(
 		'admin',
 		( message: addClientMessage | updateClientMessage | newGameMessage | removeGameMessage ) => {
+			console.log( 'New message:', message );
 			switch ( message.action ) {
 				case 'addClient':
 					model.addClient( message.name );

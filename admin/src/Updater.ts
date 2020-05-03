@@ -18,13 +18,18 @@ class Updater extends UpdaterBase
 
 	private diagram: DiagramUpdater;
 
-	constructor( controller: ControllerType, address: string )
+	constructor()
 	{
 		super();
 
 		this.statistics = new StatUpdater();
-		this.games = new GameUpdater( controller, address );
+		this.games = new GameUpdater();
 		this.diagram = new DiagramUpdater();
+	}
+
+	init( controller: ControllerType, address: string ): void
+	{
+		this.games.init( controller, address );
 	}
 
 	updateClient( name: string, bIsOnline: boolean, statistics?: ClientStatistics ): void

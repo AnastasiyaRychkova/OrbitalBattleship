@@ -88,16 +88,16 @@
 
 #diagram[data-team="Actinoids"]
 {
-	--team-color: var(--red);
-	--team-color-error: var(--red-error);
-	--op-color: var(--blue);
+	--team-color: var(--blue);
+	--team-color-error: var(--blue-error);
+	--op-color: var(--red);
 }
 
 #diagram[data-team="Lanthanoids"]
 {
-	--team-color: var(--blue);
-	--team-color-error: var(--blue-error);
-	--op-color: var(--red);
+	--team-color: var(--red);
+	--team-color-error: var(--red-error);
+	--op-color: var(--blue);
 }
 
 #diagram-grid[data-match="true"] svg[data-spin-state="on"]

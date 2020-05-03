@@ -65,13 +65,11 @@ class Player implements IUser
 		this._shots 	= new ElemConfig();
 
 		this._client.initGame( this );
-
-		this.updateClient();
 	}
 
 	get name(): string
 	{
-		return this._client ? this.name : "Unknown";
+		return this._client ? this._client.name : "Unknown";
 	}
 
 	get bIsOnline(): boolean
@@ -144,26 +142,55 @@ class Player implements IUser
 	 */
 	createStateObject(): UpdateStateMessage
 	{
-		const opponent: Player | undefined = this._game.getOpponent( this );
+		if ( this._state > EState.PeriodicTable )
+		{
+			const opponent: Player | undefined = this._game.getOpponent( this );
 
-		return {
-			state: this._state,
-			team: this._team,
-			element: {
-				number: this._element.number,
-				name: this._element.name,
-				symbol: this._element.symbol,
-			},
-			diagram: ElemConfig.getDiagramState( this._diagram, opponent._shots ),
-			diagramCheck: this._diagramCheck,
-			opDiagram: ElemConfig.getDiagramState( opponent._diagram, this._shots, true ),
-			rightMove: this._game.hasRightMove( this ),
-			opElement: {
-				number: opponent._element.number,
-				name: opponent._element.name,
-				symbol: opponent._element.symbol,
-			},
+			return {
+				state: this._state,
+				team: this._team,
+				element: {
+					number: this._element.number,
+					name: this._element.name,
+					symbol: this._element.symbol,
+				},
+				diagram: ElemConfig.getDiagramState( this._diagram, opponent._shots ),
+				diagramCheck: this._diagramCheck,
+				opDiagram: ElemConfig.getDiagramState( opponent._diagram, this._shots, true ),
+				rightMove: this._game.hasRightMove( this ),
+				opElement: this._state === EState.Celebration
+					? {
+						number: opponent._element.number,
+						name: opponent._element.name,
+						symbol: opponent._element.symbol,
+					}
+					: {
+						number: -1,
+						name: '',
+						symbol: '',
+					},
+			};
 		}
+		else
+			return {
+				state: this._state,
+				team: this._team,
+				element: {
+					number: this._element.number,
+					name: this._element.name,
+					symbol: this._element.symbol,
+				},
+				diagram: [],
+				diagramCheck: false,
+				opDiagram: [],
+				rightMove: false,
+				opElement: {
+					number: -1,
+					name: '',
+					symbol: '',
+				},
+			}
+		
 	}
 
 
@@ -409,7 +436,7 @@ class Player implements IUser
 	onShot( spin: number, callback: ( result: boolean ) => void ): void
 	{
 		// Действительно ли сейчас матч
-		if ( this._state === EState.Match )
+		if ( this._state !== EState.Match )
 		{
 			log(
 				'Cheater',
@@ -425,7 +452,7 @@ class Player implements IUser
 		}
 
 		// Имеет ли игрок право хода
-		if ( this._game.hasRightMove( this ) )
+		if ( !this._game.hasRightMove( this ) )
 		{
 			log(
 				'Cheater',
@@ -498,7 +525,9 @@ class Player implements IUser
 		if ( this.bIsOnline )
 			this.socket?.emit(
 				'shot',
-				spin
+				{
+					number: spin,
+				}
 			);
 		
 		return this._element.config.hasSpin( spin );
@@ -530,7 +559,7 @@ class Player implements IUser
 		}
 
 		// Имеет ли игрок право хода
-		if ( this._game.hasRightMove( this ) )
+		if ( !this._game.hasRightMove( this ) )
 		{
 			log(
 				'Cheater',
@@ -592,7 +621,7 @@ class Player implements IUser
 		}
 
 		// Является ли игрок победителем
-		if ( this._game.hasRightMove( this ) )
+		if ( !this._game.hasRightMove( this ) )
 		{
 			log(
 				'Cheater',
@@ -628,7 +657,7 @@ class Player implements IUser
 			if ( this._game.getOpponent( this ).bIsOnline )
 				toAdmin( {
 					action: 'updateClient',
-					game: this._game.id,
+					game: '',
 					info1: this._client!.createUserInfo(),
 				} );
 			

@@ -62,6 +62,30 @@ class Client implements IUser
 		);
 
 		this.updateClient();
+
+		const message: RefreshListMessage = {
+			action: 'add',
+			data: [
+				{
+					name: this.name,
+					bIsInvited: false,
+					bIsInviting: false,
+				}
+			],
+		}
+
+		// Отправить всем неиграющим клиентам команду на удаление клиента
+		clientList.forEach(
+			( client ) => {
+				if ( client.bIsOnline && !client.bHasUnfinishedGame )
+				{
+					client.socket?.emit(
+						'refreshResults',
+						message,
+					);
+				}
+			}
+		);
 	}
 
 	get bIsOnline(): boolean
@@ -275,11 +299,37 @@ class Client implements IUser
 		if ( this._player )
 			this._player.onReconnection();
 		else
+		{
+			const message: RefreshListMessage = {
+				action: 'add',
+				data: [
+					{
+						name: this.name,
+						bIsInvited: false,
+						bIsInviting: false,
+					}
+				],
+			}
+
+			// Отправить всем неиграющим клиентам команду на удаление клиента
+			clientList.forEach(
+				( client ) => {
+					if ( client.bIsOnline && !client.bHasUnfinishedGame )
+					{
+						client.socket?.emit(
+							'refreshResults',
+							message,
+						);
+					}
+				}
+			);
+
 			toAdmin( {
 				action: 'updateClient',
 				game: '',
 				info1: this.createUserInfo(),
 			} );
+		}
 
 		this.bindEvents();
 		this.updateClient();
@@ -319,7 +369,7 @@ class Client implements IUser
 		clientList.forEach(
 			( client ) =>
 			{
-				if ( client !== this && !client.bIsOnline && client.bHasUnfinishedGame )
+				if ( client !== this && client.bIsOnline && !client.bHasUnfinishedGame )
 					list.push( getRow( client ) );
 			}
 		);
@@ -388,7 +438,7 @@ class Client implements IUser
 		);
 
 		// Если оба игрока пригласили друг друга, то можно начинать игру
-		if ( client._inviters.has( this ) )
+		if ( this._inviters.has( client ) )
 		{
 			new Game( this, client );
 		}
@@ -484,6 +534,8 @@ class Client implements IUser
 				}
 			);
 		}
+
+		this._inviters.clear();
 
 		toAdmin( {
 			action: 'updateClient',

@@ -43,6 +43,10 @@ class Game
 	constructor( client1: Client, client2: Client )
 	{
 		this.id = client1.name + client2.name;
+		log(
+			'INFO',
+			'New game: '+this.id
+		);
 
 		const randomTeam: ETeam = getRandomTeam();
 

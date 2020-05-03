@@ -2,10 +2,15 @@ import colors from 'colors/safe';
 
 /**
  * Сообщение пользователю служебной информации (логирование)
- * @param type Тип сообщения
+ * @param type Тип сообщения `INFO`|`LOG`|`Debug`|`Event`|`Error`|`Cheater`|`MATCH RESULT`
  * @param message Сообщение
  */
-function log( type: string, message: string | Error, path?: string ) {
+function log(
+	type: string,
+	message: string | Error,
+	path?: string,
+	...restMessages: any[]
+) {
 	if( message instanceof Error )
 		switch (type) {
 			case 'Error':
@@ -49,7 +54,7 @@ function log( type: string, message: string | Error, path?: string ) {
 				colorFunc = colors.white;
 				break;
 		}
-		console.log( colorFunc( type ), colorFunc( path !== undefined ? ( path + ': ' ) : '' ), colorFunc( message ) );
+		console.log( colorFunc( type ), colorFunc( path !== undefined ? ( path + ': ' ) : '' ), colorFunc( message ), ...restMessages );
 	}
 }
 

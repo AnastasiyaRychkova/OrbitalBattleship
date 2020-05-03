@@ -63,7 +63,8 @@ class AdminModel
 		setInterval(
 			this.updateTiming,
 			20000,
-			this.model
+			this.model,
+			this.updater
 		);
 	}
 
@@ -78,13 +79,13 @@ class AdminModel
 
 		if ( playerInfo === undefined )
 		{
-			console.error( 'Failed to open diagram window. Invalid value of player name', player );
+			console.error( 'Failed to open diagram window. Invalid value of player name: '+player );
 			return;
 		}
 
 		if ( playerInfo.game == null )
 		{
-			console.error( 'Failed to open diagram window. The player has no game', player );
+			console.error( 'Failed to open diagram window. The player has no game: '+player );
 			return;
 		}
 
@@ -367,7 +368,7 @@ class AdminModel
 	/**
 	 * Обновление отображения временнЫх значений
 	 */
-	async updateTiming( model: Map<string, Info> )
+	async updateTiming( model: Map<string, Info>, updater: UpdaterType )
 	{
 		const now: number = Date.now();
 		for ( const client of model ) {
@@ -377,7 +378,7 @@ class AdminModel
 				&& client[1].game.player.state > EState.Online
 				&& client[1].game.player.state < EState.Celebration
 			)
-				this.updater.updateClient(
+				updater.updateClient(
 					client[0],
 					client[1].bIsOnline,
 					{

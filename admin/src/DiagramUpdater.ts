@@ -74,7 +74,7 @@ class DiagramUpdater extends UpdaterBase
 
 	updatePlayer( player: PlayerUpdInfo ): void
 	{
-		if( this.bHidden || name !== this.name.textContent )
+		if( this.bHidden || player.name !== this.name.textContent )
 			return;
 
 		for (const prop in player) {

@@ -16,14 +16,18 @@ class GameUpdater extends UpdaterBase
 	/** Метод, который необходимо повесить на элемент игрока, чтобы открыть окно диаграммы */
 	openDiagram: ( event: Event ) => void;
 
-	constructor( controller: ControllerType, address: string )
+	constructor()
 	{
 		super();
 
-		( document.querySelector( '.ipv4-address > span' ) as HTMLSpanElement ).textContent = address;
+		this.openDiagram = () => {};
 
 		this.list = document.getElementById( 'game-list' ) as HTMLUListElement;
+	}
 
+	init( controller: ControllerType, address: string ): void
+	{
+		( document.querySelector( '.ipv4-address > span' ) as HTMLSpanElement ).textContent = address;
 		this.openDiagram = controller.openDiagram;
 	}
 
@@ -41,12 +45,12 @@ class GameUpdater extends UpdaterBase
 			\n	<div class="player" id="${'g-'+player1.name}" data-online="${player1.bIsOnline}" data-rm="${player1.rightMove}" data-disable="false">\
 			\n		<div class="name">${player1.name}</div>\
 			\n		<div class="state ${EState[player1.state].toLowerCase()}"></div>\
-			\n		<div class="element"><sub>${player1.element.number}</sub>${player1.element.symbol}</div>\
+			\n		<div class="element"><sub>${player1.element.number > 0 ? player1.element.number : '??'}</sub>${player1.element.number > 0 ? player1.element.symbol : '??'}</div>\
 			\n	</div>\
 			\n	<div class="player" id="${'g-'+player2.name}" data-online="${player2.bIsOnline}" data-rm="${player2.rightMove}" data-disable="false">\
 			\n		<div class="name">${player2.name}</div>\
 			\n		<div class="state ${EState[player2.state].toLowerCase()}"></div>\
-			\n		<div class="element"><sub>${player2.element.number}</sub>${player2.element.symbol}</div>\
+			\n		<div class="element"><sub>${player2.element.number > 0 ? player2.element.number : '??'}</sub>${player2.element.number > 0 ? player2.element.symbol : '??'}</div>\
 			\n	</div>\
 			\n</li>`
 		);
@@ -116,7 +120,7 @@ class GameUpdater extends UpdaterBase
 				case 'element':
 					const element: HTMLElement = ( client.getElementsByClassName( 'element' )[0] ) as HTMLElement;
 					const elementInfo: ChemicalElement = clientInfo as ChemicalElement;
-					element.innerHTML = `<sub>${elementInfo.number}</sub>${elementInfo.symbol}`;
+					element.innerHTML = `<sub>${elementInfo.number > 0 ? elementInfo.number : '??'}</sub>${elementInfo.number > 0 ? elementInfo.symbol : '??'}`;
 					break;
 
 				case 'rightMove':
