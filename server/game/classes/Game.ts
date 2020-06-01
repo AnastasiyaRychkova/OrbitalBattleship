@@ -34,6 +34,9 @@ class Game
 	 */
 	private _rightMove: number;
 
+	/** Время начала матча (timestamp) */
+	private _startTime: number;
+
 	/** Таймер самоуничтожения */
 	private _selfDestructionTimer: NodeJS.Timeout | undefined;
 
@@ -56,6 +59,7 @@ class Game
 		];
 		this._readyPlayers 	= 0;
 		this._rightMove 	= -1;
+		this._startTime		= Date.now();
 
 		clientList.forEach(
 			( client: Client ) =>
@@ -165,9 +169,9 @@ class Game
 		{
 			log(
 				'Warn',
-				`Failed to go to the Match:
-					${ this._players[ 0 ] ? this._players[ 0 ].name : 'Unknown player' },
-					${ this._players[ 1 ] ? this._players[ 1 ].name : 'Unknown player' }`,
+				`Failed to go to the Match:\
+				\n	${ this._players[ 0 ] ? this._players[ 0 ].name : 'Unknown player' }\,
+				\n	${ this._players[ 1 ] ? this._players[ 1 ].name : 'Unknown player' }`,
 				'toMatch'
 			)
 			return;

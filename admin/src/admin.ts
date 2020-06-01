@@ -6,7 +6,7 @@ import { connect } from "./connection.js";
 const updater: Updater = new Updater();
 const model: AdminModel = new AdminModel( updater );
 const controller: Controller = new Controller( model );
-updater.init( controller, '192.168.0.0:5500' );
+updater.init( controller, '192.168.0.0:8081' );
 
 connect( 'http://localhost:8081', model );
 

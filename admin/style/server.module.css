@@ -93,15 +93,23 @@
 	align-items: center;
 	height: 2em;
 	padding: 0.4em 0.4em;
-/* 	border: 1.5px solid transparent; */
 	cursor: pointer;
 }
 
 .player:hover
 {
 	background-color: var(--selection);
-/* 	border: 1.5px solid var(--blue); */
+	
+}
+
+.player:first-child:hover
+{
 	color: var(--blue);
+}
+
+.player:last-child:hover
+{
+	color: var(--red);
 }
 
 .player[data-rm="true"]:first-child

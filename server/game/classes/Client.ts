@@ -16,6 +16,7 @@ import type {
 	AnyClientMessage,
 } from '../messages.js';
 import type { UserInfo } from '../../../common/messages.js';
+import { setImmediate } from 'timers';
 
 
 class Client implements IUser
@@ -192,8 +193,7 @@ class Client implements IUser
 				);
 				switch ( message.type ) {
 					case 'refreshList':
-						client.onRefreshList( callback )
-						.catch( ( error ) => log( 'Error', error ) );
+						client.onRefreshList( callback );
 						break;
 					
 					case 'invite':
@@ -381,7 +381,7 @@ class Client implements IUser
 	 * Обновить список клиентов, с которыми можно поиграть
 	 * @param callback Функция, которая будет вызвана на клиенте. Принимает готовый список
 	 */
-	async onRefreshList( callback: ( list: ClientInfoRow[] ) => void ): Promise<void>
+	onRefreshList( callback: ( list: ClientInfoRow[] ) => void ): void
 	{
 		log(
 			this.name,
@@ -389,8 +389,13 @@ class Client implements IUser
 			'RefreshList'
 		);
 
-		const list: ClientInfoRow[] = this.getClientsList( true );
-		callback( list );
+		setImmediate(
+			() =>
+			{
+				const list: ClientInfoRow[] = this.getClientsList( true );
+				callback( list );
+			}
+		);
 	}
 
 	/**

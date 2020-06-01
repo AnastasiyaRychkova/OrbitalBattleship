@@ -12,10 +12,10 @@ listenOn(
 	}
 );
 
-process.addListener(
+/* process.addListener(
 	'uncaughtException',
 	( error ) =>
 	{
 		console.error( error );
 	}
-);
+); */

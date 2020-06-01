@@ -48,6 +48,16 @@ export type ChemicalElement = {
 	symbol: string;
 };
 
+/** Статистика пользователя */
+export type Statistics = {
+	/** Количество законченных матчей */
+	games: number,
+	/** Количество побед */
+	victories: number,
+	/** Время, проведенное в играх (мс) */
+	totalTime: number,
+}
+
 
 
 /*=============================================
