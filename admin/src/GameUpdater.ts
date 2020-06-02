@@ -1,7 +1,7 @@
 import UpdaterBase from "./UpdaterBase.js";
 import EState from "../../common/EState.js";
 import type { PlayerGameInfo, PlayerUpdInfo } from './types.js';
-import { ChemicalElement } from "../../common/messages.js";
+import { ChemicalElement, AdminUser, AdminUserInfo } from "../../common/messages.js";
 import { ETeam } from "../../common/ETeam.js";
 
 type ControllerType = {
@@ -134,6 +134,49 @@ class GameUpdater extends UpdaterBase
 	{
 		while ( this.list.hasChildNodes() )
 			this.list.lastChild!.remove();
+	}
+
+	reload( model: AdminUser[] ): void
+	{
+		this.clear();
+
+		/** Временное хранилище для поиска пар игроков */
+		const games = new Map<string, PlayerGameInfo[]>();
+
+		/** Из имени и AdminUserInfo объекта получить PlayerGameInfo объект */
+		function makePlayerGameInfo( name: string, info: AdminUserInfo ): PlayerGameInfo
+		{
+			return {
+				name: name,
+				bIsOnline: info.bIsOnline,
+				state: info.game!.player.state,
+				team: info.game!.player.team,
+				element: info.game!.player.element,
+				rightMove: info.game!.player.rightMove,
+			}
+		}
+
+		for ( const [ name, info ] of model )
+		{
+			if ( info.game == null )
+				continue;
+
+			const players = games.get( info.game.id );
+
+			if ( players === undefined )
+				games.set(
+					info.game.id,
+					[
+						makePlayerGameInfo( name, info ),
+					]
+				)
+			else
+			{
+				players.push( makePlayerGameInfo( name, info ) );
+				if ( players.length === 2 )
+					this.newGame( info.game.id, players[0], players[1] );
+			}
+		}
 	}
 }
 

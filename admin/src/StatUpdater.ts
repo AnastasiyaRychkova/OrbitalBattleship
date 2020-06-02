@@ -1,5 +1,5 @@
 import UpdaterBase from "./UpdaterBase.js";
-import { Statistics } from "../../common/messages.js";
+import { Statistics, AdminUser } from "../../common/messages.js";
 
 
 /**
@@ -137,6 +137,23 @@ class StatUpdater extends UpdaterBase
 	{
 		while( this.list.hasChildNodes() )
 			this.list.lastChild!.remove();
+	}
+
+	reload( model: AdminUser[] ): void
+	{
+		this.clear();
+
+		for ( const [ name, info, rating ] of model )
+			this.list.insertAdjacentHTML(
+				"beforeend",
+				`<li id="${'cl-'+name}" class="client" data-online="${info.bIsOnline}" data-rating="${rating !== undefined ? rating : 0}">\
+				\n	<span class="client-name">${name}</span>\
+				\n	<span class="client-games">${info.statistics.games}</span>\
+				\n	<span class="client-victories">${info.statistics.victories}</span>\
+				\n	<span class="client-total-time">${msToMin( info.statistics.totalTime )}</span>\
+				\n	<span class="client-avg-time">${msToMin( info.statistics.totalTime / info.statistics.games )}</span>\
+				\n</li>`
+			);
 	}
 }
 

@@ -74,8 +74,12 @@ export type Statistics = {
 	totalTime: number,
 };
 
-/** Тип для отправки профилей всех пользователей сервера */
-export type AdminUser = [ string, AdminUserInfo ];
+/** Тип для отправки профилей всех пользователей сервера
+ * - Name
+ * - Info
+ * - Rating
+ */
+export type AdminUser = [ string, AdminUserInfo, number? ];
 
 
 

@@ -1,10 +1,11 @@
 import type { PlayerUpdInfo, PlayerGameInfo } from './types.js';
-import type { UserInfo, Statistics } from '../../common/messages.js';
+import type { UserInfo, Statistics, AdminUser } from '../../common/messages.js';
 
 class UpdaterBase
 {
 	/**
 	 * Обновить статус подключения клиента (online/offline)
+	 * 
 	 * @param name Имя клиента
 	 * @param bIsOnline Статус подключения
 	 * @param statistics Общая статистика игрока
@@ -16,6 +17,7 @@ class UpdaterBase
 
 	/**
 	 * Обновить игровую информацию о клиенте
+	 * 
 	 * @param player Информация о клиенте, которую необходимо обновить
 	 */
 	updatePlayer( player: PlayerUpdInfo ): void
@@ -25,6 +27,7 @@ class UpdaterBase
 
 	/**
 	 * Обновить счетчики игроков
+	 * 
 	 * @param total Количество игроков, о которых имеется информация на сервере
 	 * @param online Количество online игроков
 	 */
@@ -35,6 +38,7 @@ class UpdaterBase
 
 	/**
 	 * Показать или закрыть окно с диаграммой
+	 * 
 	 * @param newHidden Нужно ли скрыть окно
 	 * @param info Если необходимо показать окно, то какой информацией необходимо его заполнить
 	 */
@@ -45,6 +49,7 @@ class UpdaterBase
 
 	/**
 	 * Создать новую игру, если она не существует, и обновить в противном случае
+	 * 
 	 * @param gameId ID новой игры
 	 * @param player1 Первый участник
 	 * @param player2 Второй участник
@@ -56,6 +61,7 @@ class UpdaterBase
 
 	/**
 	 * Удалить запись об игроке
+	 * 
 	 * @param player Имя игрока
 	 */
 	removePlayer( name: string ): void
@@ -68,7 +74,17 @@ class UpdaterBase
 	 */
 	clear(): void
 	{
-		console.log( 'Error: clear: Updater has no this method realization\n' );
+		console.log( 'Error: clear: Updater has no this method realization' );
+	}
+
+	/**
+	 * Полностью обновить новыми данными
+	 * 
+	 * @param model Массив, хранящий профили всех клиентов
+	 */
+	reload( model: AdminUser[] ): void
+	{
+		console.log( 'Error: clear: Updater has no this method realization\nTotal: '+model.length );
 	}
 }
 

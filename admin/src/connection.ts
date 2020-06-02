@@ -1,4 +1,4 @@
-import { addClientMessage, updateClientMessage, newGameMessage, UserInfo, removeGameMessage } from "../../common/messages";
+import { addClientMessage, updateClientMessage, newGameMessage, UserInfo, removeGameMessage, reloadAdminMessage, AdminUser } from "../../common/messages";
 
 type AdminModelType = {
 	addClient( client: string ): void;
@@ -6,6 +6,7 @@ type AdminModelType = {
 	newGame( gameId: string, startTime: number, player1: UserInfo, player2: UserInfo ): void;
 	removeGame( gameId: string ): void;
 	clear(): void;
+	reload( newModel: AdminUser[] ): void;
 }
 
 let socket: SocketIOClient.Socket;
@@ -24,7 +25,7 @@ function connect( address: string, model: AdminModelType )
 
 	socket.on(
 		'admin',
-		( message: addClientMessage | updateClientMessage | newGameMessage | removeGameMessage ) => {
+		( message: addClientMessage | updateClientMessage | newGameMessage | removeGameMessage | reloadAdminMessage ) => {
 			console.log( 'New message:', message );
 			switch ( message.action ) {
 				case 'addClient':
@@ -46,7 +47,11 @@ function connect( address: string, model: AdminModelType )
 					break;
 
 				case 'removeGame':
-					model.removeGame( message.game )
+					model.removeGame( message.game );
+					break;
+
+				case 'reloadAdmin':
+					model.reload( message.model );
 					break;
 			}
 		}

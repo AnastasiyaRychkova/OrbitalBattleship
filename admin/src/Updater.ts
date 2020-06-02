@@ -3,7 +3,7 @@ import StatUpdater from "./StatUpdater.js";
 import GameUpdater from "./GameUpdater.js";
 import DiagramUpdater from "./DiagramUpdater.js";
 import type { PlayerUpdInfo, PlayerGameInfo } from './types.js';
-import type { UserInfo, Statistics } from '../../common/messages.js';
+import type { UserInfo, Statistics, AdminUser } from '../../common/messages.js';
 
 type ControllerType = {
 	openDiagram( event: Event ): void;
@@ -76,6 +76,13 @@ class Updater extends UpdaterBase
 		this.games.clear();
 		this.updateDiagramHidden( true );
 		this.updateClientCounter( 0, 0 );
+	}
+
+	reload( model: AdminUser[] ): void
+	{
+		this.statistics.reload( model );
+		this.games.reload( model );
+		this.updateDiagramHidden( true );
 	}
 }
 

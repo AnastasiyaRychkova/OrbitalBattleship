@@ -4,4 +4,6 @@ package-lock.json
 OB.code-workspace
 build/
 admin/script/
+admin/lib/
 server/build/
+.VSCodeCounter/

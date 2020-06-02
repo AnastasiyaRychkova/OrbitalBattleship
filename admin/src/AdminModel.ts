@@ -1,4 +1,4 @@
-import type { PlayerInfo, UserInfo, AdminUserInfo as Info, Statistics } from "../../common/messages.js";
+import type { PlayerInfo, UserInfo, AdminUserInfo as Info, Statistics, AdminUser } from "../../common/messages.js";
 import type { PlayerGameInfo, PlayerUpdInfo } from "./types.js";
 import EState from "../../common/EState.js";
 
@@ -10,6 +10,7 @@ type UpdaterType = {
 	newGame( gameId: string, player1: PlayerGameInfo, player2: PlayerGameInfo ): void;
 	removePlayer( name: string ): void;
 	clear(): void;
+	reload( model: AdminUser[] ): void;
 }
 
 
@@ -372,10 +373,24 @@ class AdminModel
 
 	private countRating( games: number, victories: number, totalTime: number ): number
 	{
-		return ( victories / games ) * ( totalTime / games / 60000 );
+		return games ? ( victories / games ) * ( totalTime / games / 60000 ) : 0;
 	}
 
-	
+	reload( newModel: AdminUser[] ): void
+	{
+		this.model.clear();
+
+		for (const user of newModel)
+		{
+			const [ name, info ] = user;
+			this.model.set( name, info );
+			user[2] = this.countRating( info.statistics.games, info.statistics.victories, info.statistics.totalTime );
+		}
+			
+		
+		this.updater.reload( newModel );
+		this.updClientCounter();
+	}
 }
 
 
