@@ -105,8 +105,10 @@ class StatUpdater extends UpdaterBase
 
 	private sort()
 	{
-		this.list.querySelectorAll
 		const nodeList = this.list.children;
+		if ( nodeList.length === 0 )
+			return;
+
 		var itemsArray: HTMLElement[] = [];
 		for (var i = 0; i < nodeList.length; i++)
 			itemsArray.push( this.list.removeChild( nodeList[i] ) as HTMLElement );
@@ -154,6 +156,8 @@ class StatUpdater extends UpdaterBase
 				\n	<span class="client-avg-time">${msToMin( info.statistics.totalTime / info.statistics.games )}</span>\
 				\n</li>`
 			);
+
+		this.sort();
 	}
 }
 
