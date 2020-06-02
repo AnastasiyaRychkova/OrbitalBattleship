@@ -1,5 +1,5 @@
-import type { PlayerUpdInfo, ClientStatistics, PlayerGameInfo } from './types.js';
-import type { UserInfo } from '../../common/messages.js';
+import type { PlayerUpdInfo, PlayerGameInfo } from './types.js';
+import type { UserInfo, Statistics } from '../../common/messages.js';
 
 class UpdaterBase
 {
@@ -9,9 +9,9 @@ class UpdaterBase
 	 * @param bIsOnline Статус подключения
 	 * @param statistics Общая статистика игрока
 	 */
-	updateClient( name: string, bIsOnline: boolean, statistics?: ClientStatistics ): void
+	updateClient( name: string, bIsOnline: boolean, statistics?: Statistics, rating?: number ): void
 	{
-		console.log( 'Error: updateClient: Updater has no this method realization\n', name, bIsOnline, statistics );
+		console.log( 'Error: updateClient: Updater has no this method realization\n', name, bIsOnline, statistics, rating );
 	}
 
 	/**

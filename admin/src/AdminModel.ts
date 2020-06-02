@@ -1,9 +1,9 @@
-import type { PlayerInfo, UserInfo } from "../../common/messages.js";
-import type { ClientStatistics, PlayerGameInfo, PlayerUpdInfo } from "./types.js";
+import type { PlayerInfo, UserInfo, AdminUserInfo as Info, Statistics } from "../../common/messages.js";
+import type { PlayerGameInfo, PlayerUpdInfo } from "./types.js";
 import EState from "../../common/EState.js";
 
 type UpdaterType = {
-	updateClient( name: string, bIsOnline: boolean, statistics?: ClientStatistics ): void;
+	updateClient( name: string, bIsOnline: boolean, statistics?: Statistics, rating?: number ): void;
 	updatePlayer( player: PlayerUpdInfo ): void;
 	updateClientCounter( online: number, total: number ): void;
 	updateDiagramHidden( newHidden: boolean, info?: UserInfo ): void;
@@ -12,29 +12,7 @@ type UpdaterType = {
 	clear(): void;
 }
 
-type Info = {
-	bIsOnline: boolean,
-	game: {
-		id: string,
-		player: PlayerInfo,
-		startTime: number,
-	} | null,
-	statistics: {
-		games: number,
-		victories: number,
-		totalTime: number,
-	}
-};
 
-
-/**
- * Перевод миллисекунд в минуты с округлением
- * @param ms Миллисекунды
- */
-function msToMin( ms: number ): number
-{
-	return Math.round( ms / 60000 );
-}
 
 function equalArray<T>( arr1: T[], arr2: T[] ): boolean
 {
@@ -135,10 +113,9 @@ class AdminModel
 			client,
 			true,
 			{
-				counter: {
-					games: 0,
-					victories: 0,
-				}
+				games: 0,
+				victories: 0,
+				totalTime: 0,
 			}
 		);
 		this.updClientCounter();
@@ -165,7 +142,36 @@ class AdminModel
 			this.updater.updateClient( info.client.name, clientInfo.bIsOnline );
 			this.updClientCounter();
 		}
-		// Если игрок покинул игру
+
+		// Изменившаяся информация о клиенте
+		const updInfo: PlayerUpdInfo = {
+			name: info.client.name,
+			gameId: gameId,
+		}
+
+		// Обновить статистику, если сервер ее прислал
+		if ( info.client.statistics )
+		{
+			Object.assign( clientInfo.statistics, info.client.statistics );
+			const state: EState = info.player.state;
+
+			this.updater.updateClient(
+				info.client.name,
+				clientInfo.bIsOnline,
+				{
+					games: clientInfo.statistics.games,
+					victories: clientInfo.statistics.victories,
+					// в totalTime входит время игры, но не входит «чествование победителя»
+					totalTime: state >= EState.PeriodicTable && state <= EState.Match && clientInfo.game != null
+						? clientInfo.statistics.totalTime + ( Date.now() - clientInfo.game.startTime )
+						: clientInfo.statistics.totalTime,
+				},
+				this.countRating( clientInfo.statistics.games, clientInfo.statistics.victories, clientInfo.statistics.totalTime ), // если сервер прислал статистику, значит есть смысл обновить рейтинг
+			);
+		}
+
+
+				// Если игрок покинул игру
 		if ( gameId === '' )
 		{
 			if ( clientInfo.game != null )
@@ -182,36 +188,6 @@ class AdminModel
 			return;
 		}
 
-		// Изменившаяся информация о клиенте
-		const updInfo: PlayerUpdInfo = {
-			name: info.client.name,
-			gameId: gameId,
-		}
-
-		// По окончании матча необходимо пересчитать статистику
-		if ( info.player.state !== clientInfo.game.player.state && info.player.state === EState.Celebration )
-		{
-			clientInfo.statistics.games++; // количество игр
-			if ( info.player.rightMove )
-				clientInfo.statistics.victories++; // количество побед
-			clientInfo.statistics.totalTime += Date.now() - clientInfo.game.startTime; // общее время проведенное в играх
-
-			this.updater.updateClient(
-				info.client.name,
-				clientInfo.bIsOnline,
-				{
-					counter: {
-						games: clientInfo.statistics.games,
-						victories: clientInfo.statistics.victories,
-					},
-					timing: {
-						totalTime: msToMin( clientInfo.statistics.totalTime ),
-						AVGTime: msToMin( clientInfo.statistics.totalTime / clientInfo.statistics.games )
-					}
-				}
-			);
-
-		}
 
 		let changedProps: number = 0; // количество изменений
 		for (const prop in info.player) {
@@ -289,7 +265,7 @@ class AdminModel
 	 * @param player1 Информация о первом игроке
 	 * @param player2 Информация о втором игроке
 	 */
-	newGame( gameId: string, player1: UserInfo, player2: UserInfo ): void
+	newGame( gameId: string, startTime: number, player1: UserInfo, player2: UserInfo ): void
 	{
 		const info1: Info | undefined = this.model.get( player1.client.name );
 		const info2: Info | undefined = this.model.get( player2.client.name );
@@ -300,7 +276,6 @@ class AdminModel
 			return;
 		}
 
-		const startTime: number = Date.now();
 		this.preparingBeforeGame( info1, player1, gameId, startTime );
 		this.preparingBeforeGame( info2, player2, gameId, startTime );
 
@@ -371,23 +346,20 @@ class AdminModel
 	async updateTiming( model: Map<string, Info>, updater: UpdaterType )
 	{
 		const now: number = Date.now();
-		for ( const client of model ) {
-			if (
-				client[1].bIsOnline
-				&& client[1].game != null
-				&& client[1].game.player.state > EState.Online
-				&& client[1].game.player.state < EState.Celebration
+		for ( const [ name, info ] of model ) {
+			if (   info.game != null
+				&& info.game.player.state >= EState.PeriodicTable
+				&& info.game.player.state <= EState.Match
 			)
 				updater.updateClient(
-					client[0],
-					client[1].bIsOnline,
+					name,
+					info.bIsOnline,
 					{
-						timing: {
-							totalTime: msToMin( client[1].statistics.totalTime + ( now - client[1].game.startTime ) ),
-							AVGTime: msToMin( client[1].statistics.totalTime / client[1].statistics.games ),
-						}
+						games: info.statistics.games,
+						victories: info.statistics.victories,
+						totalTime: info.statistics.totalTime + ( now - info.game.startTime ),
 					}
-				)
+				);
 		}
 	}
 
@@ -396,6 +368,14 @@ class AdminModel
 		this.model.clear();
 		this.updater.clear();
 	}
+
+
+	private countRating( games: number, victories: number, totalTime: number ): number
+	{
+		return ( victories / games ) * ( totalTime / games / 60000 );
+	}
+
+	
 }
 
 

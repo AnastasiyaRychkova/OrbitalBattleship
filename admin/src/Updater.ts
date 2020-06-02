@@ -2,8 +2,8 @@ import UpdaterBase from "./UpdaterBase.js";
 import StatUpdater from "./StatUpdater.js";
 import GameUpdater from "./GameUpdater.js";
 import DiagramUpdater from "./DiagramUpdater.js";
-import type { PlayerUpdInfo, ClientStatistics, PlayerGameInfo } from './types.js';
-import type { UserInfo } from '../../common/messages.js';
+import type { PlayerUpdInfo, PlayerGameInfo } from './types.js';
+import type { UserInfo, Statistics } from '../../common/messages.js';
 
 type ControllerType = {
 	openDiagram( event: Event ): void;
@@ -32,9 +32,9 @@ class Updater extends UpdaterBase
 		this.games.init( controller, address );
 	}
 
-	updateClient( name: string, bIsOnline: boolean, statistics?: ClientStatistics ): void
+	updateClient( name: string, bIsOnline: boolean, statistics?: Statistics, rating?: number ): void
 	{
-		this.statistics.updateClient( name, bIsOnline, statistics );
+		this.statistics.updateClient( name, bIsOnline, statistics, rating );
 
 		if ( statistics !== undefined )
 			return;

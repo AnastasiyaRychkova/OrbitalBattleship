@@ -19,8 +19,17 @@ import type { UpdateStateMessage } from '../messages.js';
 import type { PlayerInfo } from "../../../common/messages.js";
 import { toAdmin } from "../../kernel/admin.js";
 
+
+/** Объект, содержащий всю игровую информацию */
+type AdminGameInfo = {
+	id: string,
+	player: PlayerInfo,
+	startTime: number,
+};
+
+
 /**
- * игровой профиль игрока
+ * Игровой профиль игрока
  */
 class Player implements IUser
 {
@@ -109,10 +118,6 @@ class Player implements IUser
 
 	/**
 	 * Создать объект для отправки администратору
-	 * 
-	 * Может принимать объект для клиента, чтобы позаимствовать у него уже вычисленные поля
-	 * 
-	 * @param stateObject Объект, подготовленный для отправки клиенту
 	 */
 	createPlayerInfo(): PlayerInfo
 	{
@@ -133,6 +138,19 @@ class Player implements IUser
 				base: this._state > EState.Preparing ? this._diagram.toNumArray() : this._element.config.toNumArray(),
 			}
 		}
+	}
+
+	/**
+	 * Создать объект, содержащий всю игровую информацию,
+	 * для отправки администратору при отправке слепка состояния сервера
+	 */
+	createAdminGameInfo(): AdminGameInfo
+	{
+		return {
+			id: this._game.id,
+			player: this.createPlayerInfo(),
+			startTime: this._game.startTime,
+		};
 	}
 
 

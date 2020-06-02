@@ -15,7 +15,7 @@ import type {
 	RefreshListMessage,
 	AnyClientMessage,
 } from '../messages.js';
-import type { UserInfo } from '../../../common/messages.js';
+import type { UserInfo, Statistics, AdminUser } from '../../../common/messages.js';
 import { setImmediate } from 'timers';
 
 
@@ -30,6 +30,9 @@ class Client implements IUser
 	 * Имя игрока (идентификатор)
 	 */
 	readonly name: string;
+
+	/** Статистика пользователя */
+	private _statistics: Statistics;
 
 	/**
 	 * Приглашающие на игру клиенты
@@ -52,6 +55,11 @@ class Client implements IUser
 		this.name 		= name;
 		this._inviters	= new Set<Client>();
 		this._player	= undefined;
+		this._statistics = {
+			games: 0,
+			victories: 0,
+			totalTime: 0,
+		};
 
 		this.bindEvents();
 
@@ -114,7 +122,7 @@ class Client implements IUser
 	}
 
 	/**
-	 * Создать слепок системы
+	 * Создать слепок системы для отправки клиенту
 	 * @param state Состояние игры, в которое необходимо перевести клиента
 	 */
 	createStateObject( state?: EState ): UpdateStateMessage
@@ -166,6 +174,7 @@ class Client implements IUser
 				this.createStateObject()
 			);
 	}
+
 
 	/**
 	 * Повесить слушателей на основные сетевые события
@@ -253,6 +262,7 @@ class Client implements IUser
 				client: {
 					name: this.name,
 					bIsOnline: this.bIsOnline,
+					statistics: this._statistics,
 				},
 				player: this._player.createPlayerInfo(),
 			};
@@ -262,6 +272,7 @@ class Client implements IUser
 			client: {
 				name: this.name,
 				bIsOnline: this.bIsOnline,
+				statistics: this._statistics,
 			},
 			player: {
 				state: EState.Online,
@@ -279,6 +290,19 @@ class Client implements IUser
 				},
 			},
 		};
+	}
+
+
+	createAdminUser(): AdminUser
+	{
+		return [
+			this.name,
+			{
+				bIsOnline: this.bIsOnline,
+				game: this._player ? this._player.createAdminGameInfo() : null,
+				statistics: this._statistics,
+			}
+		];
 	}
 
 

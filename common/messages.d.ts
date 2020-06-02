@@ -6,12 +6,28 @@ export type DiagramView = {
 	base: number[],
 }
 
+type AdminUserInfo = {
+	bIsOnline: boolean,
+	game: {
+		id: string,
+		player: PlayerInfo,
+		startTime: number,
+	} | null,
+	statistics: {
+		games: number,
+		victories: number,
+		totalTime: number,
+	}
+};
+
 /** Основная информация о клиенте */
 export type ClientInfo = {
 	/** Имя клиента и уникальный идентификатор */
 	name: string,
 	/** Есть ли связь с клиентом */
 	bIsOnline: boolean,
+	/** Статистика пользователя */
+	statistics?: Statistics,
 };
 
 /** Игровая информация о клиенте */
@@ -56,7 +72,12 @@ export type Statistics = {
 	victories: number,
 	/** Время, проведенное в играх (мс) */
 	totalTime: number,
-}
+};
+
+/** Тип для отправки профилей всех пользователей сервера */
+export type AdminUser = [ string, AdminUserInfo ];
+
+
 
 
 
@@ -79,6 +100,7 @@ export type updateClientMessage = {
 export type newGameMessage = {
 	action: 'newGame',
 	game: 	 GameInfo,
+	startTime: number,
 	player1: UserInfo,
 	player2: UserInfo,
 }
@@ -86,6 +108,11 @@ export type newGameMessage = {
 export type removeGameMessage = {
 	action: 'removeGame',
 	game: 	GameInfo,
+}
+
+export type reloadAdminMessage = {
+	action: 'reloadAdmin',
+	model: AdminUser[],
 }
 
 /*=====  End of Server message  ======*/
@@ -96,4 +123,5 @@ export type AnyServerMessage =
 	| addClientMessage
 	| updateClientMessage
 	| newGameMessage
-	| removeGameMessage;
+	| removeGameMessage
+	| reloadAdminMessage;

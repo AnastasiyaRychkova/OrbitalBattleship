@@ -1,5 +1,17 @@
 import UpdaterBase from "./UpdaterBase.js";
-import type { ClientStatistics } from './types.js';
+import { Statistics } from "../../common/messages.js";
+
+
+/**
+ * Перевод миллисекунд в минуты с округлением
+ * @param ms Миллисекунды
+ */
+function msToMin( ms: number ): number
+{
+	return Math.round( ms / 60000 );
+}
+
+
 
 class StatUpdater extends UpdaterBase
 {
@@ -23,7 +35,7 @@ class StatUpdater extends UpdaterBase
 
 	}
 
-	updateClient( name: string, bIsOnline: boolean, statistics?: ClientStatistics ): void
+	updateClient( name: string, bIsOnline: boolean, statistics?: Statistics, rating?: number ): void
 	{
 		const li: HTMLElement | null = document.getElementById( 'cl-' + name );
 		
@@ -31,7 +43,7 @@ class StatUpdater extends UpdaterBase
 		{
 			/** Создание элемента
 			 * - - - - - - - - - - - - - - - - - - - - - - - -
-			 * <li class="client" data-offline="true">
+			 * <li id="cl-name" class="client" data-offline="true">
 					<span class="client-name">Player3</span>
 					<span class="client-games">14</span>
 					<span class="client-victories">11</span>
@@ -39,40 +51,49 @@ class StatUpdater extends UpdaterBase
 					<span class="client-avg-time">4</span>
 				</li>
 			 */
-			
-			this.list.insertAdjacentHTML(
-				"beforeend",
-				`<li id="${'cl-'+name}" class="client" data-online="${bIsOnline}" data-rating="0">\
-				\n	<span class="client-name">${name}</span>\
-				\n	<span class="client-games">0</span>\
-				\n	<span class="client-victories">0</span>\
-				\n	<span class="client-total-time">0</span>\
-				\n	<span class="client-avg-time">0</span>\
-				\n</li>`
-			);
+
+			if ( statistics )
+				this.list.insertAdjacentHTML(
+					"beforeend",
+					`<li id="${'cl-'+name}" class="client" data-online="${bIsOnline}" data-rating="${rating !== undefined ? rating : 0}">\
+					\n	<span class="client-name">${name}</span>\
+					\n	<span class="client-games">${statistics.games}</span>\
+					\n	<span class="client-victories">${statistics.victories}</span>\
+					\n	<span class="client-total-time">${msToMin( statistics.totalTime )}</span>\
+					\n	<span class="client-avg-time">${msToMin( statistics.totalTime / statistics.games )}</span>\
+					\n</li>`
+				);
+			else
+				this.list.insertAdjacentHTML(
+					"beforeend",
+					`<li id="${'cl-'+name}" class="client" data-online="${bIsOnline}" data-rating="0">\
+					\n	<span class="client-name">${name}</span>\
+					\n	<span class="client-games">0</span>\
+					\n	<span class="client-victories">0</span>\
+					\n	<span class="client-total-time">0</span>\
+					\n	<span class="client-avg-time">0</span>\
+					\n</li>`
+				);
 		}
 		else
 		{
 			li.dataset.online = bIsOnline.toString();
 
-			if ( statistics?.counter )
+			if ( statistics )
 			{
-				if ( statistics.timing !== undefined )
-				{
-					li.getElementsByClassName( 'client-total-time' )[0].textContent = statistics.timing.totalTime.toString();
-					li.getElementsByClassName( 'client-avg-time' )[0].textContent = statistics.timing.AVGTime.toString();
-				}
+					li.getElementsByClassName( 'client-total-time' )[0].textContent = msToMin( statistics.totalTime ).toString();
+					li.getElementsByClassName( 'client-avg-time' )[0].textContent = msToMin( statistics.totalTime / statistics.games ).toString();
 
-				if ( statistics.counter.games !== undefined )
-				{
-					li.getElementsByClassName( 'client-games' )[0].textContent = statistics.counter.games.toString();
-					li.getElementsByClassName( 'client-victories' )[0].textContent = statistics.counter.victories.toString();
-					li.dataset.rating = StatUpdater.countRating( statistics.counter.games, statistics.counter.victories, statistics.timing!.totalTime ).toString();
+					li.getElementsByClassName( 'client-games' )[0].textContent = statistics.games.toString();
+					li.getElementsByClassName( 'client-victories' )[0].textContent = statistics.victories.toString();
 
-					this.sort();
-				}
+					if ( rating !== undefined )
+					li.dataset.rating = rating.toString();
 			}
 		}
+
+		if ( rating !== undefined )
+			this.sort();
 	}
 
 	updateClientCounter( online: number, total: number ): void
@@ -95,8 +116,12 @@ class StatUpdater extends UpdaterBase
 			{
 				const numberA = parseInt( nodeA.dataset.rating! );
 				const numberB = parseInt( nodeB.dataset.rating! );
-				if ( numberA < numberB ) return -1;
-				if ( numberA > numberB ) return 1;
+				if ( numberA != numberB ) return numberA - numberB;
+				
+				const nameA = nodeA.id.slice(3);
+				const nameB = nodeB.id.slice(3);
+				if ( nameA < nameB ) return -1;
+				if ( nameA > nameB ) return 1;
 				return 0;
 			}
 		)
@@ -106,11 +131,6 @@ class StatUpdater extends UpdaterBase
 				this.list.append( node );
 			}
 		);
-	}
-
-	private static countRating( games: number, victories: number, totalTime: number ): number
-	{
-		return victories / games * totalTime / games;
 	}
 
 	clear(): void

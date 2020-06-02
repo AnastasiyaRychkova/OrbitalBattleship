@@ -3,7 +3,7 @@ import { addClientMessage, updateClientMessage, newGameMessage, UserInfo, remove
 type AdminModelType = {
 	addClient( client: string ): void;
 	updateClient( info: UserInfo, gameId: string ): void;
-	newGame( gameId: string, player1: UserInfo, player2: UserInfo ): void;
+	newGame( gameId: string, startTime: number, player1: UserInfo, player2: UserInfo ): void;
 	removeGame( gameId: string ): void;
 	clear(): void;
 }
@@ -37,7 +37,12 @@ function connect( address: string, model: AdminModelType )
 					break;
 
 				case 'newGame':
-					model.newGame( message.game, message.player1, message.player2 )
+					model.newGame(
+						message.game,
+						message.startTime,
+						message.player1,
+						message.player2
+					);
 					break;
 
 				case 'removeGame':

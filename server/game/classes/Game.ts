@@ -35,7 +35,7 @@ class Game
 	private _rightMove: number;
 
 	/** Время начала матча (timestamp) */
-	private _startTime: number;
+	readonly startTime: number;
 
 	/** Таймер самоуничтожения */
 	private _selfDestructionTimer: NodeJS.Timeout | undefined;
@@ -59,7 +59,7 @@ class Game
 		];
 		this._readyPlayers 	= 0;
 		this._rightMove 	= -1;
-		this._startTime		= Date.now();
+		this.startTime		= Date.now();
 
 		clientList.forEach(
 			( client: Client ) =>
@@ -99,6 +99,7 @@ class Game
 		toAdmin( {
 			action: 'newGame',
 			game: this.id,
+			startTime: this.startTime,
 			player1: client1.createUserInfo(),
 			player2: client2.createUserInfo()
 		} );
