@@ -496,6 +496,20 @@ class Client implements IUser
 	}
 
 	/**
+	 * Занести результат матча в статистику
+	 * 
+	 * @param bIsWinner Победитель ли?
+	 * @param matchTime Продолжительность матча в мс
+	 */
+	countMatchStatistics( bIsWinner: boolean, matchTime: number ): void
+	{
+		this._statistics.games++;
+		if ( bIsWinner )
+			this._statistics.victories++;
+		this._statistics.totalTime += matchTime;
+	}
+
+	/**
 	 * Закончить матч.
 	 * 
 	 * Обнуляется ссылка на игрока, и отсылается сообщение клиенту

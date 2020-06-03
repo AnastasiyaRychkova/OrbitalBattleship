@@ -247,6 +247,10 @@ class Game
 			\n===================`,
 		);
 
+		const matchTime: number = Date.now() - this.startTime;
+		this._players[ this._rightMove ].client?.countMatchStatistics( true, matchTime );
+		this._players[ loserIndex ].client?.countMatchStatistics( false, matchTime );
+
 		/* Отпустить проигравшего через заданный временной промежуток,
 		если этого раньше не сделает соперник-победитель */
 		setTimeout(
