@@ -1,5 +1,3 @@
-import gameConfig from "../../config.json";
-
 import IUser from './User.js';
 import Client from './Client.js';
 import Game from './Game.js';
@@ -244,9 +242,18 @@ class Player implements IUser
 		const opponent: Player = this._game.getOpponent( this );
 
 		if ( opponent.bIsOnline )
+		{
 			opponent.socket?.emit( 'opConnection' );
+			this.socket?.emit( 'opConnection' );
+		}
 		else
-			this._game.preventSelfDestruction();
+		{
+			this._game.onPlayerConnection();
+			if ( ( this._state === EState.Preparing && this._diagramCheck )
+				|| ( this._state === EState.Match && !this._game.hasRightMove( this ) )
+			)
+				this.socket?.emit( 'opDisconnection' );
+		}
 		
 		toAdmin( {
 			action: 'updateClient',
@@ -263,11 +270,7 @@ class Player implements IUser
 	 */
 	onDisconnect(): void
 	{
-		const opponent: Player = this._game.getOpponent( this );
-		if ( opponent.bIsOnline )
-			opponent.socket?.emit( 'opDisconnection' );
-		else
-			this._game.delayedSelfDestruction();
+		this._game.onPlayerDisconnection( this );
 	}
 
 
@@ -398,30 +401,17 @@ class Player implements IUser
 		// сравнить диаграмму и конфигурацию загаданного элемента
 		if ( ElemConfig.isEqual( this._diagram, this._element.config ) )
 		{ // правильно
-			const ready: number = this._game.registerReadiness();
 			log(
 				this.name,
 				`Checking filling the diagram.\
 				\n  Result: true,\
-				\n  Ready players: ${ ready },\
 				\n  D: ${ this._diagram!.toArray() }`,
 				'onCheckConfig'
 			);
 			this._diagramCheck = true;
 			callback( true );
 
-			if ( !this._game.getOpponent( this ).bIsOnline )
-			{
-				this._client!.socket?.emit( 'opDisconnection ' );
-				return;
-			}
-
-			if ( ready === Game.NUMBER_OF_PLAYERS )
-				setTimeout(
-					this._game.toMatch.bind( this._game ),
-					gameConfig.checkResultWaiting
-				);
-
+			this._game.registerReadiness()
 		}
 		else // неправильно
 		{

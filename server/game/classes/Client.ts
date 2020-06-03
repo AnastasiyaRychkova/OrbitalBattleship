@@ -254,7 +254,7 @@ class Client implements IUser
 	 * Создать объект для отправки администратору
 	 * @param stateObject Объект, подготовленный для отправки клиенту
 	 */
-	createUserInfo(): UserInfo
+	createUserInfo( bWithStatistics: boolean = false ): UserInfo
 	{
 		if ( this._player !== undefined )
 		{
@@ -262,7 +262,7 @@ class Client implements IUser
 				client: {
 					name: this.name,
 					bIsOnline: this.bIsOnline,
-					statistics: this._statistics,
+					statistics: bWithStatistics ? this._statistics : undefined,
 				},
 				player: this._player.createPlayerInfo(),
 			};
@@ -272,7 +272,7 @@ class Client implements IUser
 			client: {
 				name: this.name,
 				bIsOnline: this.bIsOnline,
-				statistics: this._statistics,
+				statistics: bWithStatistics ? this._statistics : undefined,
 			},
 			player: {
 				state: EState.Online,
@@ -576,9 +576,9 @@ class Client implements IUser
 					}
 				}
 			);
-		}
 
-		this._inviters.clear();
+			this._inviters.clear();
+		}
 
 		toAdmin( {
 			action: 'updateClient',

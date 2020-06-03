@@ -6,11 +6,13 @@ import type {
 } from 'socket.io';
 import type { RegistrationMessage, AnyClientMessage } from '../game/messages.js';
 import EState from '../../common/EState.js';
+import { AdminUser } from '../../common/messages.js';
 
 
 type ClientInstance = {
 	readonly bIsOnline: boolean;
 	onReconnection( newSocket: Socket ): void;
+	createAdminUser(): AdminUser,
 };
 
 type ClientStatic = {
@@ -21,7 +23,7 @@ type ClientStatic = {
 type InitData = {
 	Client: ClientStatic,
 	clientList: Map<string, ClientInstance>,
-	startAdmin: ( socket: Socket ) => void,
+	startAdmin: ( socket: Socket, clientList: Map<string, ClientInstance> ) => void,
 }
 
 
@@ -153,7 +155,7 @@ function listenOn(
 				'ADMIN',
 				'Started'
 			);
-			startAdmin( socket );
+			startAdmin( socket, clientList );
 		}
 	)
 }

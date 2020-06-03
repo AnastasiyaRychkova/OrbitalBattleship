@@ -143,13 +143,18 @@ class Game
 	}
 
 	/**
-	 * Отметь готовность игрока с следующему этапу игры
-	 * 
-	 * @returns Количество готовых к следующему этапу игроков
+	 * Отметь готовность игрока к началу перестрелки (матча)
 	 */
-	registerReadiness(): number
+	registerReadiness(): void
 	{
-		return ++this._readyPlayers;
+		this._readyPlayers++;
+		if ( this._readyPlayers === Game.NUMBER_OF_PLAYERS )
+		{
+			setTimeout(
+				this.toMatch.bind( this ),
+				gameConfig.checkResultWaiting
+			);
+		}
 	}
 
 
@@ -158,12 +163,10 @@ class Game
 		if (
 			!(
 				this._players[ 0 ]
-				&& this._players[ 0 ].bIsOnline
 				&& this._players[ 0 ].state === EState.Preparing
 			)
 			|| !(
 				this._players[ 1 ]
-				&& this._players[ 1 ].bIsOnline
 				&& this._players[ 1 ].state === EState.Preparing
 			)
 		)
@@ -201,7 +204,6 @@ class Game
 	private _toMatch(): void
 	{
 		this._rightMove = Math.round( Math.random() );
-		this._readyPlayers = 0;
 
 		this._players.forEach( player => player.initState( EState.Match ) );
 	}
@@ -232,10 +234,16 @@ class Game
 		this._rightMove = bIsWinner
 							? instigatorIndex
 							: ( instigatorIndex + 1 ) % Game.NUMBER_OF_PLAYERS;
+		const loserIndex: number = ( this._rightMove + 1 ) % Game.NUMBER_OF_PLAYERS;
 
+		// Пересчитать статистику с учетом завершенного матча
+		const matchTime: number = Date.now() - this.startTime;
+		this._players[ this._rightMove ].client?.countMatchStatistics( true, matchTime );
+		this._players[ loserIndex ].client?.countMatchStatistics( false, matchTime );
+
+		// Перевести игроков в следующее состояние
 		this._players.forEach( player => player.initState( EState.Celebration ) );
 
-		const loserIndex: number = ( this._rightMove + 1 ) % Game.NUMBER_OF_PLAYERS;
 		log(
 			'MATCH RESULT',
 			`\n===================\
@@ -246,10 +254,6 @@ class Game
 			\nElement: ${ this._players[ loserIndex ].element }\
 			\n===================`,
 		);
-
-		const matchTime: number = Date.now() - this.startTime;
-		this._players[ this._rightMove ].client?.countMatchStatistics( true, matchTime );
-		this._players[ loserIndex ].client?.countMatchStatistics( false, matchTime );
 
 		/* Отпустить проигравшего через заданный временной промежуток,
 		если этого раньше не сделает соперник-победитель */
@@ -262,8 +266,8 @@ class Game
 		toAdmin( {
 			action: 'updateClient',
 			game: this.id,
-			info1: this._players[0].client!.createUserInfo(),
-			info2: this._players[1].client!.createUserInfo(),
+			info1: this._players[0].client!.createUserInfo( true ),
+			info2: this._players[1].client!.createUserInfo( true ),
 		} );
 	}
 
@@ -277,9 +281,9 @@ class Game
 	{
 		// Можно вызвать только один раз
 		this.destroy = () => {};
-		this.delayedSelfDestruction = () => {};
+		this._delayedSelfDestruction = () => {};
 		// Если есть работающий таймер, то его необходимо остановить
-		this.preventSelfDestruction();
+		this._preventSelfDestruction();
 
 		// Оборвать все связи между объектами,
 		// чтобы игру и 2х игроков мог подобрать мусорщик
@@ -292,11 +296,30 @@ class Game
 	}
 
 	/**
+	 * Установить таймер самоуничтожения игры, если оба игрока отключены
+	 * 
+	 * @param player Игрок, с кем было потеряно соединение
+	 */
+	onPlayerDisconnection( player: Player ): void
+	{
+		if ( !this.getOpponent( player ).bIsOnline )
+			this._delayedSelfDestruction();
+	}
+
+	/**
+	 * Остановить таймер самоуничтожения, если он был установлен, т.к. один из игроков в сети
+	 */
+	onPlayerConnection(): void
+	{
+		this._preventSelfDestruction();
+	}
+
+	/**
 	 * Установить таймер самоуничтожения
 	 */
-	delayedSelfDestruction(): void
+	private _delayedSelfDestruction(): void
 	{
-		this.preventSelfDestruction();
+		this._preventSelfDestruction();
 
 		this._selfDestructionTimer = setTimeout(
 			( game: Game ) => game.destroy(),
@@ -308,7 +331,7 @@ class Game
 	/**
 	 * Остановить таймер самоуничтожения, если тот был заведен
 	 */
-	preventSelfDestruction(): void
+	private _preventSelfDestruction(): void
 	{
 		if ( this._selfDestructionTimer )
 		{
