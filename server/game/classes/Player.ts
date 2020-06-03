@@ -1,3 +1,5 @@
+import gameConfig from "../../config.json";
+
 import IUser from './User.js';
 import Client from './Client.js';
 import Game from './Game.js';
@@ -411,7 +413,14 @@ class Player implements IUser
 			this._diagramCheck = true;
 			callback( true );
 
-			this._game.registerReadiness()
+			const ready: number = this._game.registerReadiness();
+			if ( ready === 1 )
+			{
+				setTimeout(
+					this.checkOpponentConnection.bind( this ),
+					gameConfig.checkResultWaiting
+				)
+			}
 		}
 		else // неправильно
 		{
@@ -424,6 +433,14 @@ class Player implements IUser
 				'onCheckConfig'
 			);
 			callback( false );
+		}
+	}
+
+	checkOpponentConnection(): void
+	{
+		if ( this.bIsOnline && !this._game.getOpponent( this ).bIsOnline )
+		{
+			this.socket?.emit( 'opDisconnection' );
 		}
 	}
 

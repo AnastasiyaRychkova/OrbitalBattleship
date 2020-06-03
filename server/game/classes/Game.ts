@@ -144,8 +144,10 @@ class Game
 
 	/**
 	 * Отметь готовность игрока к началу перестрелки (матча)
+	 * 
+	 * @returns Количество готовых к матчу игроков
 	 */
-	registerReadiness(): void
+	registerReadiness(): number
 	{
 		this._readyPlayers++;
 		if ( this._readyPlayers === Game.NUMBER_OF_PLAYERS )
@@ -155,6 +157,7 @@ class Game
 				gameConfig.checkResultWaiting
 			);
 		}
+		return this._readyPlayers;
 	}
 
 
@@ -200,10 +203,20 @@ class Game
 	}
 
 
-
+	/**
+	 * Выбрать игрока с правом первого хода и перевести обоих в состояние матча
+	 * 
+	 * Если в сети только один игрок, то право первого хода дается ему
+	 */
 	private _toMatch(): void
 	{
-		this._rightMove = Math.round( Math.random() );
+		if ( this._players[0].bIsOnline && !this._players[1].bIsOnline )
+			this._rightMove = 0;
+		else
+			if ( this._players[1].bIsOnline && !this._players[0].bIsOnline )
+				this._rightMove = 1;
+			else
+				this._rightMove = Math.round( Math.random() );
 
 		this._players.forEach( player => player.initState( EState.Match ) );
 	}
