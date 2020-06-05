@@ -2,6 +2,7 @@ import UpdaterBase from "./UpdaterBase.js";
 import type { PlayerUpdInfo } from "./types.js";
 import { EState, ETeam, ElemConfig, SpinState } from '../../common/general.js';
 import type { ChemicalElement, UserInfo, DiagramView } from '../../common/messages.js';
+import { stateTooltip } from "./tooltips.js";
 
 
 class DiagramUpdater extends UpdaterBase
@@ -171,6 +172,7 @@ class DiagramUpdater extends UpdaterBase
 	 */
 	private updState( state: EState ): void {
 		this.state.className = "state " + EState[ state ].toLowerCase();
+		this.state.dataset.tooltip = stateTooltip.get( state );
 		this.diagram.dataset.match = ( state === EState.Match || state === EState.Celebration ).toString();
 	}
 

@@ -344,7 +344,7 @@ class AdminModel
 	/**
 	 * Обновление отображения временнЫх значений
 	 */
-	async updateTiming( model: Map<string, Info>, updater: UpdaterType )
+	updateTiming( model: Map<string, Info>, updater: UpdaterType )
 	{
 		const now: number = Date.now();
 		for ( const [ name, info ] of model ) {
@@ -361,6 +361,16 @@ class AdminModel
 						totalTime: info.statistics.totalTime + ( now - info.game.startTime ),
 					}
 				);
+			else
+				updater.updateClient(
+					name,
+					info.bIsOnline,
+					{
+						games: info.statistics.games,
+						victories: info.statistics.victories,
+						totalTime: info.statistics.totalTime,
+					}
+				);
 		}
 	}
 
@@ -373,7 +383,8 @@ class AdminModel
 
 	private countRating( games: number, victories: number, totalTime: number ): number
 	{
-		return games ? ( victories / games ) * ( totalTime / games / 60000 ) : 0;
+		// return games ? ( victories / games ) * ( totalTime / games / 60000 ) : 0;
+		return games ? ( victories / games ) * 10 + totalTime * 0 : 0;
 	}
 
 	reload( newModel: AdminUser[] ): void

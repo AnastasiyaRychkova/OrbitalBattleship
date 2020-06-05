@@ -5,7 +5,7 @@
 	top: calc(4.8em + 1px);
 	left: 0;
 	flex-direction: column;
-	z-index: 100;
+	z-index: 10;
 	width: 100vw;
 	height: calc(100% - 4.6em - 1px);
 	background-color: var(--b-g4);

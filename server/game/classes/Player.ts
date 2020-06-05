@@ -679,7 +679,7 @@ class Player implements IUser
 		this.destroy = () => {};
 		if ( this._client )
 		{
-			if ( this._game.getOpponent( this ).bIsOnline )
+			// if ( this._game.getOpponent( this ).bIsOnline )
 				toAdmin( {
 					action: 'updateClient',
 					game: '',

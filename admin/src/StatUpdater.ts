@@ -11,6 +11,16 @@ function msToMin( ms: number ): number
 	return Math.round( ms / 60000 );
 }
 
+/**
+ * Среднее арифметическое
+ * @param A Делимое
+ * @param B Делитель
+ */
+function avg( A: number, B: number ): number
+{
+	return B ? A / B : 0;
+}
+
 
 
 class StatUpdater extends UpdaterBase
@@ -60,7 +70,8 @@ class StatUpdater extends UpdaterBase
 					\n	<span class="client-games">${statistics.games}</span>\
 					\n	<span class="client-victories">${statistics.victories}</span>\
 					\n	<span class="client-total-time">${msToMin( statistics.totalTime )}</span>\
-					\n	<span class="client-avg-time">${msToMin( statistics.totalTime / statistics.games )}</span>\
+					\n	<span class="client-avg-time">${msToMin( avg( statistics.totalTime, statistics.games ) )}</span>\
+					\n	<span class="client-rating">${rating?.toFixed(2) || 0.00}</span>\
 					\n</li>`
 				);
 			else
@@ -72,6 +83,7 @@ class StatUpdater extends UpdaterBase
 					\n	<span class="client-victories">0</span>\
 					\n	<span class="client-total-time">0</span>\
 					\n	<span class="client-avg-time">0</span>\
+					\n	<span class="client-rating">0.00</span>\
 					\n</li>`
 				);
 		}
@@ -82,13 +94,17 @@ class StatUpdater extends UpdaterBase
 			if ( statistics )
 			{
 					li.getElementsByClassName( 'client-total-time' )[0].textContent = msToMin( statistics.totalTime ).toString();
-					li.getElementsByClassName( 'client-avg-time' )[0].textContent = msToMin( statistics.totalTime / statistics.games ).toString();
+					li.getElementsByClassName( 'client-avg-time' )[0].textContent = msToMin( avg( statistics.totalTime, statistics.games ) ).toString();
 
 					li.getElementsByClassName( 'client-games' )[0].textContent = statistics.games.toString();
 					li.getElementsByClassName( 'client-victories' )[0].textContent = statistics.victories.toString();
 
 					if ( rating !== undefined )
-					li.dataset.rating = rating.toString();
+					{
+						li.dataset.rating = rating.toString();
+						li.getElementsByClassName( 'client-rating' )[0].textContent = rating.toFixed(2).toString();
+					}
+					
 			}
 		}
 
@@ -105,23 +121,29 @@ class StatUpdater extends UpdaterBase
 
 	private sort()
 	{
-		const nodeList = this.list.children;
-		if ( nodeList.length === 0 )
+
+		const nodeList: HTMLCollection = this.list.children;
+		const n = nodeList.length;
+		if ( n === 0 )
 			return;
 
-		var itemsArray: HTMLElement[] = [];
-		for (var i = 0; i < nodeList.length; i++)
-			itemsArray.push( this.list.removeChild( nodeList[i] ) as HTMLElement );
+		const itemsArray: HTMLElement[] = [];
+		for (var i = n - 1; i >= 0; i--)
+		{
+			const elem = nodeList.item(i);
+			itemsArray.push( elem as HTMLElement );
+			elem?.remove();
+		}
 
 		itemsArray.sort(
 			( nodeA: HTMLElement, nodeB: HTMLElement ) =>
 			{
-				const numberA = parseInt( nodeA.dataset.rating! );
-				const numberB = parseInt( nodeB.dataset.rating! );
-				if ( numberA != numberB ) return numberA - numberB;
-				
-				const nameA = nodeA.id.slice(3);
-				const nameB = nodeB.id.slice(3);
+				const numberA = parseFloat( nodeA.dataset.rating! );
+				const numberB = parseFloat( nodeB.dataset.rating! );
+				if ( numberA != numberB ) return numberB - numberA;
+
+				const nameA = nodeA.id;
+				const nameB = nodeB.id;
 				if ( nameA < nameB ) return -1;
 				if ( nameA > nameB ) return 1;
 				return 0;
@@ -133,6 +155,7 @@ class StatUpdater extends UpdaterBase
 				this.list.append( node );
 			}
 		);
+		console.log( 'SORT' );
 	}
 
 	clear(): void
@@ -153,7 +176,8 @@ class StatUpdater extends UpdaterBase
 				\n	<span class="client-games">${info.statistics.games}</span>\
 				\n	<span class="client-victories">${info.statistics.victories}</span>\
 				\n	<span class="client-total-time">${msToMin( info.statistics.totalTime )}</span>\
-				\n	<span class="client-avg-time">${msToMin( info.statistics.totalTime / info.statistics.games )}</span>\
+				\n	<span class="client-avg-time">${msToMin( avg( info.statistics.totalTime, info.statistics.games ) )}</span>\
+				\n	<span class="client-rating">${rating?.toFixed(2) || 0.00}</span>\
 				\n</li>`
 			);
 

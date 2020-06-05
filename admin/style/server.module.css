@@ -3,6 +3,11 @@
 	flex: 1 1 40%;
 }
 
+#server
+{
+	--tooltip: var(--selection);
+}
+
 #server .header
 {
 	align-items: center;
@@ -102,6 +107,11 @@
 	
 }
 
+.player
+{
+	--tooltip: white;
+}
+
 .player:first-child:hover
 {
 	color: var(--blue);
@@ -158,7 +168,6 @@
 .name
 {
 	flex-grow: 1;
-	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }

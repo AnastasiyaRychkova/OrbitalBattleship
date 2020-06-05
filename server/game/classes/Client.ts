@@ -319,6 +319,11 @@ class Client implements IUser
 	onReconnection( newSocket: Socket ): void
 	{
 		this._socket = newSocket;
+		log(
+			this.name,
+			'Current state: bHasUnfinishedGame: '+this.bHasUnfinishedGame,
+			'onReconnection'
+		);
 
 		if ( this._player )
 			this._player.onReconnection();

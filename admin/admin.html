@@ -70,11 +70,11 @@
 		<div class="header">
 			<h2>Statistics</h2>
 			<ul class="client-counter">
-				<li class="online-players">
+				<li class="online-players" data-tooltip="online players" data-tooltip-position="bottom">
 					<div class="logo"></div>
 					<span>0</span>
 				</li>
-				<li class="all-players">
+				<li class="all-players" data-tooltip="total players" data-tooltip-position="bottom">
 					<div class="logo"></div>
 					<span>0</span>
 				</li>
@@ -87,6 +87,7 @@
 				<span>Victories</span>
 				<span>Total<br>time<br><span class="dimension">[min]</span></span>
 				<span>AVG<br><span class="dimension">[min]</span></span>
+				<span>Rating</span>
 			</div>
 			<ol class="client-list scroll" id="client-list">
 				<li class="client" id="cl-Player3" data-online="false">
@@ -95,6 +96,7 @@
 					<span class="client-victories">11</span>
 					<span class="client-total-time">58</span>
 					<span class="client-avg-time">4</span>
+					<span class="client-rating">9.58</span>
 				</li>
 				<li class="client" data-online="true">
 					<span class="client-name">Somebody name text string</span>
@@ -102,6 +104,7 @@
 					<span class="client-victories">11</span>
 					<span class="client-total-time">58</span>
 					<span class="client-avg-time">4</span>
+					<span class="client-rating">29.58</span>
 				</li>
 				<li class="client" data-online="true">
 					<span class="client-name">Player2</span>
@@ -109,6 +112,7 @@
 					<span class="client-victories">11</span>
 					<span class="client-total-time">50</span>
 					<span class="client-avg-time">3</span>
+					<span class="client-rating">49.58</span>
 				</li>
 				<li class="client" data-online="true">
 					<span class="client-name">Player4</span>
@@ -116,6 +120,7 @@
 					<span class="client-victories">11</span>
 					<span class="client-total-time">69</span>
 					<span class="client-avg-time">4</span>
+					<span class="client-rating">99.58</span>
 				</li>
 				<li class="client" data-online="false">
 					<span>Somebody name text string1</span>
@@ -123,6 +128,7 @@
 					<span class="client-victories">10</span>
 					<span class="client-total-time">71</span>
 					<span class="client-avg-time">5</span>
+					<span class="client-rating">1.58</span>
 				</li>
 				<li class="client" data-online="true">
 					<span class="client-name">Somebody name text string2</span>
@@ -130,6 +136,7 @@
 					<span class="client-victories">9</span>
 					<span class="client-total-time">64</span>
 					<span class="client-avg-time">5</span>
+					<span class="client-rating">119.58</span>
 				</li>
 			</ol>
 		</div>
@@ -137,7 +144,7 @@
 	</section>
 	<section id="diagram" data-close="true" data-team="Actinoids" data-online="true">
 		<div class="player-info">
-			<div class="state pt" id="player-state"></div>
+			<div class="state pt" id="player-state" data-tooltip="state" data-tooltip-position="bottom"></div>
 			<h2 id="player-name">Player3</h2>
 			<div class="team"></div>
 			<ul class="player-info-mini">

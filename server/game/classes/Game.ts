@@ -186,9 +186,9 @@ class Game
 
 		log(
 			'Event',
-			`Match started:
-				> ${ this._players[ 0 ].name },
-				> ${ this._players[ 1 ].name }`,
+			`Match started:\
+			\n	> ${ this._players[ 0 ].name },\
+			\n	> ${ this._players[ 1 ].name }`,
 			'toMatch'
 		)
 
@@ -292,6 +292,11 @@ class Game
 	 */
 	destroy(): void
 	{
+		log(
+			'LOG',
+			`Game destruction ( ${this.id} )`,
+			'destroy'
+		);
 		// Можно вызвать только один раз
 		this.destroy = () => {};
 		this._delayedSelfDestruction = () => {};
@@ -316,7 +321,9 @@ class Game
 	onPlayerDisconnection( player: Player ): void
 	{
 		if ( !this.getOpponent( player ).bIsOnline )
+		{	
 			this._delayedSelfDestruction();
+		}
 	}
 
 	/**

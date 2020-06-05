@@ -3,6 +3,7 @@ import EState from "../../common/EState.js";
 import type { PlayerGameInfo, PlayerUpdInfo } from './types.js';
 import { ChemicalElement, AdminUser, AdminUserInfo } from "../../common/messages.js";
 import { ETeam } from "../../common/ETeam.js";
+import { stateTooltip } from "./tooltips.js";
 
 type ControllerType = {
 	openDiagram( event: Event ): void;
@@ -44,12 +45,12 @@ class GameUpdater extends UpdaterBase
 			`<li class="game" id="${gameId}">\
 			\n	<div class="player" id="${'g-'+player1.name}" data-online="${player1.bIsOnline}" data-rm="${player1.rightMove}" data-disable="false">\
 			\n		<div class="name">${player1.name}</div>\
-			\n		<div class="state ${EState[player1.state].toLowerCase()}"></div>\
+			\n		<div class="state ${EState[player1.state].toLowerCase()}" data-tooltip="${stateTooltip.get( player1.state )}" data-tooltip-position="left"></div>\
 			\n		<div class="element"><sub>${player1.element.number > 0 ? player1.element.number : '??'}</sub>${player1.element.number > 0 ? player1.element.symbol : '??'}</div>\
 			\n	</div>\
 			\n	<div class="player" id="${'g-'+player2.name}" data-online="${player2.bIsOnline}" data-rm="${player2.rightMove}" data-disable="false">\
 			\n		<div class="name">${player2.name}</div>\
-			\n		<div class="state ${EState[player2.state].toLowerCase()}"></div>\
+			\n		<div class="state ${EState[player2.state].toLowerCase()}" data-tooltip="${stateTooltip.get( player2.state )}" data-tooltip-position="left"></div>\
 			\n		<div class="element"><sub>${player2.element.number > 0 ? player2.element.number : '??'}</sub>${player2.element.number > 0 ? player2.element.symbol : '??'}</div>\
 			\n	</div>\
 			\n</li>`
@@ -82,7 +83,9 @@ class GameUpdater extends UpdaterBase
 		{
 			player.id = '';
 			player.dataset.disable = 'true';
-			( player.getElementsByClassName( 'state' )[0] as HTMLElement ).className = 'state void';
+			const state = player.getElementsByClassName( 'state' )[0] as HTMLElement;
+			state.className = 'state void';
+			state.removeAttribute( 'data-tooltip' );
 			return;
 		}
 
@@ -115,6 +118,7 @@ class GameUpdater extends UpdaterBase
 				case 'state':
 					const state: HTMLElement = ( client.getElementsByClassName( 'state' )[0] ) as HTMLElement;
 					state.className = 'state ' + EState[ clientInfo as EState ].toLowerCase();
+					state.dataset.tooltip = stateTooltip.get( clientInfo as number );
 					break;
 
 				case 'element':
