@@ -6,7 +6,7 @@ type UpdaterType = {
 	updateClient( name: string, bIsOnline: boolean, statistics?: Statistics, rating?: number ): void;
 	updatePlayer( player: PlayerUpdInfo ): void;
 	updateClientCounter( online: number, total: number ): void;
-	updateDiagramHidden( newHidden: boolean, info?: UserInfo ): void;
+	updateDiagramHidden( newHidden: boolean, info?: UserInfo, opponent?: UserInfo ): void;
 	newGame( gameId: string, player1: PlayerGameInfo, player2: PlayerGameInfo ): void;
 	removePlayer( name: string ): void;
 	clear(): void;
@@ -68,15 +68,15 @@ class AdminModel
 			return;
 		}
 
+		const opponent = this.findOpponent( player );
+		let opInfo: UserInfo | undefined;
+		if ( opponent )
+			opInfo = this.createUserInfo( opponent[0], opponent[1] );
+
 		this.updater.updateDiagramHidden(
 			false,
-			{
-				client: {
-					name: player,
-					bIsOnline: playerInfo.bIsOnline,
-				},
-				player: playerInfo.game.player,
-			}
+			this.createUserInfo( player, playerInfo ),
+			opInfo
 		);
 	}
 
@@ -401,6 +401,36 @@ class AdminModel
 		
 		this.updater.reload( newModel );
 		this.updClientCounter();
+	}
+
+	/**
+	 * Найти игроков, участвующих в данной игре
+	 * @param gameId ID игры
+	 */
+	findOpponent( player: string ): AdminUser | undefined
+	{
+		const playerInfo = this.model.get( player );
+		if ( playerInfo === undefined || playerInfo.game == null )
+			return undefined;
+
+		const gameId = playerInfo.game.id;
+		for ( const [name, info] of this.model.entries() )
+		{
+			if ( info.game && info.game.id === gameId && name !== player )
+				return [name, info];
+		}
+		return undefined;
+	}
+
+	createUserInfo( name: string, info: Info ): UserInfo
+	{
+		return {
+			client: {
+				name: name,
+				bIsOnline: info.bIsOnline,
+			},
+			player: info.game!.player,
+		}
 	}
 }
 

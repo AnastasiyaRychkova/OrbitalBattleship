@@ -21,6 +21,11 @@ function avg( A: number, B: number ): number
 	return B ? A / B : 0;
 }
 
+type ControllerType = {
+	clientOnHover( event: Event ): void;
+	clientOnUnhover( event: Event ): void;
+}
+
 
 
 class StatUpdater extends UpdaterBase
@@ -34,6 +39,9 @@ class StatUpdater extends UpdaterBase
 	/** Общее количество клиентов, о которых имеется информация на сервере */
 	private totalClients: HTMLElement;
 
+	onHover: ( event: Event ) => void;
+	onUnhover: ( event: Event ) => void;
+
 	constructor()
 	{
 		super();
@@ -43,6 +51,14 @@ class StatUpdater extends UpdaterBase
 		this.onlineClients = document.querySelector( '.client-counter > .online-players > span' ) as HTMLElement;
 		this.totalClients = document.querySelector( '.client-counter > .all-players > span' ) as HTMLElement;
 
+		this.onHover = () => {};
+		this.onUnhover = () => {};
+	}
+
+	init( controller: ControllerType ): void
+	{
+		this.onHover = controller.clientOnHover;
+		this.onUnhover = controller.clientOnUnhover;
 	}
 
 	updateClient( name: string, bIsOnline: boolean, statistics?: Statistics, rating?: number ): void
@@ -86,6 +102,12 @@ class StatUpdater extends UpdaterBase
 					\n	<span class="client-rating">0.00</span>\
 					\n</li>`
 				);
+			const newElem = document.getElementById( 'cl-'+name );
+			if ( newElem != null )
+			{
+				newElem.addEventListener( 'mouseover', this.onHover );
+				newElem.addEventListener( 'mouseout', this.onUnhover );
+			}
 		}
 		else
 		{
@@ -169,6 +191,7 @@ class StatUpdater extends UpdaterBase
 		this.clear();
 
 		for ( const [ name, info, rating ] of model )
+		{
 			this.list.insertAdjacentHTML(
 				"beforeend",
 				`<li id="${'cl-'+name}" class="client" data-online="${info.bIsOnline}" data-rating="${rating !== undefined ? rating : 0}">\
@@ -180,6 +203,14 @@ class StatUpdater extends UpdaterBase
 				\n	<span class="client-rating">${rating?.toFixed(2) || 0.00}</span>\
 				\n</li>`
 			);
+			const newElem = document.getElementById( 'cl-'+name );
+			if ( newElem != null )
+			{
+				newElem.addEventListener( 'mouseover', this.onHover );
+				newElem.addEventListener( 'mouseout', this.onUnhover );
+			}
+		}
+			
 
 		this.sort();
 	}

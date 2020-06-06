@@ -39,6 +39,12 @@ body
 	font-weight: bold;
 }
 
+*::selection
+{
+	background: var(--p);
+	color: white;
+}
+
 h2
 {
 	font-size: 1.2em;
@@ -93,12 +99,14 @@ h1
 	color: var(--disable);
 	font-size: 0.85em;
 	font-weight: 600;
+	user-select: none;
 }
 
 
 * [data-tooltip]
 {
 	position: relative;
+	user-select: none;
 }
 
 * [data-tooltip]::after,
@@ -107,33 +115,33 @@ h1
 	position: absolute;
 	visibility: hidden;
 	opacity: 0;
-	transition: transform 200ms ease, opacity 200ms;
 	box-shadow: 0px 0px 8px 0px rgba(61, 60, 66, 0.1);
+	transition: transform 200ms ease, opacity 200ms;
 }
 
 * [data-tooltip]::before
 {
-	content: attr(data-tooltip);
+	z-index: 51;
+	padding: 5px 15px;
 	background: var(--tooltip);
+	text-transform: uppercase;
+	text-decoration: none;
+	line-height: 14px;
+	letter-spacing: 1px;
+	white-space: nowrap;
 	color: var(--p);
 	font-size: 10px;
 	font-weight: bold;
-	padding: 5px 15px;
-	white-space: nowrap;
-	text-decoration: none;
-	text-transform: uppercase;
-	letter-spacing: 1px;
-	line-height: 14px;
-	z-index: 51;
+	content: attr(data-tooltip);
 }
 
 * [data-tooltip]::after
 {
+	z-index: 50;
 	width: 0;
 	height: 0;
 	border: 6px solid transparent;
 	content: '';
-	z-index: 50;
 }
 
 * [data-tooltip]:hover:after,
@@ -152,10 +160,10 @@ h1
 
 * [data-tooltip][data-tooltip-position="top"]:after
 {
-	border-top-color: var(--tooltip);
-	border-bottom: none;
 	bottom: calc(100% + 8px);
 	left: 10px;
+	border-bottom: none;
+	border-top-color: var(--tooltip);
 }
 
 /*  left tooltip */
@@ -167,10 +175,10 @@ h1
 
 * [data-tooltip][data-tooltip-position="left"]:after
 {
-	border-left-color: var(--tooltip);
-	border-right: none;
 	top: calc(50% - 6px);
 	right: calc(100% + 2px);
+	border-right: none;
+	border-left-color: var(--tooltip);
 }
 
 /*  right tooltip */
@@ -182,10 +190,10 @@ h1
 
 * [data-tooltip][data-tooltip-position="right"]:after
 {
-	border-right-color: var(--tooltip);
-	border-left: none;
 	top: calc(50% - 6px);
 	left: calc(100% + 2px);
+	border-left: none;
+	border-right-color: var(--tooltip);
 }
 
 /*  bottom tooltip */
@@ -197,10 +205,10 @@ h1
 
 * [data-tooltip][data-tooltip-position="bottom"]:after
 {
-	border-bottom-color: var(--tooltip);
-	border-top: none;
 	top: calc(100% + 8px);
 	left: 10px;
+	border-top: none;
+	border-bottom-color: var(--tooltip);
 }
 
 

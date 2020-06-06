@@ -7,6 +7,8 @@ import { stateTooltip } from "./tooltips.js";
 
 type ControllerType = {
 	openDiagram( event: Event ): void;
+	clientOnHover( event: Event ): void;
+	clientOnUnhover( event: Event ): void;
 }
 
 class GameUpdater extends UpdaterBase
@@ -17,6 +19,9 @@ class GameUpdater extends UpdaterBase
 	/** Метод, который необходимо повесить на элемент игрока, чтобы открыть окно диаграммы */
 	openDiagram: ( event: Event ) => void;
 
+	onHover: ( event: Event ) => void;
+	onUnhover: ( event: Event ) => void;
+
 	constructor()
 	{
 		super();
@@ -24,12 +29,17 @@ class GameUpdater extends UpdaterBase
 		this.openDiagram = () => {};
 
 		this.list = document.getElementById( 'game-list' ) as HTMLUListElement;
+
+		this.onHover = () => {};
+		this.onUnhover = () => {};
 	}
 
 	init( controller: ControllerType, address: string ): void
 	{
 		( document.querySelector( '.ipv4-address > span' ) as HTMLSpanElement ).textContent = address;
 		this.openDiagram = controller.openDiagram;
+		this.onHover = controller.clientOnHover;
+		this.onUnhover = controller.clientOnUnhover;
 	}
 
 	newGame( gameId: string, player1: PlayerGameInfo, player2: PlayerGameInfo ): void
@@ -56,13 +66,32 @@ class GameUpdater extends UpdaterBase
 			\n</li>`
 		);
 
-		document.getElementById( 'g-'+player1.name )?.addEventListener(
+		let newElement = document.getElementById( 'g-'+player1.name );
+		newElement?.addEventListener(
 			'click',
 			this.openDiagram
 		);
-		document.getElementById( 'g-'+player2.name )?.addEventListener(
+		newElement?.addEventListener(
+			'mouseover',
+			this.onHover
+		);
+		newElement?.addEventListener(
+			'mouseout',
+			this.onUnhover
+		);
+
+		newElement = document.getElementById( 'g-'+player2.name );
+		newElement?.addEventListener(
 			'click',
 			this.openDiagram
+		);
+		newElement?.addEventListener(
+			'mouseover',
+			this.onHover
+		);
+		newElement?.addEventListener(
+			'mouseout',
+			this.onUnhover
 		);
 	}
 
@@ -73,6 +102,9 @@ class GameUpdater extends UpdaterBase
 		if ( player == null )
 			return;
 		player.removeEventListener( "click", this.openDiagram );
+		player.removeEventListener( 'mouseover', this.onHover );
+		player.removeEventListener( 'mouseout', this.onUnhover );
+		player.removeAttribute( 'data-selected' );
 
 		// Если оба игрока покинули игру, то необходимо игру удалить
 		const game: HTMLElement = player.parentElement!;

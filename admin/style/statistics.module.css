@@ -10,6 +10,7 @@
 	justify-content: flex-start;
 	height: 4.6em;
 	border-bottom: 1px solid var(--b-g1);
+	user-select: none;
 }
 
 .client-counter
@@ -69,6 +70,7 @@
 	color: var(--p);
 	font-weight: 600;
 	counter-reset: li;
+	user-select: none;
 }
 
 .client
@@ -86,7 +88,8 @@
 	background-color: var(--b-g4);
 }
 
-.client:hover
+.client:hover,
+.client[data-selected]
 {
 	background-color: var(--selection);
 }

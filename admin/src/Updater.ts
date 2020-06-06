@@ -7,6 +7,9 @@ import type { UserInfo, Statistics, AdminUser } from '../../common/messages.js';
 
 type ControllerType = {
 	openDiagram( event: Event ): void;
+	reopenDiagram( event: Event ): void;
+	clientOnHover( event: Event ): void;
+	clientOnUnhover( event: Event ): void;
 }
 
 /** Модуль, обновляющий интерфейс согласно внутреннему представлению */
@@ -29,7 +32,9 @@ class Updater extends UpdaterBase
 
 	init( controller: ControllerType, address: string ): void
 	{
+		this.statistics.init( controller );
 		this.games.init( controller, address );
+		this.diagram.init( controller );
 	}
 
 	updateClient( name: string, bIsOnline: boolean, statistics?: Statistics, rating?: number ): void
@@ -54,9 +59,9 @@ class Updater extends UpdaterBase
 		this.statistics.updateClientCounter( online, total );
 	}
 
-	updateDiagramHidden( newHidden: boolean, info?: UserInfo ): void
+	updateDiagramHidden( newHidden: boolean, info?: UserInfo, opponent?: UserInfo ): void
 	{
-		this.diagram.updateDiagramHidden( newHidden, info );
+		this.diagram.updateDiagramHidden( newHidden, info, opponent );
 	}
 
 	newGame( gameId: string, player1: PlayerGameInfo, player2: PlayerGameInfo ): void

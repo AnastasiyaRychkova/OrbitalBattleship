@@ -16,6 +16,11 @@
 	border-bottom: 1px solid var(--b-g3);
 }
 
+.header > h2
+{
+	user-select: none;
+}
+
 .ipv4-address
 {
 	display: flex;
@@ -99,9 +104,11 @@
 	height: 2em;
 	padding: 0.4em 0.4em;
 	cursor: pointer;
+	user-select: none;
 }
 
-.player:hover
+.player:hover,
+.player[data-selected]
 {
 	background-color: var(--selection);
 	

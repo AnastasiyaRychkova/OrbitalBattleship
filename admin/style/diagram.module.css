@@ -34,6 +34,7 @@
 	padding-left: 1.8em;
 	border-left: 3px solid var(--team-color);
 	list-style: none;
+	user-select: none;
 }
 
 .player-info-mini > li
@@ -53,33 +54,55 @@
 
 #d-close
 {
-	right: 0;
-	width: 1.2em;
-	height: 1.2em;
-	padding: 0;
+	position: absolute;
+	top: 1em;
+	width: 2.1em;
+	height: 2.1em;
 	outline: none;
-	border: 2px solid var(--blue);
-	border-radius: 50%;
+	border: none;
 	background-color: transparent;
 	cursor: pointer;
-	transition: color ease .3s, background-color ease .3s;
-	line-height: 1em;
-	color: var(--blue);
-	font-size: 1.6em;
 }
 
 #d-close:hover
 {
+	background-color: transparent;
+}
+
+#d-close:hover:before,
+#d-close:hover:after
+{
 	background-color: var(--blue);
-	color: white;
 }
 
 #d-close:active
 {
-	background-color: var(--blue-error);
+	transform: translateY(2px);
 }
 
-.player-info > .state
+#d-close:before,
+#d-close:after
+{
+	position: absolute;
+	top: -0.2em;
+	width: 2px;
+	height: 2.1em;
+	background-color: var(--bold);
+	transition: background-color ease .3s;
+	content: '';
+}
+
+#d-close:before
+{
+	transform: rotate(45deg);
+}
+
+#d-close:after
+{
+	transform: rotate(-45deg);
+}
+
+.player-info .state
 {
 	margin-right: 1.4em;
 	width: 2.4em;
@@ -98,43 +121,6 @@
 	--team-color: var(--red);
 	--team-color-error: var(--red-error);
 	--op-color: var(--blue);
-}
-
-#diagram-grid[data-match="true"] svg[data-spin-state="on"]
-{
-	--arrow-fill: var(--team-color);
-	--arrow-stroke: var(--team-color);
-}
-
-#diagram-grid[data-match="true"] svg[data-spin-state="miss"]
-{
-	--arrow-fill: white;
-	--arrow-stroke: var(--op-color);
-}
-
-#diagram-grid[data-match="true"] svg[data-spin-state="hit"]
-{
-	--arrow-fill: var(--op-color);
-	--arrow-stroke: var(--op-color);
-}
-
-
-#diagram-grid[data-match="false"] svg[data-spin-state="on"]
-{
-	--arrow-fill: var(--team-color-error);
-	--arrow-stroke: var(--team-color-error);
-}
-
-#diagram-grid[data-match="false"] svg[data-spin-state="miss"]
-{
-	--arrow-fill: white;
-	--arrow-stroke: var(--team-color);
-}
-
-#diagram-grid[data-match="false"] svg[data-spin-state="hit"]
-{
-	--arrow-fill: var(--team-color);
-	--arrow-stroke: var(--team-color);
 }
 
 .team
@@ -193,6 +179,109 @@
 }
 
 
+.opponent
+{
+	display: flex;
+	align-items: center;
+	margin-left: 0em;
+}
+
+.vs
+{
+	margin: 0 1.8em;
+	letter-spacing: 0.1em;
+	color: var(--selection);
+	user-select: none;
+	font-size: 1.2em;
+}
+
+#opponent-name
+{
+	transition: color ease .3s;
+	color: var(--disable);
+	font-size: 1.2em;
+	font-weight: 800;
+}
+
+#opponent-name[data-disable="true"]:hover
+{
+	cursor: default;
+	color: var(--disable);
+}
+
+#opponent-name:hover
+{
+	cursor: pointer;
+	color: var(--op-color);
+}
+
+#opponent-name:active
+{
+	cursor: pointer;
+	transform: translateY(1px);
+}
+
+.opponent .team
+{
+	margin-right: 1.4em;
+	margin-left: 0;
+}
+
+#diagram .opponent[data-online="true"] .team
+{
+	background-color: var(--op-color);
+}
+
+#diagram .opponent[data-online="false"] .team
+{
+	background-color: var(--disable);
+}
+
+.opponent > .state
+{
+	margin-right: 0;
+	margin-left: 1.4em;
+}
+
+
+
+#diagram-grid[data-match="true"] svg[data-spin-state="on"]
+{
+	--arrow-fill: var(--team-color);
+	--arrow-stroke: var(--team-color);
+}
+
+#diagram-grid[data-match="true"] svg[data-spin-state="miss"]
+{
+	--arrow-fill: white;
+	--arrow-stroke: var(--op-color);
+}
+
+#diagram-grid[data-match="true"] svg[data-spin-state="hit"]
+{
+	--arrow-fill: var(--op-color);
+	--arrow-stroke: var(--op-color);
+}
+
+
+#diagram-grid[data-match="false"] svg[data-spin-state="on"]
+{
+	--arrow-fill: var(--team-color-error);
+	--arrow-stroke: var(--team-color-error);
+}
+
+#diagram-grid[data-match="false"] svg[data-spin-state="miss"]
+{
+	--arrow-fill: white;
+	--arrow-stroke: var(--team-color);
+}
+
+#diagram-grid[data-match="false"] svg[data-spin-state="hit"]
+{
+	--arrow-fill: var(--team-color);
+	--arrow-stroke: var(--team-color);
+}
+
 
 .cell
 {
@@ -216,6 +305,7 @@
 	line-height: calc(1em + 0.1vw);
 	color: var(--b-g2);
 	font-size: calc(1em + 0.1vw);
+	user-select: none;
 }
 
 .cell > span

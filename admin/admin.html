@@ -27,7 +27,7 @@
 			</div>
 			<ul class="game-list scroll" id="game-list">
 				<li class="game">
-					<div class="player">
+					<div class="player" data-selected="true">
 						<div class="name">Somebody name text string</div>
 						<div class="state pt"></div>
 						<div class="element"><sub>??</sub>??</div>
@@ -98,7 +98,7 @@
 					<span class="client-avg-time">4</span>
 					<span class="client-rating">9.58</span>
 				</li>
-				<li class="client" data-online="true">
+				<li class="client" data-online="true" data-selected="true">
 					<span class="client-name">Somebody name text string</span>
 					<span class="client-games">14</span>
 					<span class="client-victories">11</span>
@@ -142,11 +142,17 @@
 		</div>
 		<div class="bg"></div>
 	</section>
-	<section id="diagram" data-close="true" data-team="Actinoids" data-online="true">
+	<section id="diagram" data-close="false" data-team="Actinoids" data-online="true">
 		<div class="player-info">
 			<div class="state pt" id="player-state" data-tooltip="state" data-tooltip-position="bottom"></div>
 			<h2 id="player-name">Player3</h2>
 			<div class="team"></div>
+			<span class="vs">VS</span>
+			<div class="opponent" id="opponent" data-online="false">
+				<div class="team"></div>
+				<span id="opponent-name" data-tooltip="open" data-tooltip-position="bottom" data-disable="false">player1</span>
+				<div class="state pt" id="opponent-state" data-tooltip="state" data-tooltip-position="bottom"></div>
+			</div>
 			<ul class="player-info-mini">
 				<li>
 					<div class="info-icon">
@@ -171,7 +177,7 @@
 				</li>
 			</ul>
 			<div class="aggregate">
-				<button type="button" id="d-close">×</button>
+				<button type="button" id="d-close"> </button>
 			</div>
 		</div>
 		<div class="diagram-field scroll">
