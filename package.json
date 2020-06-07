@@ -1,39 +1,73 @@
 {
   "name": "orbital-battleship-server",
+  "productName": "orbital-battleship-server",
   "version": "1.0.0",
-  "description": "Server for VR multiplayer game",
-  "private": true,
-  "main": "app.js",
-  "dependencies": {
-    "@types/socket.io-client": "^1.4.32",
-    "colors": "^1.4.0",
-    "ip": "^1.1.5",
-    "socket.io": "^2.3.0",
-    "socket.io-client": "^2.3.0"
+  "description": "My Electron application description",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "npm run build && electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "eslint --ext .ts .",
+    "build:server": "cd src/server && tsc",
+    "build:admin": "cd src/admin && tsc",
+    "build": "npm run build:server && npm run build:admin"
+  },
+  "keywords": [],
+  "author": {
+    "name": "Anastasiya Rychkova",
+    "email": "a.k.rychkova@yandex.ru"
+  },
+  "license": "MIT",
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "orbital_battleship_server"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
+    }
   },
   "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.51",
+    "@electron-forge/maker-deb": "^6.0.0-beta.51",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.51",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.51",
+    "@electron-forge/maker-zip": "^6.0.0-beta.51",
+    "@typescript-eslint/eslint-plugin": "^2.34.0",
+    "@typescript-eslint/parser": "^2.34.0",
     "@types/ip": "^1.1.0",
-    "@types/node": "^13.9.5",
-    "@types/socket.io": "^2.1.4",
-    "typescript": "^3.8.3"
+    "@types/node": "^12.12.44",
+    "@types/socket.io": "^2.1.8",
+    "@types/socket.io-client": "^1.4.33",
+    "electron": "9.0.2",
+    "eslint": "^6.8.0",
+    "eslint-plugin-import": "^2.20.2",
+    "typescript": "^3.9.5"
   },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build:server": "cd server && tsc",
-    "build:admin": "cd admin && tsc",
-    "build": "npm run build:server && npm run build:client",
-    "watch:server": "npm run build:server -- --watch",
-    "watch:admin": "npm run build:admin -- --watch",
-    "start": "node server/build/server/index.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/AnastasiyaRychkova/OrbitalBattleship.git"
-  },
-  "author": "Anastasia Rychkova",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/AnastasiyaRychkova/OrbitalBattleship/issues"
-  },
-  "homepage": "https://github.com/AnastasiyaRychkova/OrbitalBattleship#readme"
+  "dependencies": {
+    "colors": "^1.4.0",
+    "electron-squirrel-startup": "^1.0.0",
+    "ip": "^1.1.5",
+    "socket.io": "^2.3.0"
+  }
 }

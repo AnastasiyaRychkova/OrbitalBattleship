@@ -2,8 +2,6 @@
 node_modules/
 package-lock.json
 OB.code-workspace
-build/
-admin/script/
+dist/
 admin/lib/
-server/build/
 .VSCodeCounter/
