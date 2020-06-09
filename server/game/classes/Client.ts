@@ -1,3 +1,4 @@
+const { setImmediate } = require('timers');
 import IUser from './User.js';
 import Player from './Player.js';
 import Game from "./Game.js";
@@ -16,7 +17,7 @@ import type {
 	AnyClientMessage,
 } from '../messages.js';
 import type { UserInfo, Statistics, AdminUser } from '../../../common/messages.js';
-import { setImmediate } from 'timers';
+// import { setImmediate } from 'timers';
 
 
 class Client implements IUser

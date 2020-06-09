@@ -1,4 +1,4 @@
-import { Socket } from "socket.io";
+import type { Socket } from 'socket.io';
 import type { AnyServerMessage, AdminUser } from '../../common/messages.js';
 
 type ClientType = {

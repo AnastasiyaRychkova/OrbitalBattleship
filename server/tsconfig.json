@@ -1,16 +1,19 @@
 {
 	"extends": "../tsconfig.json",
 	"compilerOptions": {
-		"target": "ES2019",
-		"module": "commonjs",
-		"lib": ["ES2019"],
+		"target": "ES2020",
+		"module": "ES2020",
+		"lib": ["ES2019"], 
 		"outDir": "../dist",
 		"types": [
 			"node",
 			"socket.io",
 			"ip",
 		],
-		
+		"inlineSources": true,
 		"resolveJsonModule": true
-	}
+	},
+	"files": [
+		"index.ts"
+	]
 }

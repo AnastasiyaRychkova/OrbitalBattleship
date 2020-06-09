@@ -3,20 +3,23 @@
   "productName": "orbital-battleship-server",
   "version": "1.0.0",
   "description": "My Electron application description",
-  "main": "dist/index.js",
+  "main": "dist/main.js",
   "scripts": {
-    "start": "npm run build && electron-forge start",
+    "start": "electron-forge start",
+    "build:start": "tsc && npm run build && electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts .",
-    "build:server": "cd src/server && tsc",
-    "build:admin": "cd src/admin && tsc",
-    "build": "npm run build:server && npm run build:admin"
+    "build:main": "tsc",
+    "build:starter": "cd starter && tsc",
+    "build:server": "cd server && tsc",
+    "build:admin": "cd admin && tsc",
+    "build": "npm run build:server && npm run build:admin && npm run build:starter"
   },
   "keywords": [],
   "author": {
-    "name": "Anastasiya Rychkova",
+    "name": "Anastasia Rychkova",
     "email": "a.k.rychkova@yandex.ru"
   },
   "license": "MIT",

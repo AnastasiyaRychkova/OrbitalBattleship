@@ -1,4 +1,4 @@
-import gameConfig from "../../config.json";
+import gameConfig from "../../config.js";
 import { default as Client, clientList } from './Client.js';
 import Player from './Player.js';
 import { EState } from '../../../common/general.js';
@@ -12,7 +12,7 @@ import {
 import type { RefreshListMessage }  from '../messages.js';
 
 import log from '../../kernel/log.js';
-import { toAdmin } from "../../kernel/admin";
+import { toAdmin } from "../../kernel/admin.js";
 
 /**
  * Информация об игре

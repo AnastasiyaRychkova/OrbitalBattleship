@@ -22,9 +22,6 @@ body {
 	--b-g4: #ffffff;
 	--blue: #2489ff;
 	--grey: #858585;
-	--disable: #c4c4c4;
-	--hoveredRow: #DAD8FF;
-	--background: #F3F2FA;
 	display: flex;
 	width: 100vw;
 	height: 100vh;
@@ -236,6 +233,12 @@ input::-webkit-inner-spin-button {
 	font-weight: bold;
 }
 
+.admin-btn-wrapper
+{
+	position: absolute;
+	bottom: -3.5em;
+}
+
 
 .admin-btn .label,
 .admin-btn .icon-arrow {
@@ -296,82 +299,51 @@ input::-webkit-inner-spin-button {
 	fill: white;
 }
 
+.admin-btn:disabled {
+	background-color: white;
+	color: var(--disable);
+	border-color: var(--disable);
+}
+
+.admin-btn:disabled .icon-arrow {
+	fill: var(--disable);
+}
+
+.admin-btn:disabled:hover .label {
+	transform: translateX(1.5em);
+}
+
+.admin-btn:disabled:hover .icon-arrow.before {
+	opacity: 1;
+	transform: translateX(1.5em) scaleX(1);
+}
+
+.admin-btn:disabled:hover .icon-arrow.after {
+	opacity: 0;
+	transform: translateX(-2em) scaleX(0.1);
+}
+
 /*=====  End of Admin button  ======*/
 
 
 
-
 /*=============================================
-=            Logging            =
+=            Loader            =
 =============================================*/
 
-.logging {
-	display: inline-flex;
-	position: absolute;
-	bottom: 2em;
+#loader
+{
+	display: flex;
+	justify-content: center;
 	align-items: center;
-	cursor: pointer;
-}
-
-.logging-text {
-	margin-left: 8px;
-	color: var(--disable);
-	font-size: 0.8em;
-	font-weight: bold;
-}
-
-.toggle {
-	position: relative;
-	width: 2.2em;
-	height: 1.1em;
-	overflow: hidden;
-	border-radius: 0.6em;
-	background: var(--disable);
-	isolation: isolate;
-}
-
-.toggle-inner {
 	position: absolute;
-	top: 0.1em;
-	left: 0.1em;
-	z-index: 2;
-	width: 2em;
-	height: 0.9em;
-	overflow: hidden;
-	border-radius: 15px;
-}
-
-.active-bg {
-	position: absolute;
+	width: 100vw;
+	height: 100vh;
+	background-color: #bbbec17c;
 	top: 0;
 	left: 0;
-	width: 200%;
-	height: 100%;
-	background: var(--blue);
-	transform: translate3d(-100%, 0, 0);
-	transition: transform 0.05s linear 0.17s;
 }
 
-.toggle-state {
-	display: none;
-}
-
-.indicator {
-	width: 200%;
-	height: 100%;
-	border-radius: 13px;
-	background: white;
-	transform: translate3d(-75%, 0, 0);
-	transition: transform 0.35s cubic-bezier(0.85, 0.05, 0.18, 1.35);
-}
-
-.toggle-state:checked ~ .active-bg {
-	transform: translate3d(-50%, 0, 0);
-}
-
-.toggle-state:checked ~ .toggle-inner .indicator {
-	transform: translate3d(25%, 0, 0);
-}
+/*=====  End of Loader  ======*/
 
 
-/*=====  End of Logging  ======*/

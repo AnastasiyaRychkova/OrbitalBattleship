@@ -1,4 +1,5 @@
-import colors from 'colors/safe';
+// import colors from 'colors/safe';
+const colors = require('colors/safe');
 
 /**
  * Сообщение пользователю служебной информации (логирование)

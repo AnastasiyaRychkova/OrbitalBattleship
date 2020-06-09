@@ -1,4 +1,4 @@
-import gameConfig from "../../config.json";
+import gameConfig from "../../config.js";
 
 import IUser from './User.js';
 import Client from './Client.js';

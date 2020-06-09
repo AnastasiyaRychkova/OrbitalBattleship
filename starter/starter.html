@@ -55,17 +55,27 @@
 			<span id="btn-name">Start server</span>
 		</button>
 		
-		<button type="button" class="admin-btn" style="display: none;">
-			<svg class="icon-arrow before">
-				<use xlink:href="#arrow"></use>
-			</svg>
-			<span class="label">Admin</span>
-			<svg class="icon-arrow after">
-				<use xlink:href="#arrow"></use>
-			</svg>
-		</button>
+		<div class="admin-btn-wrapper" id="admin-btn-wrapper" style="display: none;">
+			<button type="button" class="admin-btn" id="start-admin-btn">
+				<svg class="icon-arrow before">
+					<use xlink:href="#arrow"></use>
+				</svg>
+				<span class="label">Admin</span>
+				<svg class="icon-arrow after">
+					<use xlink:href="#arrow"></use>
+				</svg>
+			</button>
+		</div>
 		
 	</main>
+	<div id="loader" style="display: none;">
+		<div class="loader">
+			<span></span>
+			<span></span>
+			<span></span>
+			<span></span>
+		</div>
+	</div>
 	<svg style="display: none;">
 		<defs>
 			<symbol id="arrow" viewBox="0 0 35 15">
@@ -74,17 +84,6 @@
 			</symbol>
 		</defs>
 	</svg>
-
-	<label class="logging" style="display: none;">
-		<div class="toggle">
-			<input class="toggle-state" type="checkbox" name="check" value="check" />
-			<div class="toggle-inner">
-				<div class="indicator"></div>
-			</div>
-			<div class="active-bg"></div>
-		</div>
-		<div class="logging-text">Logging</div>
-	</label>
 </body>
-<script src="script/appearance.js"></script>
+<script type="module" src="../dist/starter/src/starter.js" ></script>
 </html>

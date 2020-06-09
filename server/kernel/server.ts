@@ -1,16 +1,26 @@
-import SocketIO from 'socket.io';
-import { port } from '../config.json';
-import ip from 'ip';
+/* import SocketIO from 'socket.io';
+import ip from 'ip'; */
+const SocketIO = require('socket.io');
+const ip = require('ip');
 import log from './log.js';
 
-const io: SocketIO.Server = SocketIO( port );
-const admin: SocketIO.Namespace = io.of( 'admin' );
+let io: SocketIO.Server = null as unknown as SocketIO.Server;
 const ipv4: string = ip.address();
 
-log( 'INFO', `The server was started at ${ ipv4 }:${ port }`, 'SERVER' );
+/**
+ * Запустить сервер на указанном порту
+ * @param port Номер порта
+ */
+function start( port: number )
+{
+	io = SocketIO( port );
+
+	log( 'INFO', `The server was started at ${ ipv4 }:${ port }`, 'SERVER' );
+
+	return io;
+}
 
 export {
-	io,
-	admin,
+	start,
 	ipv4,
 }
